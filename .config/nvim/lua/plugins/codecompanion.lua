@@ -42,8 +42,11 @@ return {
             },
             interactions = {
                 chat = {
-                    adapter = "local",
-                    -- adapter = "opencode", -- Very slow
+                    -- adapter = "local",
+                    adapter = {
+                        name = "opencode",
+                        -- model = "local_model"
+                    },
                 },
                 inline = {
                     adapter = "local",
