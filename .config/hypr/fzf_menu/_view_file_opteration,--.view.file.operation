@@ -8,7 +8,7 @@ echo "File operations in progress:"
 while read -r f; do
     filename="$(basename -- "$f")"
     action="${filename%%_*}"
-    dest="$(head -n 1 "$f" | sed -E "s:^#::")"
+    dest="$(head -n2 "$f" | tail -n1 | sed -E "s:^##\s*::")"
     [ -z "$dest" ] && dest="Unknown"
 
     echo "${filename}: ${dest}"
