@@ -1,0 +1,43 @@
+#!/usr/bin/sh
+[ ! -d "$XDG_RUNTIME_DIR/lf_progress" ] && exit 0
+
+selected="$(
+fd -tx --glob -- "*.sh" "$XDG_RUNTIME_DIR/lf_progress" |
+    fzf -i --multi --exact --reverse --prompt="Kill operation:" \
+        --delimiter / --with-nth -1 --preview "less {}"
+    )"
+
+
+while read -r f; do
+     pkill -15 -f "^(/usr/bin|/bin|)bash $f" >/dev/null 2>&1 || true
+     rm "$f"
+done <<< "$selected"
+
+    # xargs -0 --no-run-if-empty -I{} pkill -f "^(/usr/bin|/bin|)bash {}"
+# cat <<\EOF >"$XDG_RUNTIME_DIR/check_file_operation.sh"
+# #!/bin/bash
+# set -e
+# while read -r f; do
+#     filename="$(basename -- "$f")"
+#     action="${filename%%_*}"
+#     dest="$(head -n 1 "$f" | sed -E "s:^#::")"
+#     [ -z "$dest" ] && dest="Unknown"
+
+#     echo "${filename}: ${dest}"
+#     filename="${filename//./_}"
+
+#     if tmux list-sessions 2>/dev/null | rg -q -F "$filename"; then
+#         if [ "$action" = "rm" ]; then
+#             echo "$(tmux capture-pane -peC -t "$filename":0 | grep -v -e '^$' | tail -n1)"
+
+#         else
+#             echo "$(tmux capture-pane -peC -t "$filename":0 | grep -v -e '^$' | tail -n1 | awk '{print $1, $2, $3, $4}')"
+
+#         fi
+#     fi
+#     echo
+# done < <(fd  -tx --glob -- "*.sh" "$XDG_RUNTIME_DIR/lf_progress")
+
+# EOF
+# chmod 700 "$XDG_RUNTIME_DIR/check_file_operation.sh"
+# watch -n 1 --no-title bash "$XDG_RUNTIME_DIR/check_file_operation.sh"

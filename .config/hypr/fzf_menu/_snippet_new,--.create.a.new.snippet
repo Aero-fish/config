@@ -1,0 +1,8 @@
+#!/usr/bin/sh
+set -e
+echo "Enter the name of the snippet: "
+read -r snippet_name
+
+if [ -n "$snippet_name" ]; then
+    nvim-reuse "$HOME/.config/hypr/fzf_menu/snippets/${snippet_name}"
+fi

@@ -1,0 +1,32 @@
+[
+    {
+        "label": "Lock",
+        "exec": "/usr/local/share/power_operation.sh lock",
+        "icon": "/usr/share/nwg-bar/images/system-lock-screen.svg"
+    },
+    {
+        "label": "Logout",
+        "exec": "/usr/local/share/power_operation.sh logout",
+        "icon": "/usr/share/nwg-bar/images/system-log-out.svg"
+    },
+    {
+        "label": "Suspend",
+        "exec": "/usr/local/share/power_operation.sh suspend",
+        "icon": "/usr/share/nwg-bar/images/system-suspend.svg"
+    },
+    {
+        "label": "Hibernate",
+        "exec": "/usr/local/share/power_operation.sh hibernate",
+        "icon": "/usr/share/nwg-bar/images/system-hibernate.svg"
+    },
+    {
+        "label": "Reboot",
+        "exec": "systemctl reboot",
+        "icon": "/usr/share/nwg-bar/images/system-reboot.svg"
+    },
+    {
+        "label": "Shutdown",
+        "exec": "systemctl -i poweroff",
+        "icon": "/usr/share/nwg-bar/images/system-shutdown.svg"
+    }
+]

@@ -1,0 +1,2075 @@
+# ! --------- Options ----------
+# Quit server when there are no clients left connected
+# Leave it alive for file copying
+set autoquit false
+
+# Preview
+set previewer '~/.config/lf/lf_kitty_preview_bwrap'
+set cleaner '~/.config/lf/lf_kitty_clean'
+
+set dirfirst true
+set drawbox true
+
+# Re-name copy/cut file, if name already exist
+# %f=file name, %b=base name, %e=extension (including the dot), %n=number of duplicates
+set dupfilefmt '%b (%n)%e'
+
+# '*' to match any sequence, '?' to match any character
+# '[...]' or '[^...]' to match character sets or ranges
+set globsearch false
+
+# Show hidden file on start
+
+# Pattern for hidden file. Can use glob pattern. ':' as separator
+set hiddenfiles '.*:lost+found'
+
+# Save command history
+set history false
+
+set icons true
+
+# Default empty
+set ifs "\n"
+
+set ignorecase true
+set smartcase true
+set incsearch true
+set incfilter true
+
+# Info on the side. 'size:time:atime:ctime', default empty
+set info size
+
+set mouse true
+
+# List of attributes that are preserved when copying files
+# 'mode:timestamps', default 'mode'
+set preserve "mode:timestamps"
+
+# Ratio between panels
+set ratios 1:1
+
+set scrolloff 5
+
+set shell 'bash'
+set shellopts '-eu'
+
+set tabstop 4
+
+set rulerfmt "%a  |%p  |\033[7;31m %m \033[0m  |\033[7;33m %c \033[0m  |\033[7;35m %s \033[0m  |\033[7;34m %f \033[0m |%d |%i/%t"
+
+# --------- User options ---------
+set user_paste_opt ''
+set user_broot_opt ''
+set user_fzf_opt ''
+
+# --------- Override builtin CMD ---------
+cmd open ${{
+    if [ "${f##*.}" == "html" ]; then
+        (setsid librewolf "$f" &)
+
+    else
+        file_type="$(file -Lb --mime-type "$f")"
+
+        if [[ "$file_type" == text/* ]] || [[ "$file_type" == "inode/x-empty" ]]; then
+            $VISUAL "$f"
+
+        else
+            opener="$(gio mime "$file_type" | head -n1)"
+            if [[ "$opener" == "No default applications"* ]]; then
+                lf -remote "send $id echo No default program to open the file"
+
+            else
+                opener="$(echo "$opener" | sed -E 's/.*:\s*(.*)$/\1/')"
+                if [ "$opener" == "nvim.desktop" ]; then
+                    $VISUAL "$f"
+
+                else
+                    (setsid gio open "$f" >/dev/null 2>&1 </dev/null)
+                fi
+            fi
+
+        fi
+    fi
+}}
+
+#----------
+cmd delete ${{
+    readarray -t arr <<<"$fx"
+    [ "${#arr[@]}" -eq 0 ] && {
+        lf -remote "send $id echo Nothing to delete"
+        exit 0
+    }
+
+    if [ "${#arr[@]}" -gt 12 ]; then
+        echo -n "Delete all ${#arr[@]} files? [y/n]"
+    else
+        echo "Delete the following ${#arr[@]} file(s)?"
+        printf '%s\n' "${arr[@]}"
+        echo -n "[y/n]"
+    fi
+    read -n 1 -r res
+    echo -e "\n"
+    if [ "$res" != "y" ]; then
+        echo -e "Cancelled\n"
+        exit 0
+    fi
+
+    run_dir="${XDG_RUNTIME_DIR:-/run/user/0}"
+    mkdir -p "$run_dir/lf_progress"
+    SH_FILE="$(mktemp "$run_dir/lf_progress/rm_XXXXX.sh")"
+
+    rm_arr=()
+    trash_arr=()
+    for f in "${arr[@]}"; do
+        if [ ! -f "$f" ] && [ ! -d "$f" ]; then
+            rm_arr+=("$f")
+
+        elif [ "$(basename -- "$f")" == ".Trash-$(id -u)" ]; then
+            rm_arr+=("$f")
+
+        elif [ "$(du -s --apparent-size --block-size=1M "$f" | awk '{print $1}')" -gt 50 ]; then
+            rm_arr+=("$f")
+
+        else
+            trash_arr+=("$f")
+
+        fi
+    done
+
+    echo "#$PWD" >"$SH_FILE"
+    [ "${#rm_arr[@]}" -ne 0 ] && {
+        echo "rm:"
+        printf '%s\n' "${rm_arr[@]}"
+        echo
+
+        echo "#rm:" >>"$SH_FILE"
+        printf '#%s\n' "${rm_arr[@]}" >>"$SH_FILE"
+        echo >>"$SH_FILE"
+
+    }
+
+    [ "${#trash_arr[@]}" -ne 0 ] && {
+        echo "trash-put:"
+        printf '%s\n' "${trash_arr[@]}"
+
+        echo "#trash-put:" >>"$SH_FILE"
+        printf '#%s\n' "${trash_arr[@]}" >>"$SH_FILE"
+        echo >>"$SH_FILE"
+    }
+
+    [ "${#trash_arr[@]}" -ne 0 ] && {
+        echo "trash-put --force --verbose ${trash_arr[@]@Q} 2>&1 | rg '^trash-put: trying' | pv -l -N 'trash-put' -s '${#trash_arr[@]}' >/dev/null" >>"$SH_FILE"
+    }
+
+    [ "${#rm_arr[@]}" -ne 0 ] && {
+
+        echo "rm -rvf ${rm_arr[@]@Q} | pv -l -N 'rm' -s '$(du -a "${rm_arr[@]}" | wc -l)' >/dev/null" >>"$SH_FILE"
+    }
+
+    cat <<EOF >>"$SH_FILE"
+lf -remote "send unselect"
+lf -remote "send reload"
+notify-send "lf: rm completed"
+rm -- "\$0"
+EOF
+    chmod 700 "$SH_FILE"
+    tmux new-session -d -s "$(basename "$SH_FILE")" -- bash "$SH_FILE"
+    lf -remote "send $id echo Remove ${#arr[@]} file(s)"
+
+}}
+#----------
+cmd delete-with-rm ${{
+    readarray -t arr <<<"$fx"
+    [ "${#arr[@]}" -eq 0 ] && {
+        lf -remote "send $id echo Nothing to delete"
+        exit 0
+    }
+
+    if [ "${#arr[@]}" -gt 12 ]; then
+        echo -n "rm all ${#arr[@]} files? [y/n]"
+    else
+        echo "rm the following ${#arr[@]} file(s)?"
+        printf '%s\n' "${arr[@]}"
+        echo -n "[y/n]"
+    fi
+    read -n 1 -r res
+    echo -e "\n"
+    if [ "$res" != "y" ]; then
+        echo -e "Cancelled\n"
+        exit 0
+    fi
+
+    run_dir="${XDG_RUNTIME_DIR:-/run/user/0}"
+    mkdir -p "$run_dir/lf_progress"
+    SH_FILE="$(mktemp "$run_dir/lf_progress/rm_XXXXX.sh")"
+
+    echo "#$PWD" >"$SH_FILE"
+    echo "rm:"
+    printf '%s\n' "${arr[@]}"
+    echo
+
+    echo "#rm:" >>"$SH_FILE"
+    printf '#%s\n' "${arr[@]}" >>"$SH_FILE"
+    echo >>"$SH_FILE"
+    echo "rm -rvf ${arr[@]@Q} | pv -l -N 'rm' -s '$(du -a "${arr[@]}" | wc -l)' >/dev/null" >>"$SH_FILE"
+
+    cat <<EOF >>"$SH_FILE"
+lf -remote "send unselect"
+lf -remote "send reload"
+notify-send "lf: rm completed"
+rm -- "\$0"
+EOF
+    chmod 700 "$SH_FILE"
+    tmux new-session -d -s "$(basename "$SH_FILE")" -- bash "$SH_FILE"
+    lf -remote "send $id echo Remove ${#arr[@]} file(s)"
+
+}}
+#----------
+cmd paste ${{
+    check_available_space() {
+        local -n source_file=$1
+        local -n dest_path=$2
+
+        [ "${#source_file[@]}" -eq 0 ] && return
+
+        files_size="$(du -cs --apparent-size --block-size=1K "${source_file[@]}" | tail -1 | awk '{print $1}')"
+
+        free_space="$(df -k "$dest_path" | tail -1 | awk '{print $4}')"
+        if [ "$files_size" -gt "$free_space" ]; then
+            need_free_space="$((files_size - free_space))"
+            need_free_space="$(numfmt --to=iec-i --from=iec-i --suffix=B --format="%9.2f" "${need_free_space}Ki")"
+            lf -remote "send $id echo Insufficient free space, need $need_free_space more"
+            notify-send "Insufficient free space, need $need_free_space more"
+            exit 0
+        fi
+    }
+
+    ## Exit if nothing is selected
+    if [ ! -f "$HOME/.local/share/lf/files" ] ||
+        [ "$(cat "$HOME/.local/share/lf/files" | wc -l)" -le 1 ]; then
+        lf -remote "send $id echo Nothing to paste"
+        exit 0
+    fi
+
+    ACTION="$(head -n1 "$HOME/.local/share/lf/files")"
+    RUN_DIR="${XDG_RUNTIME_DIR:-/run/user/0}"
+    mkdir -p "$RUN_DIR/lf_progress"
+    DEST="$PWD"
+
+    ## Read selection into an array, and split them into rsync, mv and duplicate actions
+    selected_paths_arr=()
+    readarray -t selected_paths_arr < <(sed '1d' "$HOME/.local/share/lf/files")
+
+    rsync_cmd="rsync -ah --no-inc-recursive --info=progress2 --exclude 'lost+found/'"
+    mv_cmd="mv"
+    rm_empty_dir_cmd=""
+
+    rsync_arr=()
+    mv_arr=()
+    dup_arr=()
+
+    ## Put each selected paths into 'rsync', 'mv' or 'duplicate'.
+    ## Set arguments of the commands based on copy or move.
+    if [ "$ACTION" = "move" ]; then
+        # For move, if source and destination are on the same device, use mv, else rsync.
+        path_is_dir_arr=()
+        for path in "${selected_paths_arr[@]}"; do
+            if [ "$(stat -c "%d" "$path")" = "$(stat -c "%d" "$DEST")" ]; then
+                mv_arr+=("$path")
+
+            else
+                rsync_arr+=("$path")
+
+            fi
+
+            if [ -d "$path" ]; then
+                path_is_dir_arr+=("$path")
+            fi
+        done
+
+        rsync_cmd="$rsync_cmd --remove-source-files"
+
+        # Remove empty dir at source after mv and rsync are completed.
+        if [ "${#path_is_dir_arr[@]}" -ne 0 ]; then
+            rm_empty_dir_cmd="find $(printf '%s ' "${path_is_dir_arr[@]@Q}")-type d -empty -delete"
+        fi
+
+        unset path_is_dir_arr
+
+        # Only check rsync usage. mv does not occupy space as the are on the same device.
+        check_available_space rsync_arr DEST
+
+    elif [ "$ACTION" = "copy" ]; then
+        check_available_space selected_paths_arr DEST
+
+        # Determine whether to copy or duplicate
+        for path in "${selected_paths_arr[@]}"; do
+            if [ "$(dirname -- "$path")" = "$DEST" ]; then
+                dup_arr+=("$path")
+            else
+                rsync_arr+=("$path")
+            fi
+        done
+
+    else
+        lf -remote "send $id echo Unknown action '$ACTION'"
+        exit 0
+
+    fi
+
+    # Check existing file
+    paths_to_be_checked=("${mv_arr[@]}" "${rsync_arr[@]}")
+    filename_already_exist=()
+    for path in "${paths_to_be_checked[@]}"; do
+        if [ -e "$DEST/$(basename -- "$path")" ]; then
+            filename_already_exist+=("$path")
+        fi
+    done
+
+    if [ "${#filename_already_exist[@]}" -ne 0 ]; then
+        echo "----- File name already exist -----"
+        # Trim down to max 50 paths
+        if [ "${#filename_already_exist[@]}" -gt 50 ]; then
+            filename_already_exist="${filename_already_exist[@]:0:49}"
+            filename_already_exist+=("...more...")
+        fi
+        printf '%s\n' "${filename_already_exist[@]}"
+        echo "----------"
+
+        echo -e "File name(s) exists in dest, going to \e[31m$lf_user_paste_opt\e[0m"
+        read -n 1 -r -p "Do you want to continue? [y/n] " res
+        echo
+        if [ "$res" != "y" ]; then
+            echo -e "Cancelled\n"
+            exit 0
+        fi
+    fi
+
+    # Create the temp file after all interactions with the user is completed.
+    SH_FILE="$(mktemp "$RUN_DIR/lf_progress/${ACTION}_XXXXX.sh")"
+
+    if [ "$lf_user_paste_opt" = "skip" ]; then
+        rsync_cmd="$rsync_cmd --ignore-existing --"
+        mv_cmd="$mv_cmd --no-clobber --"
+
+    elif [ "$lf_user_paste_opt" = "replace" ]; then
+        mv_cmd="$mv_cmd --force --"
+
+    elif [ "$lf_user_paste_opt" = "backup" ]; then
+        rsync_cmd="$rsync_cmd --backup --"
+        mv_cmd="$mv_cmd --force -b --"
+
+    else
+        lf -remote "send $id echo Unknown paste option '$lf_user_paste_opt'"
+        exit 0
+    fi
+
+    ## Start to create the script
+    cat <<EOF >"$SH_FILE"
+#!/usr/bin/bash
+## Paste to ${DEST@Q}
+
+EOF
+
+    if [ "$ACTION" = "move" ]; then
+        cat <<EOF >>"$SH_FILE"
+rm -f ~/.local/share/lf/file
+lf -remote 'send clear'
+
+EOF
+    fi
+
+    ## mv does not work if the destination dir is not empty, need to move file one by one
+    ## If destination dir exit, move file one by one.
+    ## Otherwise, if source is a file or the destination dir does not exist, mv directly.
+    if [ "${#mv_arr[@]}" -ne 0 ]; then
+        mv_simple_arr=()
+        echo "echo $mv_cmd ${mv_arr[@]@Q} ${DEST@Q}" >>"$SH_FILE"
+
+        for path in "${mv_arr[@]}"; do
+
+            dir_basename="$(basename -- "$path")"
+
+            if [ ! -d "$path" ] || [ ! -d "$DEST/$dir_basename" ]; then
+                # Store in an array and move all together using one 'mv'
+                mv_simple_arr+=("$path")
+
+            else
+
+                ## mkdir -p all leaf directories
+                # Only works on POSIX compliant file system like ext4
+                # echo "(cd ${f@Q}; find -type d -links 2 -exec mkdir -p ${dest@Q}/${dir_basename@Q}/{} \;)" >>"$SH_FILE"
+
+                ## Move file one by one
+                cat <<EOF >>"$SH_FILE"
+mkdir -p ${DEST@Q}/${dir_basename@Q}
+
+arr=()
+while read -d \$'\\n' directory; do
+    if [ -n "\$last" ] && [[ ! "\$directory" == "\$last"* ]]; then
+        arr+=("\$last")
+    fi
+    last="\$directory"
+done < <(find ${path@Q} -mindepth 1 -type d -printf '%P/\\n' | sort)
+arr+=("\$last")
+printf "%s\\0" "\${arr[@]}" | xargs --no-run-if-empty -0  -I {} mkdir -p ${DEST@Q}/${dir_basename@Q}/{}
+
+error_code="\$?"
+if [ "\$error_code" -ne 0 ]; then
+    notify-send "lf: $ACTION failed. (mkdir)"
+    pw-play "$HOME/.config/my-config/notification_tones/Overheat.wav"
+    lf -remote "send reload"
+    exit 1
+fi
+
+(cd ${path@Q}; fd --unrestricted -tf -tl --exec $mv_cmd {} ${DEST@Q}/${dir_basename@Q}/{})
+error_code="\$?"
+if [ "\$error_code" -ne 0 ]; then
+    notify-send "lf: $ACTION failed.Add rsync to the script (move one by one)"
+    pw-play "$HOME/.config/my-config/notification_tones/Overheat.wav"
+    lf -remote "send reload"
+fi
+
+EOF
+            fi
+        done
+
+        if [ "${#mv_simple_arr[@]}" -ne 0 ]; then
+            cat <<EOF >>"$SH_FILE"
+$mv_cmd ${mv_simple_arr[@]@Q} ${DEST@Q}
+error_code="\$?"
+if [ "\$error_code" -ne 0 ]; then
+    notify-send "lf: $ACTION failed. (move simple)"
+    pw-play "$HOME/.config/my-config/notification_tones/Overheat.wav"
+    lf -remote "send reload"
+    exit 1
+fi
+
+EOF
+        fi
+    fi
+
+    ## Add rsync to the script
+    if [ "${#rsync_arr[@]}" -ne 0 ]; then
+        echo "$rsync_cmd ${rsync_arr[@]@Q} ${DEST@Q}" >>"$SH_FILE"
+    fi
+
+    ## Clean up empty source dir. This command is empty for copy.
+    [ -n "$rm_empty_dir_cmd" ] && echo "$rm_empty_dir_cmd" >>"$SH_FILE"
+
+    ## Duplicate files with index
+    if [ "${#dup_arr[@]}" -ne 0 ]; then
+        count=1
+        total="${#dup_arr[@]}"
+        for path in "${dup_arr[@]}"; do
+            # Find free index to append to the duplicate file, up to 100
+            for i in {1..100}; do
+                dup_name="${path}.~${i}~"
+                [ -e "$dup_name" ] && continue
+                break
+            done
+
+            # In the worst case, rely on cp's backup function to continue index
+            # E.g., for index over 100, file.txt.~100~.~1~
+            echo "echo cp '$path' '$dup_name' [$count/$total]" >>"$SH_FILE"
+            echo "cp -r --backup=t ${path@Q} ${dup_name@Q}" >>"$SH_FILE"
+            count="$((count + 1))"
+        done
+    fi
+
+    cat <<EOF >>"$SH_FILE"
+notify-send "lf: $ACTION completed"
+lf -remote "send reload"
+rm -- "\$0"
+EOF
+    chmod 700 "$SH_FILE"
+    tmux new-session -d -s "$(basename "$SH_FILE")" -- bash "$SH_FILE"
+    lf -remote "send $id echo Pasting ${#selected_paths_arr[@]} file(s) - $ACTION"
+}}
+
+#----------
+cmd paste_skip_exist :{{
+    set user_paste_opt "skip"
+    paste
+}}
+
+#----------
+cmd paste_replace_exist :{{
+    set user_paste_opt "replace"
+    paste
+}}
+
+#----------
+cmd paste_backup_exist :{{
+    set user_paste_opt "backup"
+    paste
+}}
+
+#----------
+cmd on-select &{{
+    # Send file to NautilusPreviewer if it is alive
+    if pgrep -f "^(/usr/bin/gjs /usr/lib/)?org.gnome.NautilusPreviewer" >/dev/null 2>&1; then
+        dbus-send --print-reply --dest=org.gnome.NautilusPreviewer \
+        /org/gnome/NautilusPreviewer \
+        org.gnome.NautilusPreviewer.ShowFile \
+        string:"file:///$f" \
+        int32:0 \
+        boolean:false >/dev/null 2>&1
+    fi
+
+}}
+
+#----------
+cmd on-quit &{{
+    if pgrep -f "^(/usr/bin/gjs /usr/lib/)?org.gnome.NautilusPreviewer" >/dev/null 2>&1; then
+        pkill -f "^(/usr/bin/gjs /usr/lib/)?org.gnome.NautilusPreviewer" >/dev/null 2>&1
+    fi
+}}
+
+#----------
+cmd on-cd &{{
+    bash -c '
+    # display git repository status in your prompt
+    source /usr/share/git/completion/git-prompt.sh
+    GIT_PS1_SHOWDIRTYSTATE=auto
+    GIT_PS1_SHOWSTASHSTATE=auto
+    GIT_PS1_SHOWUNTRACKEDFILES=auto
+    GIT_PS1_SHOWUPSTREAM=auto
+    git=$(__git_ps1 " (%s)")
+    fmt="\033[32;1m%u@%h\033[0m:\033[34;1m%d\033[0m\033[1m$git\033[0m"
+    lf -remote "send $id set promptfmt \"$fmt\""
+    '
+}}
+# Run to get the git info at launch
+on-cd
+
+# --------- Plugin integration ----------
+## Use lf to select files in zsh
+cmd zle-cd %printf 'cd %q && zle reset-prompt\n' "$PWD" >&$ZLE_FIFO
+
+cmd zle-insert-relative %{{
+    for f in $fx; do
+        printf 'LBUFFER+="${LBUFFER:+ }${(q)$(realpath %q --relative-to=$PWD)}"\n' "$f" >&$ZLE_FIFO
+    done
+}}
+
+cmd zle-insert-absolute %{{
+    for f in $fx; do
+        printf 'LBUFFER+="${LBUFFER:+ }%q"\n' "$f" >&$ZLE_FIFO
+    done
+}}
+
+cmd zle-init :{{
+    map , zle-cd
+    map i zle-insert-relative
+    map I zle-insert-absolute
+}}
+
+&[[ -n "$ZLE_FIFO" ]] && lf -remote "send $id zle-init"
+
+#----------
+cmd toggle_nautilus_previewer &{{
+    # ShowFile method:
+    # $1 url of file, $2 display id, $3 closeIfAlreadyShown
+
+    if pgrep -f "^(/usr/bin/gjs /usr/lib/)?org.gnome.NautilusPreviewer" >/dev/null 2>&1; then
+
+        ## Close via dbus has delay
+        # dbus-send --print-reply --dest=org.gnome.NautilusPreviewer \
+        # /org/gnome/NautilusPreviewer \
+        # org.gnome.NautilusPreviewer.Close >/dev/null 2>&1
+
+        pkill -f "^(/usr/bin/gjs /usr/lib/)?org.gnome.NautilusPreviewer" >/dev/null 2>&1
+        lf -remote "send $id echo Killed NautilusPreviewer"
+
+    else
+        dbus-send --print-reply --dest=org.gnome.NautilusPreviewer \
+        /org/gnome/NautilusPreviewer \
+        org.gnome.NautilusPreviewer.ShowFile \
+        string:"file:///$f" \
+        int32:0 \
+        boolean:false >/dev/null 2>&1
+
+        lf -remote "send $id echo Launched NautilusPreviewer"
+    fi
+}}
+
+#----------
+cmd toggle_lf_preview &{{
+    if [ "$lf_preview" = "true" ]; then
+        lf -remote "send $id :set preview false; set ratios 1"
+    else
+        lf -remote "send $id :set ratios 1:1; set preview true"
+    fi
+
+}}
+
+#----------
+cmd z ${{
+    result="$(zoxide query -i | sed 's/\\/\\\\/g;s/"/\\"/g')"
+    lf -remote "send $id cd \"$result\""
+}}
+
+#----------
+cmd ripgrep_word ${{
+    cmd="rg --follow --no-ignore --column --line-number --no-heading --color=always --smart-case --field-match-separator='\x7F:'"
+    # Preview takes too much space, not able to show full path
+    f="$(
+        fzf --ansi --disabled --layout=reverse --header="Search in files" --delimiter='\x7F:' \
+            --bind="start:reload([ -n {q} ] && $cmd -- {q} || true)" \
+            --bind="change:reload([ -n {q} ] && $cmd -- {q} || true)" \
+            --bind="enter:become(printf '%s' {1})"
+        )"
+        # --bind='enter:become(lf -remote "send $id select \"$(printf "%s" {1} | sed '\''s/\\/\\\\/g;s/"/\\"/g'\'')\"")')"
+        # --preview='~/.config/lf/lf_kitty_clean; ~/.config/lf/lf_kitty_preview_bwrap {1} "$FZF_PREVIEW_COLUMNS" "$FZF_PREVIEW_LINES" "$FZF_PREVIEW_LEFT" "$FZF_PREVIEW_TOP"'
+    f_escaped="${f@Q}"
+    f_escaped="${f_escaped// /\\ }"
+    f_escaped="${f_escaped//;/\\;}"
+    lf -remote "send $id select $f_escaped"
+}}
+
+#----------
+cmd broot ${{
+    if [ "$lf_user_broot_opt" = "norm" ]; then
+        path="$(broot)"
+    elif [ "$lf_user_broot_opt" = "whale" ]; then
+        path="$(broot -w)"
+    else
+        lf -remote "send $id echo unknown broot opt '$lf_user_broot_opt'"
+        exit 0
+    fi
+
+    [ -z "$path" ] && exit 0
+    IFS=" "
+    path_escaped="${path@Q}"
+    path_escaped="${path_escaped// /\\ }"
+
+    if [ -d "$path" ]; then
+        bash <(printf "lf -remote \"send $id cd \"%s" "$path_escaped")
+    elif [ -e "$path" ]; then
+        bash <(printf "lf -remote \"send $id select \"%s" "$path_escaped")
+    else
+        lf -remote "send $id echo cannot select '$path'"
+    fi
+}}
+
+#----------
+cmd broot_norm :{{
+    set user_broot_opt "norm"
+    broot
+}}
+
+#----------
+cmd broot_whale :{{
+    set user_broot_opt "whale"
+    broot
+}}
+
+#----------
+cmd fzf ${{
+    extra_args=()
+    if [ "$lf_user_fzf_opt" = "file" ]; then
+        extra_args+=("-tf")
+    elif [ "$lf_user_fzf_opt" = "dir" ]; then
+        extra_args+=("-td")
+    elif [ "$lf_user_fzf_opt" = "executable" ]; then
+        extra_args+=("-tx")
+    fi
+
+    files="$( fd --unrestricted --follow \
+            --exclude "*.kdb" --exclude "*.kdbx" --exclude "*.key" --exclude "*cache/" \
+            --exclude ".cargo/" --exclude ".cert" --exclude ".fpm/" --exclude ".git/" \
+            --exclude ".gnupg/" --exclude ".gphoto/" --exclude ".hyprland/" \
+            --exclude ".ipython/" --exclude ".jupyter/" --exclude ".keepass/" \
+            --exclude ".keepassxc/" --exclude ".lastpass/" --exclude ".npm/" \
+            --exclude ".nv" --exclude ".password-store/" --exclude ".perl5/" \
+            --exclude ".pki/" --exclude ".snapshots/" --exclude ".ssh/" --exclude ".svn/" \
+            --exclude ".texlive/" --exclude ".vscode-oss/" --exclude ".wine/" \
+            --exclude "bitwarden/" --exclude "keepass/" --exclude "keepassxcrc/" \
+            --exclude "__pycache__/"  --exclude "containers/" --exclude "go/" \
+            --exclude "keepass/" --exclude "keepassx/" --exclude "keepassxc/" \
+            --exclude "keyrings/" --exclude "lost+found" --exclude "mozilla*/" \
+            --exclude "librewolf*/" --exclude "node_modules/" --exclude "rclone/" \
+            --exclude "thunderbird/" \
+            "${extra_args[@]}" \
+            . "${PWD}" |
+            fzf -i --multi --exact --reverse --prompt="lf select:"
+    )"
+
+    arr=()
+    readarray -t arr < <(printf '%s' "$files")
+    IFS=" "
+
+    if [ "${#arr[@]}" -eq 1 ]; then
+        f="${arr[0]}"
+        f_escaped="${arr[0]@Q}"
+        f_escaped="${f_escaped// /\\ }"
+        f_escaped="${f_escaped//;/\\;}"
+        echo "$f"
+        if [ -d "$f" ]; then
+            bash <(printf "lf -remote \"send $id cd \"%s" "$f_escaped")
+
+        elif [ -e "$f" ]; then
+            bash <(printf "lf -remote \"send $id select \"%s" "$f_escaped")
+        else
+            lf -remote "send $id echo cannot select '$f'"
+        fi
+
+    elif [ "${#arr[@]}" -gt 1 ]; then
+        lf -remote "send ${id} unselect"
+
+        # Remove tailing slash, lf do not like it
+        arr=("${arr[@]%/}")
+        args="${arr[@]@Q}"
+        args="${args// /\\ }"
+        args="${args//;/\\;}"
+        bash <(printf "lf -remote \"send $id toggle \"%s" "$args")
+    fi
+}}
+
+#----------
+cmd fzf_all :{{
+    set user_fzf_opt "all"
+    fzf
+}}
+
+#----------
+cmd fzf_file :{{
+    set user_fzf_opt "file"
+    fzf
+}}
+
+
+#----------
+cmd fzf_dir :{{
+    set user_fzf_opt "dir"
+    fzf
+}}
+
+#----------
+cmd fzf_exe :{{
+    set user_fzf_opt "executable"
+    fzf
+}}
+
+# --------- Custom CMD ---------
+cmd show_keymap ${{
+    grep -e "^\(map \|cmap \|##\)" ~/.config/lf/lfrc | sed "/###/i\ " | $PAGER
+}}
+
+#----------
+cmd goto_usb &{{
+    lf -remote "send $id cd /run/media/$(id -n -u)"
+}}
+
+#----------
+cmd goto_phone &{{
+    lf -remote "send $id cd \"$XDG_RUNTIME_DIR/gvfs\""
+}}
+
+#----------
+cmd bulk-rename ${{
+
+    run_dir="${XDG_RUNTIME_DIR:-/run/user/0}"
+
+    old="$(mktemp "$run_dir/lf_rename_old_XXXXX")"
+    new="$(mktemp "$run_dir/lf_rename_new_XXXXX")"
+
+    if [ -n "$fx" ]; then
+        fx="$(basename -a $fx)"
+    else
+        lf -remote "send $id echo Rename failed, 'fx' is empty."
+        return
+    fi
+
+    printf '%s\n' "$fx" >"$old"
+    printf '%s\n' "$fx" >"$new"
+
+    if [ "$VISUAL" == "nvim" ]; then
+        $VISUAL -c "set filetype=text" "$run_dir/$(basename -- "$new")"
+    else
+        $VISUAL "$new"
+    fi
+
+    if [ "$(wc -l < "$new")" -ne "$(wc -l < "$old")" ]; then
+        lf -remote "send $id echo Rename failed, number of file names mismatch."
+       exit
+    fi
+
+    paste "$old" "$new" | while IFS= read -r names; do
+        src="$(printf '%s' "$names" | cut -f1)"
+        dst="$(printf '%s' "$names" | cut -f2)"
+        if [ "$src" = "$dst" ] || [ -e "$dst" ]; then
+            continue
+        fi
+        mv -- "$src" "$dst"
+    done
+    rm -- "$old" "$new"
+    lf -remote "send $id unselect"
+}}
+
+#----------
+cmd edit-config ${{
+    $VISUAL ~/.config/lf/lfrc
+    lf -remote "send $id :set ratios 1:1; set preview true"
+    lf -remote "send $id source ~/.config/lf/lfrc"
+}}
+
+#----------
+cmd follow_link %{{
+  lf -remote "send ${id} select '$(readlink -f $f)'"
+}}
+
+#----------
+cmd open-and-quit ${{
+    if [ -d "$f" ]; then
+        (setsid /usr/local/share/nvim-via-desktop "$f" &) >/dev/null 2>&1 </dev/null
+    else
+        lf -remote "send ${id} open"
+    fi
+    lf -remote "send ${id} quit"
+}}
+
+#----------
+cmd edit-selection ${{
+    run_dir="${XDG_RUNTIME_DIR:-/run/user/0}"
+
+    mkdir -p "$run_dir/nvim/run/lf"
+    file="$(mktemp "$run_dir/nvim/run/lf/XXXXX")"
+    printf "${fx}\n" > "$file"
+
+    if [ "$VISUAL" == "nvim" ]; then
+        $VISUAL "/run/lf/$(basename -- "$file")"
+    else
+        $VISUAL "$file"
+    fi
+
+    lf -remote "send ${id} unselect"
+
+    # Need to set IFS, otherwise expanding array use '\n' to separate elements
+    readarray -t arr <"$file"
+    IFS=" "
+
+    # Use space as separator, default is '\n' in lf
+    # Escape all special char
+    args="${arr[@]@Q}"
+
+    # Escape spaces, both the separator and the spaces in file name
+    args="${args// /\\ }"
+    bash <(printf "lf -remote \"send ${id} toggle \"%s" "$args")
+
+    rm "$file"
+}}
+
+#----------
+cmd edit-cp-mv-list ${{
+    if [ -f "$HOME/.local/share/lf/files" ]; then
+        $VISUAL "$HOME/.local/share/lf/files"
+    fi
+
+    # Toggle tag to refresh
+    lf -remote "send ${id} :tag-toggle; tag-toggle"
+}}
+
+#----------
+cmd open-shell-here &(setsid kitty &) >/dev/null 2>&1 </dev/null
+cmd open-in-new-nvim &(setsid /usr/local/share/nvim-via-desktop "$f" &) >/dev/null 2>&1 </dev/null
+
+cmd yank-paths &{{
+    readarray -t arr <<<"$fx"
+    wl-copy "$(printf "%s " "${arr[@]@Q}")"
+}}
+
+cmd yank-paths-with-newline &{{
+    readarray -t arr <<<"$fx"
+    if [ "${#arr[@]}" -eq 1 ]; then
+        wl-copy "$(printf '%s' "${arr[0]}")"
+    else
+        wl-copy "$(printf '%s\n' "${arr[@]}")"
+    fi
+
+}}
+
+cmd yank-basename &{{
+    readarray -t arr <<<"$fx"
+    readarray -t arr_basename < <(printf '%s' "$(basename -a -- "${arr[@]}")")
+    wl-copy "$(printf '%s ' "${arr_basename[@]@Q}")"
+}}
+
+cmd yank-basename-with-newline &{{
+    readarray -t arr <<<"$fx"
+    readarray -t arr_basename < <(printf '%s' "$(basename -a -- "${arr[@]}")")
+    if [ "${#arr_basename[@]}" -eq 1 ]; then
+        wl-copy "$(printf '%s' "${arr_basename[0]}")"
+    else
+        wl-copy "$(printf '%s\n' "${arr_basename[@]}")"
+    fi
+
+}}
+
+cmd yank-current-directory &wl-copy "$PWD"
+cmd yank-current-directory-basename &wl-copy "$(basename -- "$PWD")"
+
+#----------
+cmd toggle_time &{{
+    case "$lf_info" in
+    "size")
+        lf -remote "send ${id} :set info size:time"
+        ;;
+    "time")
+        lf -remote "send ${id} :set info"
+        ;;
+    "size:time")
+        lf -remote "send ${id} :set info size"
+        ;;
+    *)
+        lf -remote "send ${id} :set info time"
+        ;;
+    esac
+}}
+
+#----------
+cmd toggle_size &{{
+    case "$lf_info" in
+    "size")
+        lf -remote "send ${id} :set info"
+        ;;
+    "time")
+        lf -remote "send ${id} :set info size:time"
+        ;;
+    "size:time")
+        lf -remote "send ${id} :set info time"
+        ;;
+    *)
+        lf -remote "send ${id} :set info size"
+        ;;
+    esac
+}}
+
+
+#----------
+cmd extract ${{
+    readarray -t arr <<<"$fx"
+    [ "${#arr[@]}" -eq 0 ] && {
+        lf -remote "send $id echo Nothing to extract"
+        exit 0
+    }
+
+    run_dir="${XDG_RUNTIME_DIR:-/run/user/0}"
+    mkdir -p "$run_dir/lf_progress"
+    SH_FILE="$(mktemp "$run_dir/lf_progress/extract_XXXXX.sh")"
+    dest="$PWD"
+    cat << EOF >"$SH_FILE"
+#${PWD@Q}
+cd ${PWD@Q} || { rm "\$0"; exit 1; }
+
+ex() {
+    if [ "\$#" -ne 1 ]; then
+        echo "usage: ex <file>"
+    elif [ -f "\$1" ] ; then
+        case \$1 in
+            *.tar.bz2)  tar -xjpf "\$1" ;;
+            *.tar.gz)   tar -xzpf "\$1" ;;
+            *.tar.xz)   tar -I pixz -xpf "\$1" ;;
+            *.tar.zst)  tar --zstd -xpf "\$1" ;;
+            *.bz2)      bunzip2 -kc "\$1" > ./"\$(basename -- "\$1" | sed -E 's:\\.bz2$::')" ;;
+            *.rar)      unrar x -inul "\$1" . ;;
+            *.tar)      tar -xpf "\$1" ;;
+            *.gz)       gunzip -kc "\$1" > ./"\$(basename -- "\$1" | sed -E 's:\\.gz$::')" ;;
+            *.tar)      tar -xpf - ;;
+            *.tbz2)     tar -xjpf "\$1" ;;
+            *.tgz)      tar -xzpf "\$1" ;;
+            *.zip)      unzip -q "\$1" ;;
+            *.Z)        uncompress "\$1" ;;
+            *.deb)      ar -x "\$1" ;;
+            *.7z)       7z x "\$1" ;;
+            *.iso)       7z x "\$1" ;;
+            *.rpm)      rpmextract.sh "\$1" ;;
+            *.AppImage)
+                if [ ! -x "\$1" ]; then
+                    if [ ! -w "\$1" ]; then
+                        echo "'\$1' is not executable, and cannot chmod."
+                        return
+                    fi
+
+                    if [ -O "\$1" ]; then
+                        chmod u+x "\$1"
+                    elif [ -G "\$1" ]; then
+                        chmod g+x "\$1"
+                    else
+                        chmod o+x "\$1"
+                    fi
+                fi
+
+                dir_path="\$(dirname -- "\$1")"
+                bwrap \\
+                    --unshare-user \\
+                    --unshare-ipc \\
+                    --unshare-pid \\
+                    --unshare-uts \\
+                    --unshare-cgroup-try \\
+                    \\
+                    --disable-userns \\
+                    --hostname my-pc \\
+                    --proc /proc \\
+                    --cap-drop ALL \\
+                    --new-session \\
+                    --die-with-parent \\
+                    --seccomp 9 \\
+                    9</usr/local/share/seccomp-filter/default_seccomp_filter.bpf \\
+                    \\
+                    --ro-bind-try "/usr" "/usr" \\
+                    --symlink "/usr/bin" "/bin" \\
+                    --symlink "/usr/bin" "/sbin" \\
+                    --symlink "/usr/lib" "/lib" \\
+                    --symlink "/usr/lib" "/lib64" \\
+                    --bind-try ${PWD@Q} ${PWD@Q} \\
+                    --bind-try "\$dir_path" "\$dir_path" \\
+                    "\$1" --appimage-extract
+                ;;
+            *) echo "\$1 cannot be extracted via ex()" ;;
+        esac
+    else
+        echo "\$1 is not a valid file"
+    fi
+}
+
+files=(
+$(printf '    %s\n' "${arr[@]@Q}")
+)
+
+count=0
+total_count="\${#files[@]}"
+overwrite_policy=""
+for file in "\${files[@]}"; do
+    count=\$((count+1))
+    if [ -f "\${file}" ]; then
+        echo "Extracting '\$file'...(\${count}/\${total_count})"
+        ex "\$file"
+    else
+        echo "'\$file' does not exist."
+    fi
+done
+
+notify-send "lf: Extract completed"
+lf -remote "send reload"
+read -n 1 -s -p "Press any key to exit..."
+rm -- "\$0"
+EOF
+    chmod 700 "$SH_FILE"
+    (setsid kitty -- bash "$SH_FILE" &) >/dev/null 2>&1 </dev/null
+    lf -remote "send $id echo Extracting $f"
+}}
+
+#----------
+cmd extract-to-individual-folder ${{
+    readarray -t arr <<<"$fx"
+    [ "${#arr[@]}" -eq 0 ] && {
+        lf -remote "send $id echo Nothing to extract"
+        exit 0
+    }
+
+    run_dir="${XDG_RUNTIME_DIR:-/run/user/0}"
+    mkdir -p "$run_dir/lf_progress"
+    SH_FILE="$(mktemp "$run_dir/lf_progress/extract_inv_XXXXX.sh")"
+        cat << EOF >"$SH_FILE"
+#${PWD@Q}
+base_dir=${PWD@Q}
+cd "\$base_dir" ||{ rm "\$0"; exit 1; }
+
+ex() {
+    if [ "\$#" -ne 1 ]; then
+        echo "usage: ex <file>"
+
+    elif [ -f "\$1" ] ; then
+        case \$1 in
+            *.tar.bz2)  tar -xjpf "\$1" ;;
+            *.tar.gz)   tar -xzpf "\$1" ;;
+            *.tar.xz)   tar -I pixz -xpf "\$1" ;;
+            *.tar.zst)  tar --zstd -xpf "\$1" ;;
+            *.bz2)      bunzip2 -kc "\$1" > ./"\$(basename -- "\$1" | sed -E 's:\\.bz2$::')" ;;
+            *.rar)      unrar x -inul "\$1" . ;;
+            *.tar)      tar -xpf "\$1" ;;
+            *.gz)       gunzip -kc "\$1" > ./"\$(basename -- "\$1" | sed -E 's:\\.gz$::')" ;;
+            *.tar)      tar -xpf - ;;
+            *.tbz2)     tar -xjpf "\$1" ;;
+            *.tgz)      tar -xzpf "\$1" ;;
+            *.zip)      unzip -q "\$1" ;;
+            *.Z)        uncompress "\$1" ;;
+            *.deb)      ar -x "\$1" ;;
+            *.7z)       7z x "\$1" ;;
+            *.iso)       7z x "\$1" ;;
+            *.rpm)      rpmextract.sh "\$1" ;;
+            *.AppImage)
+                if [ ! -x "\$1" ]; then
+                    if [ ! -w "\$1" ]; then
+                        echo "'\$1' is not executable, and cannot chmod"
+                        return
+                    fi
+
+                    if [ -O "\$1" ]; then
+                        chmod u+x "\$1"
+                    elif [ -G "\$1" ]; then
+                        chmod g+x "\$1"
+                    else
+                        chmod o+x "\$1"
+                    fi
+                fi
+
+                dir_path="\$(dirname -- "\$1")"
+                bwrap \\
+                    --unshare-user \\
+                    --unshare-ipc \\
+                    --unshare-pid \\
+                    --unshare-uts \\
+                    --unshare-cgroup-try \\
+                    \\
+                    --disable-userns \\
+                    --hostname my-pc \\
+                    --proc /proc \\
+                    --cap-drop ALL \\
+                    --new-session \\
+                    --die-with-parent \\
+                    --seccomp 9 \\
+                    9</usr/local/share/seccomp-filter/default_seccomp_filter.bpf \\
+                    \\
+                    --ro-bind-try "/usr" "/usr" \\
+                    --symlink "/usr/bin" "/bin" \\
+                    --symlink "/usr/bin" "/sbin" \\
+                    --symlink "/usr/lib" "/lib" \\
+                    --symlink "/usr/lib" "/lib64" \\
+                    --bind-try ${PWD@Q} ${PWD@Q} \\
+                    --bind-try "\$dir_path" "\$dir_path" \\
+                    "\$1" --appimage-extract
+                ;;
+            *)          echo "\$1 cannot be extracted via ex()" ;;
+        esac
+    else
+        echo "\$1 is not a valid file"
+    fi
+}
+
+files=(
+$(printf '    %s\n' "${arr[@]@Q}")
+)
+
+count=0
+total_count="\${#files[@]}"
+overwrite_policy=""
+for file in "\${files[@]}"; do
+    count=\$((count+1))
+    if [ -f "\${file}" ]; then
+        fullname="\$(basename -- "\$file")"
+        basename="\${fullname%.*}"
+        [ "\${basename: -4}" = ".tar" ] && basename="\${basename%.*}"
+
+        if [ -e "\$basename" ]; then
+            while [ "\$overwrite_policy" != "v" ] && [ "\$overwrite_policy" != "k" ]; do
+                read -n 1 -p "A file/directory named '\$basename' already exist. Do you want to [o]verwrite, [s]kip, o[v]erwirte all, or s[k]ip all? " overwrite_policy
+                echo
+
+                case "\$overwrite_policy" in
+                    [ovsk] ) break;;
+                    * ) echo "Unknown option '\$overwrite_policy'";;
+                esac
+            done
+
+            case "\$overwrite_policy" in
+                [ov] ) command rm -r "\$basename";;
+                [sk] ) continue;;
+                * ) echo "Unknown option '\$overwrite_policy'";;
+            esac
+        fi
+
+        echo "Extracting '\$file'...(\${count}/\${total_count})"
+        mkdir -p "\${basename}"
+        cd "\${basename}"
+        ex "\$file"
+        cd "\${base_dir}"
+
+        num_of_dir="\$(fd -t d --unrestricted --max-results 2 --exact-depth 1 . "./\${basename}" | wc -l)"
+        num_of_file="\$(fd -t f --unrestricted --max-results 2 --exact-depth 1 . "./\${basename}" | wc -l)"
+        if [ "\$num_of_file" -eq 0 ] && [ "\$num_of_dir" -eq 1 ]; then
+            inner_dir="\$(fd -t d --unrestricted --max-results 1 --exact-depth 1 . "./\${basename}")"
+            inner_dir="\$(basename -- "\$inner_dir")"
+
+            if [ "\$basename" = "\$inner_dir" ]; then
+                temp_name=\$(mktemp -d --dry-run "tmp.XXXXXXXXXX")
+                mv "\${basename}" "\${temp_name}"
+                mv "\${temp_name}/\${inner_dir}" "\${inner_dir}"
+                rmdir -p --ignore-fail-on-non-empty "\${temp_name}"
+            else
+                if [ ! -e "./\$inner_dir" ]; then
+                    mv "\${basename}/\${inner_dir}" "\${inner_dir}"
+                    rmdir -p --ignore-fail-on-non-empty "\${basename}"
+                fi
+            fi
+
+        fi
+
+    else
+        echo "'\$file' does not exist."
+    fi
+done
+
+notify-send "lf: Extract to individual folder completed "${PWD@Q}
+lf -remote "send reload"
+read -n 1 -s -p "Press any key to exit..."
+rm -- "\$0"
+EOF
+    chmod 700 "$SH_FILE"
+    (setsid kitty -- bash "$SH_FILE" &) >/dev/null 2>&1 </dev/null
+    lf -remote "send $id unselect"
+    lf -remote "send $id echo Extracting ${#arr[@]} file(s) to individual folder"
+
+}}
+
+#----------
+cmd archive-single-tar-zstd ${{
+    readarray -t arr <<<"$fx"
+    [ "${#arr[@]}" -eq 0 ] && {
+        lf -remote "send $id echo Nothing to archive"
+        exit 0
+    }
+
+    # Guess the common dir
+    common_dir=""
+    for f in "${arr[@]}"; do
+        if [ -z "$common_dir" ]; then
+            common_dir="$(dirname -- "$f")"
+        else
+            current_file_dir="$(dirname -- "$f")"
+            common_dir="$(
+                printf "%s\n%s\n" "$common_dir" "$current_file_dir" |
+                sed -e 'N;s/^\(.*\).*\n\1.*$/\1/'
+            )"
+        fi
+
+        if [ "$common_dir" = "/" ]; then
+            break
+        fi
+    done
+
+    # Add tailing slash
+    if [ "$common_dir" != "/" ]; then
+        prefix="${common_dir}/"
+    else
+        prefix="$common_dir"
+    fi
+
+    arr_trim=("${arr[@]#"$prefix"}")
+
+    tar_cmd=("tar" "--owner=0" "--group=0" "-C" "${common_dir@Q}" "-cpf" "-")
+    du_cmd=("du" "-cbs")
+
+    tar_cmd+=("${arr_trim[@]@Q}")
+    du_cmd+=("${arr[@]@Q}")
+
+    # Get file name
+    if [ "${#arr[@]}" -eq 1 ]; then
+        file_name="$(basename -- "${arr[0]}")"
+    else
+        echo "Enter output file name without extension:"
+        read -r file_name
+    fi
+
+    if [ -z "$file_name" ]; then
+        echo "Empty file name"
+        exit 0
+    fi
+    dest="${PWD}/${file_name}.tar.zst"
+
+    # Check if file of same name exists
+    if [ -e "$dest" ]; then
+    read -n 1 -r -p "'$dest' already exists, overwrite? [y/n] " res
+        echo
+        case "$res" in
+            [Yy] ) rm -r "$dest";;
+            * ) exit 0;;
+        esac
+    fi
+
+
+    run_dir="${XDG_RUNTIME_DIR:-/run/user/0}"
+    mkdir -p "$run_dir/lf_progress"
+    SH_FILE="$(mktemp "$run_dir/lf_progress/tar_XXXXX.sh")"
+
+        cat << EOF >"$SH_FILE"
+#$dest
+${tar_cmd[@]} | pv -s "\$(${du_cmd[@]} | tail -1 | awk '{print \$1}')" | zstdmt >${dest@Q}
+
+notify-send "lf: Archive completed "${dest@Q}
+lf -remote "send reload"
+read -n 1 -s -p "Press any key to exit..."
+rm -- "\$0"
+EOF
+    chmod 700 "$SH_FILE"
+    (setsid kitty -- bash "$SH_FILE" &) >/dev/null 2>&1 </dev/null
+    lf -remote "send $id unselect"
+    lf -remote "send $id echo Archiving to $dest"
+
+}}
+
+#----------
+cmd archive-individual-tar-zstd ${{
+    readarray -t arr <<<"$fx"
+    [ "${#arr[@]}" -eq 0 ] && {
+        lf -remote "send $id echo Nothing to archive"
+        exit 0
+    }
+
+    run_dir="${XDG_RUNTIME_DIR:-/run/user/0}"
+    mkdir -p "$run_dir/lf_progress"
+    SH_FILE="$(mktemp "$run_dir/lf_progress/tar_inv_XXXXX.sh")"
+        cat << EOF >"$SH_FILE"
+#${PWD@Q}
+cd ${PWD@Q} || { rm "\$0"; exit 1; }
+
+files=(
+$(printf '    %s\n' "${arr[@]@Q}")
+)
+
+read -n 1 -p "Delete the original file after compression? [y/n] " del_file
+echo
+case "\$del_file" in
+    [Yy] ) del_file="y";;
+    [Nn] ) del_file="n";;
+    * ) read -n 1 -s -p "Unknown option '\$del_file'. Press any key to exit...";rm -- "\$0";exit 1;;
+esac
+
+count=0
+total_count="\${#files[@]}"
+overwrite_policy=""
+for file in "\${files[@]}"; do
+    count=\$((count+1))
+    if [ -e "\$file" ]; then
+        dir="\$(dirname -- "\$file")"
+        name="\$(basename -- "\$file")"
+        dest=${PWD@Q}/"\${name}.tar.zst"
+
+        if [ -e "\$dest" ]; then
+            while [ "\${overwrite_policy}" != "v" ] && [ "\${overwrite_policy}" != "k" ]; do
+                read -n 1 -p "'\$dest' already exist. Do you want to [o]verwrite, [s]kip, o[v]erwirte all, or s[k]ip all? " overwrite_policy
+                echo
+
+                case "\$overwrite_policy" in
+                    [ovsk] ) break;;
+                    * ) echo "Unknown option '\$overwrite_policy'";;
+                esac
+            done
+
+            case "\$overwrite_policy" in
+                [ov] ) rm -r "\$dest";;
+                [sk] ) continue;;
+                * ) echo "Unknown option '\$overwrite_policy'";;
+            esac
+        fi
+
+        echo "Compressing '\$file'...(\${count}/\${total_count})"
+        tar --owner=0 --group=0 -C "\$dir" -cpf - "\$name" | pv -s \$( du -csb "\$file" | tail -1 | awk '{print \$1}') | zstdmt > "\$dest"
+
+        [ "\$del_file" == "y" ] && [ -s "\${name}.tar.zst" ] && rm -rf "\$file"
+    else
+        echo "'\$file' does not exist."
+    fi
+done
+
+notify-send "lf: Archive to individual tar completed "${PWD@Q}
+lf -remote "send reload"
+read -n 1 -s -p "Press any key to exit..."
+rm -- "\$0"
+EOF
+    chmod 700 "$SH_FILE"
+    (setsid kitty -- bash "$SH_FILE" &) >/dev/null 2>&1 </dev/null
+    lf -remote "send $id unselect"
+    lf -remote "send $id echo Archiving ${#arr[@]} file(s) to individual tar"
+
+}}
+
+#----------
+cmd archive-single-zip ${{
+    readarray -t arr <<<"$fx"
+    [ "${#arr[@]}" -eq 0 ] && {
+        lf -remote "send $id echo Nothing to archive"
+        exit 0
+    }
+
+    # Get file name
+    if [ "${#arr[@]}" -eq 1 ]; then
+        file_name="$(basename -- "${arr[0]}")"
+    else
+        echo "Enter output file name without extension:"
+        read -r file_name
+    fi
+
+    if [ -z "$file_name" ]; then
+        echo "Empty file name"
+        exit 0
+    fi
+    dest="${PWD}/${file_name}.zip"
+
+    # Check if file of same name exists
+    if [ -f "$dest" ]; then
+    read -n 1 -r -p "'$dest' already exists, overwrite? [y/n] " res
+        echo
+        case "$res" in
+            [Yy] ) rm -rf "$dest";;
+            * ) exit 0;;
+        esac
+    fi
+    run_dir="${XDG_RUNTIME_DIR:-/run/user/0}"
+    mkdir -p "$run_dir/lf_progress"
+    SH_FILE="$(mktemp "$run_dir/lf_progress/zip_XXXXX.sh")"
+
+    # Guess the common dir
+    common_dir=""
+    for f in "${arr[@]}"; do
+        if [ -z "$common_dir" ]; then
+            common_dir="$(dirname -- "$f")"
+        else
+            current_file_dir="$(dirname -- "$f")"
+            common_dir="$(
+                printf "%s\n%s\n" "$common_dir" "$current_file_dir" |
+                sed -e 'N;s/^\(.*\).*\n\1.*$/\1/'
+            )"
+        fi
+
+        if [ "$common_dir" = "/" ]; then
+            break
+        fi
+    done
+
+    # Add tailing slash
+    if [ "$common_dir" != "/" ]; then
+        prefix="${common_dir}/"
+    else
+        prefix="$common_dir"
+    fi
+
+    arr_trim=("${arr[@]#"$prefix"}")
+
+        cat << EOF >"$SH_FILE"
+#$dest
+cd ${common_dir@Q}
+zip -r ${dest@Q} ${arr_trim[@]@Q}
+
+notify-send "lf: Archive completed "${dest@Q}
+lf -remote "send reload"
+read -n 1 -s -p "Press any key to exit..."
+rm -- "\$0"
+EOF
+    chmod 700 "$SH_FILE"
+    (setsid kitty -- bash "$SH_FILE" &) >/dev/null 2>&1 </dev/null
+    lf -remote "send $id unselect"
+    lf -remote "send $id echo Archiving to $dest"
+
+}}
+
+#----------
+cmd archive-individual-zip ${{
+    readarray -t arr <<<"$fx"
+    [ "${#arr[@]}" -eq 0 ] && {
+        lf -remote "send $id echo Nothing to archive"
+        exit 0
+    }
+
+    run_dir="${XDG_RUNTIME_DIR:-/run/user/0}"
+    mkdir -p "$run_dir/lf_progress"
+    SH_FILE="$(mktemp "$run_dir/lf_progress/zip_inv_XXXXX.sh")"
+        cat << EOF >"$SH_FILE"
+#${PWD@Q}
+
+files=(
+$(printf '    %s\n' "${arr[@]@Q}")
+)
+
+read -n 1 -p "Delete the original file after compression? [y/n] " del_file
+echo
+case "\$del_file" in
+    [Yy] ) del_file="y";;
+    [Nn] ) del_file="n";;
+    * ) read -n 1 -s -p "Unknown option '\$del_file'. Press any key to exit...";rm -- "\$0";exit 1;;
+esac
+
+count=0
+total_count="\${#files[@]}"
+overwrite_policy=""
+for file in "\${files[@]}"; do
+    count=\$((count+1))
+    if [ -e "\$file" ]; then
+        name="\$(basename -- "\$file")"
+        dest=${PWD@Q}/"\${name}.zip"
+
+        if [ -e "\$dest" ]; then
+            while [ "\${overwrite_policy}" != "v" ] && [ "\${overwrite_policy}" != "k" ]; do
+                read -n 1 -p "'\$dest' already exist. Do you want to [o]verwrite, [s]kip, o[v]erwirte all, or s[k]ip all? " overwrite_policy
+                echo
+
+                case "\$overwrite_policy" in
+                    [ovsk] ) break;;
+                    * ) echo "Unknown option '\$overwrite_policy'";;
+                esac
+            done
+
+            case "\$overwrite_policy" in
+                [ov] ) rm -r "\$dest";;
+                [sk] ) continue;;
+                * ) echo "Unknown option '\$overwrite_policy'";;
+            esac
+        fi
+
+        echo "Compressing '\$file'...(\${count}/\${total_count})"
+        (cd "\$(dirname -- "\$file")"; zip -r "\$dest" "\$(basename -- "\$file")")
+
+        [ "\$del_file" == "y" ] && [ -s "\${name}.zip" ] && rm -rf "\$file"
+    else
+        echo "'\$file' does not exist."
+    fi
+done
+
+notify-send "lf: Archive to individual zip completed "${PWD@Q}
+lf -remote "send reload"
+read -n 1 -s -p "Press any key to exit..."
+rm -- "\$0"
+EOF
+    chmod 700 "$SH_FILE"
+    (setsid kitty -- bash "$SH_FILE" &) >/dev/null 2>&1 </dev/null
+    lf -remote "send $id unselect"
+    lf -remote "send $id echo Archiving ${#arr[@]} file(s) to individual zip"
+
+}}
+
+#----------
+cmd archive-single-7z ${{
+    readarray -t arr <<<"$fx"
+    [ "${#arr[@]}" -eq 0 ] && {
+        lf -remote "send $id echo Nothing to archive"
+        exit 0
+    }
+
+    # Get file name
+    if [ "${#arr[@]}" -eq 1 ]; then
+        file_name="$(basename -- "${arr[0]}")"
+    else
+        echo "Enter output file name without extension:"
+        read -r file_name
+    fi
+
+    if [ -z "$file_name" ]; then
+        echo "Empty file name"
+        exit 0
+    fi
+    dest="${PWD}/${file_name}.7z"
+
+    # Check if file of same name exists
+    if [ -f "$dest" ]; then
+    read -n 1 -r -p "'$dest' already exists, overwrite? [y/n] " res
+        echo
+        case "$res" in
+            [Yy] ) rm -rf "$dest";;
+            * ) exit 0;;
+        esac
+    fi
+    run_dir="${XDG_RUNTIME_DIR:-/run/user/0}"
+    mkdir -p "$run_dir/lf_progress"
+    SH_FILE="$(mktemp "$run_dir/lf_progress/7z_XXXXX.sh")"
+
+        cat << EOF >"$SH_FILE"
+#$dest
+7z a ${dest@Q} ${arr[@]@Q}
+
+notify-send "lf: Archive completed "${dest@Q}
+lf -remote "send reload"
+read -n 1 -s -p "Press any key to exit..."
+rm -- "\$0"
+EOF
+    chmod 700 "$SH_FILE"
+    (setsid kitty -- bash "$SH_FILE" &) >/dev/null 2>&1 </dev/null
+    lf -remote "send $id unselect"
+    lf -remote "send $id echo Archiving to $dest"
+
+}}
+
+#----------
+cmd archive-individual-7z ${{
+    readarray -t arr <<<"$fx"
+    [ "${#arr[@]}" -eq 0 ] && {
+        lf -remote "send $id echo Nothing to archive"
+        exit 0
+    }
+
+    run_dir="${XDG_RUNTIME_DIR:-/run/user/0}"
+    mkdir -p "$run_dir/lf_progress"
+    SH_FILE="$(mktemp "$run_dir/lf_progress/7z_inv_XXXXX.sh")"
+        cat << EOF >"$SH_FILE"
+#${PWD@Q}
+
+files=(
+$(printf '    %s\n' "${arr[@]@Q}")
+)
+
+read -n 1 -p "Delete the original file after compression? [y/n] " del_file
+echo
+case "\$del_file" in
+    [Yy] ) del_file="y";;
+    [Nn] ) del_file="n";;
+    * ) read -n 1 -s -p "Unknown option '\$del_file'. Press any key to exit...";rm -- "\$0";exit 1;;
+esac
+
+count=0
+total_count="\${#files[@]}"
+overwrite_policy=""
+for file in "\${files[@]}"; do
+    count=\$((count+1))
+    if [ -e "\$file" ]; then
+        name="\$(basename -- "\$file")"
+        dest=${PWD@Q}/"\${name}.7z"
+
+        if [ -e "\$dest" ]; then
+            while [ "\${overwrite_policy}" != "v" ] && [ "\${overwrite_policy}" != "k" ]; do
+                read -n 1 -p "'\$dest' already exist. Do you want to [o]verwrite, [s]kip, o[v]erwirte all, or s[k]ip all? " overwrite_policy
+                echo
+
+                case "\$overwrite_policy" in
+                    [ovsk] ) break;;
+                    * ) echo "Unknown option '\$overwrite_policy'";;
+                esac
+            done
+
+            case "\$overwrite_policy" in
+                [ov] ) rm -r "\$dest";;
+                [sk] ) continue;;
+                * ) echo "Unknown option '\$overwrite_policy'";;
+            esac
+        fi
+
+        echo "Compressing '\$file'...(\${count}/\${total_count})"
+        7z a "\$dest" "\$file"
+
+        [ "\$del_file" == "y" ] && [ -s "\${name}.7z" ] && rm -rf "\$file"
+    else
+        echo "'\$file' does not exist."
+    fi
+done
+
+notify-send "lf: Archive to individual zip completed "${PWD@Q}
+lf -remote "send reload"
+read -n 1 -s -p "Press any key to exit..."
+rm -- "\$0"
+EOF
+    chmod 700 "$SH_FILE"
+    (setsid kitty -- bash "$SH_FILE" &) >/dev/null 2>&1 </dev/null
+    lf -remote "send $id unselect"
+    lf -remote "send $id echo Archiving ${#arr[@]} file(s) to individual 7z"
+
+}}
+
+#----------
+cmd open-with-mpv-with-svp &{{
+# Need this to detect GPU in older SVP
+#clinfo >/dev/null 2>&1; sleep 1
+
+(setsid bash <(sed -E -e '/"\$\{symbolic_link\[@\]\}"/a\    --ro-bind-try /etc/machine-id /etc/machine-id \\\n    --ro-bind-try /run/udev /run/udev \\\n    --bind-try "\$HOME\/.config\/SVP4" "\$HOME\/.local\/share\/SVP4" \\\n    --bind-try "\$HOME\/.cache\/trt-models" "\$HOME\/.cache\/trt-models" \\' \
+    -e 's:^(\s*)/usr/bin/mpv .*:\1/usr/bin/sh -c "$HOME/misc/programs/SVP4/SVPManager \& /usr/bin/mpv \${extra_args[*]} \${1@Q}; /usr/bin/pkill -x SVPManager":' \
+    /usr/local/bin/mpv) "$f" &) >/dev/null 2>&1 </dev/null
+}}
+cmd open-lf-here                $(setsid kitty -- lf "$PWD" &) >/dev/null 2>&1 </dev/null
+cmd open-with-7z-gui            ${{
+
+    if [[ "$f" = "$HOME/win_d/"* ]]; then
+        wine_path="${PWD##$HOME/win_d/}" # Remove prefix
+        wine_path="${wine_path//\//\\}" # Change '/' to '\'
+        (setsid "$HOME/.local/bin/7z-gui.sh" "D:\\$wine_path" &) >/dev/null 2>&1 </dev/null
+
+    elif [[ "$f" = "$HOME/Downloads/"* ]]; then
+        wine_path="${PWD##$HOME/Downloads/}" # Remove prefix
+        wine_path="${wine_path//\//\\}" # Change '/' to '\'
+        (setsid "$HOME/.local/bin/7z-gui.sh" "E:\\$wine_path" &) >/dev/null 2>&1 </dev/null
+
+    elif [[ "$f" = "$HOME/Desktop/"* ]]; then
+        wine_path="${PWD##$HOME/Desktop/}" # Remove prefix
+        wine_path="${wine_path//\//\\}" # Change '/' to '\'
+        (setsid "$HOME/.local/bin/7z-gui.sh" "F:\\$wine_path" &) >/dev/null 2>&1 </dev/null
+
+    else
+        (setsid "$HOME/.local/bin/7z-gui.sh" "\\" &) >/dev/null 2>&1 </dev/null
+
+    fi
+}}
+cmd open-with-xnview            ${{
+    if [ -d "$f" ]; then
+        (setsid xnview.sh "$f" &) >/dev/null 2>&1 </dev/null
+    else
+        (setsid xnview.sh "$(dirname -- "$f")" &) >/dev/null 2>&1 </dev/null
+    fi
+}}
+
+cmd open-with-drawing           $(setsid drawing "$f" &) >/dev/null 2>&1 </dev/null
+cmd open-with-file-roller       $(setsid file-roller "$f" &) >/dev/null 2>&1 </dev/null
+cmd open-with-nautilus          $(setsid nautilus --new-window "$f" &) >/dev/null 2>&1 </dev/null
+cmd open-with-sudo-vim          $sudo vim "$f"
+cmd open-with-vim               $vim "$f"
+cmd open-with-yacreader         $(setsid YACReader "$f" &) >/dev/null 2>&1 </dev/null
+
+#----------
+cmd open-in-proton              $(setsid "$HOME/.local/bin/proton.sh" "$f" &) >/dev/null 2>&1 </dev/null
+cmd open-in-proton-net          $(setsid "$HOME/.local/bin/proton-net.sh" "$f" &) >/dev/null 2>&1 </dev/null
+cmd open-in-wine-default        $(setsid "$HOME/.local/bin/wine-default.sh" "$f" &) >/dev/null 2>&1 </dev/null
+cmd open-in-wine-default-cn     $(setsid "$HOME/.local/bin/wine-default-cn.sh" "$f" &) >/dev/null 2>&1 </dev/null
+cmd open-in-wine-games          $(setsid "$HOME/.local/bin/wine-games.sh" "$f" &) >/dev/null 2>&1 </dev/null
+cmd open-in-wine-net            $(setsid "$HOME/.local/bin/wine-net.sh" "$f" &) >/dev/null 2>&1 </dev/null
+cmd open-in-wine-net-cn         $(setsid "$HOME/.local/bin/wine-net-cn.sh" "$f" &) >/dev/null 2>&1 </dev/null
+cmd open-in-wine-tools          $(setsid "$HOME/.local/bin/wine-tools.sh" "$f" &) >/dev/null 2>&1 </dev/null
+cmd open-in-wine-tools-cn       $(setsid "$HOME/.local/bin/wine-tools-cn.sh" "$f" &) >/dev/null 2>&1 </dev/null
+
+#----------
+cmd checksum                    !"$HOME/.local/bin/hash-check.sh" "$f"
+cmd clamscan &{{
+    readarray -t arr <<<"$fx"
+    [ "${#arr[@]}" -eq 0 ] && {
+        lf -remote "send $id echo Nothing to scan"
+        exit 0
+    }
+
+    run_dir="${XDG_RUNTIME_DIR:-/run/user/0}"
+    mkdir -p "$run_dir/lf_progress"
+    SH_FILE="$(mktemp "$run_dir/lf_progress/clamscan_XXXXX.sh")"
+            cat << EOF >"$SH_FILE"
+#$PWD@
+files=(
+$(printf '    %s\n' "${arr[@]@Q}")
+)
+echo "scanning..."
+clamscan --recursive --infected "\${files[@]}"
+
+notify-send "clamscan: scan complete "${PWD@Q}
+read -n 1 -s -p "Press any key to exit..."
+rm -- "\$0"
+EOF
+    chmod 700 "$SH_FILE"
+    (setsid kitty -- bash "$SH_FILE" &) >/dev/null 2>&1 </dev/null
+    lf -remote "send $id echo scanning ${#arr[@]} file(s)"
+}}
+
+#----------
+cmd du %{{
+    readarray -t arr <<< "$fx"
+    du -csh "${arr[@]}" | tail -1
+}}
+
+cmd du-follow-link %{{
+    readarray -t arr <<< "$fx"
+    du -cshL "${arr[@]}" | tail -1
+}}
+#----------
+cmd sort_by_natural             :set sortby natural; set info size
+cmd sort_by_size                :set sortby size; set info size
+cmd sort_by_modified_time       :set sortby time; set info time
+cmd sort_by_access_time         :set sortby atime; set info atime
+cmd sort_by_meta_change_time    :set sortby ctime; set info ctime
+cmd sort_by_extension           :set sortby ext; set info size
+cmd sort_reverse                :set reverse!
+
+cmd open_next_sibling_dir       :updir; set dironly true; down; set dironly false
+cmd open_prev_sibling_dir       :updir; set dironly true; up; set dironly false
+
+#----------
+cmd set_permission &{{
+    readarray -t arr <<<"$fx"
+    for f in "${arr[@]}"; do
+        real_path="$(readlink -f "$f")"
+        [ ! -e "$real_path" ] && continue
+        find "$real_path" -type f -exec /usr/bin/chmod 600 {} \;
+        find "$real_path" -type d -exec /usr/bin/chmod 700 {} \;
+    done
+    lf -remote "send reload"
+}}
+
+# --------- Keymaps ----------
+clearmaps
+
+##### System #####
+map q           quit
+map <c-c>       quit
+map <c-w>       quit
+map .           set hidden!
+map <c-r>       reload
+map <c-v>       reload
+
+map \:          read                # lf cmd
+map \$          shell               # shell cmd
+map \%          shell-pipe          # shell cmd >statline
+map \!          shell-wait          # shell cmd; pause
+map \&          shell-async         # shell cmd &
+
+map `           $read -n 1 -s -r    # show shell underneath
+
+map <f-1>       show_keymap
+map ?           show_keymap
+
+# map <c-z>       $kill -STOP $PPID
+#redraw
+
+##### Movement #####
+map k           up
+map <up>        up
+
+map j           down
+map <down>      down
+
+map h           updir
+map <left>      updir
+
+map l           open
+map <right>     open
+map <enter>     open
+map O           open-and-quit
+
+map J           open_next_sibling_dir
+map K           open_prev_sibling_dir
+
+map <c-u>       half-up
+map <c-d>       half-down
+
+map <c-b>       page-up
+map <pgup>      page-up
+map <c-f>       page-down
+map <pgdn>      page-down
+
+map ]           jump-next  # forward
+map [           jump-prev  # back
+map <backspace2>    jump-prev
+
+map H           high
+map M           middle
+map L           low
+
+map gg          top
+map G           bottom
+
+map m           mark-save
+map \'          mark-load
+map \"          mark-remove
+
+##### Selection #####
+map u           :unselect; clear
+map U           clear  # clear copy/cut list
+map v           invert
+map <c-a>       :unselect; invert
+
+map <space>     :toggle; down
+map T           :tag-toggle; down
+
+# glob-select (leader g)
+# glob-unselect (leader G)
+# tag
+
+##### Command #####
+map y           copy
+map d           cut
+map D           delete
+map <delete>    delete
+map p           paste_replace_exist
+map P           paste_skip_exist
+
+map R           bulk-rename
+map r           rename
+
+map c           calcdirsize
+map C           edit-config
+
+map e           $$VISUAL "$f"
+map E           open-in-new-nvim
+map w           $$SHELL
+map W           open-shell-here
+
+map Yp          yank-paths-with-newline
+map YP          yank-paths
+map Yb          yank-basename-with-newline
+map YB          yank-basename
+map Yd          yank-current-directory
+map YD          yank-current-directory-basename
+
+##### Toggle #####
+map tp          toggle_lf_preview
+map tP          toggle_nautilus_previewer
+map tt          toggle_time
+map ts          toggle_size
+
+##### Search #####
+map f           find
+map F           filter
+map <esc>       setfilter
+
+map /           search
+map n           search-next
+map N           search-prev
+
+map b           broot_norm
+map B           broot_whale
+
+map z           fzf_all
+map Zd          fzf_dir
+map Zf          fzf_file
+map Zx          fzf_exe
+
+# find-back
+# find-next
+# find-prev
+# search-back
+
+##### Archive ######
+map at        archive-single-tar-zstd
+map aT        archive-individual-tar-zstd
+map ax        extract-to-individual-folder
+map aX        extract
+map az        archive-single-zip
+map aZ        archive-individual-zip
+map a7        archive-single-7z
+map a8        archive-individual-7z
+
+##### Open with ######
+map o7          open-with-7z-gui
+map oV          open-with-sudo-vim
+map od          open-with-drawing
+map oe          open-lf-here
+map oE          open-with-nautilus
+map ol          $lazygit
+map or          open-with-file-roller
+map os          open-with-mpv-with-svp
+map ov          open-with-vim
+map ox          open-with-xnview
+map oy          open-with-yacreader
+
+map owp         open-in-proton
+map owd         open-in-wine-default
+map owg         open-in-wine-games
+map own         open-in-wine-net
+map owN         open-in-proton-net
+
+##### Goto #####
+map gb          cd ~/Sync/Bak
+map gD          cd ~/Downloads
+map gd          cd ~/Desktop
+map gh          cd ~
+map ~           push :cd<space>~
+map gP          cd /srv/smb/printer
+map gi          goto_phone
+map gp          cd ~/Pictures
+map gr          cd ~/misc/repo
+map gs          cd ~/Sync
+map gt          cd ~/.local/share/Trash
+map gu          goto_usb
+map gc          cd ~/workspace/coding
+map gv          cd ~/workspace/vm_share
+map gw          cd ~/workspace/writing
+map gW          cd ~/workspace
+map ;           push :cd<space>
+
+##### Sort #####
+map sn          sort_by_natural
+map ss          sort_by_size
+map st          sort_by_modified_time
+map sa          sort_by_access_time
+map sc          sort_by_meta_change_time
+map se          sort_by_extension
+map sr          sort_reverse
+
+##### Execute #####
+map xt          push %touch<space>""<left>
+map xm          push %mkdir<space>-p<space>""<left>
+map xc          push %IFS="$(printf<space>'\n\t')"<space>chmod<space><space>$fx;<space>lf<space>-remote<space>"send<space>reload"<home><right><right><right><right><right><right><right><right><right><right><right><right><right><right><right><right><right><right><right><right><right><right><right><right><right><right><right><right><right>
+map xp          set_permission
+map X           !"$f"
+
+##### Leader #####
+map <tab>c      checksum
+map <tab>C      clamscan
+map <tab>d      du
+map <tab>D      delete-with-rm
+map <tab>g      push :glob-select<tab>
+map <tab>G      push :glob-unselect<tab>
+map <tab>l      follow_link
+map <tab>p      paste_backup_exist
+map <tab>r      :ripgrep_word
+map <tab>s      edit-selection
+map <tab>S      edit-cp-mv-list
+map <tab>z      z
+
+# map <tab>t      edit-tag-list  # Not work, lf keep writing to the file
+
+##### cmaps #####
+cmap <tab>      cmd-menu-complete
+cmap <backtab>  cmd-menu-complete-back
+#cmap <c-j>      cmd-menu-complete
+#cmap <c-k>      cmd-menu-complete-back
+
+# cmd-menu-accept
+
+##### Mouse #####
+## Left  = move_to
+## Right = open
+## Back = Left
+
+map <m-up>      up
+map <m-down>    down
+map <c-m-up>    page-up
+map <c-m-down>  page-down
+
+##### Select file in zsh #####
+## map , zle-cd
+## map i zle-insert-relative
+## map I zle-insert-absolute
+
+## log###
+# compress current file or selected files with tar and gunzip
+# cmd tar ${{
+#     set -f
+#     mkdir $1
+#     cp -r $fx $1
+#     tar czf $1.tar.gz $1
+#     rm -rf $1
+# }}
+
+# compress current file or selected files with zip
+# cmd zip ${{
+#     set -f
+#     mkdir $1
+#     cp -r $fx $1
+#     zip -r $1.zip $1
+#     rm -rf $1
+# }}
+
+##### Builtin commands #####
+## cmd maps     $lf -remote "query $id maps" | $PAGER
+## cmd cmaps    $lf -remote "query $id cmaps" | $PAGER
+## cmd cmds     $lf -remote "query $id cmds" | $PAGER
+##
+## cmap <esc>           cmd-escape
+## cmap <tab>           cmd-complete
+## cmap <c-c>           cmd-interrupt
+## cmap <c-n>/<down>    cmd-history-next
+## cmap <c-p>/<up>      cmd-history-prev
+## cmap <c-b>/<left>    cmd-left
+## cmap <c-f>/<right>   cmd-right
+## cmap <c-a>/<home>    cmd-home
+## cmap <c-e>/<end>     cmd-end
+## cmap <c-d>/<delete>  cmd-delete
+## cmap <backspace>     cmd-delete-back
+## cmap <c-u>           md-delete-home
+## cmap <c-k>           cmd-delete-end
+## cmap <c-w>           cmd-delete-unix-word
+## cmap <c-y>           cmd-yank
+## cmap <c-t>           cmd-transpose
+## cmap <a-t>           cmd-transpose-word
+## cmap <a-f>           cmd-word
+## cmap <a-b>           cmd-word-back
+## cmap <a-d>           cmd-delete-word-back
+## cmap <a-c>           cmd-capitalize-word
+## cmap <a-u>           cmd-uppercase-word
+## cmap <a-l>           cmd-lowercase-word
+## cmap <c-j>/<enter>   cmd-enter
+
+# --------- Auto execute ----------
+$mkdir -p "$HOME/.cache/lf_thumbnails"
+

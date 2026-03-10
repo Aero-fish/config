@@ -1,0 +1,5 @@
+defaults: default_options.yaml
+from: markdown
+to: html
+toc: true
+toc-depth: 3

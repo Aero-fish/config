@@ -1,0 +1,1 @@
+readarray -td '' arr < <(fd --print0 . .)

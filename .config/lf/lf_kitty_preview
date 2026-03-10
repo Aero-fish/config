@@ -1,0 +1,198 @@
+#!/usr/bin/bash
+set -o pipefail
+
+# ---------- Variables ----------
+FILE_PATH="$(realpath "$1")"
+# W=$2
+# H=$3
+# X=$4
+# Y=$5
+
+[ ! -f "$FILE_PATH" ] && exit 1
+THUMBNAIL_CACHE="$HOME/.cache/lf_thumbnails"
+THUMBNAIL_JSON_DB="$THUMBNAIL_CACHE/db.json"
+JSON_DB_KEY="$(stat --format='%Y' "$FILE_PATH")_$FILE_PATH"
+
+MIMETYPE="$(file -Lb --mime-type "$FILE_PATH")"
+FILE_SIZE_IN_BYTE="$(stat --printf="%s" "$FILE_PATH")"
+
+mkdir -p "$THUMBNAIL_CACHE"
+# ---------- Functions ----------
+show_image() {
+    # kitty +kitten icat --silent --stdin no --transfer-mode file --place "${W}x${H}@${X}x${Y}" "$1" </dev/null >/dev/tty
+    if [ -n "$_NVIM_" ] || [ "$TERM" = "linux" ]; then
+        echo -e "----- File Type Classification -----\n$(file --dereference --brief -- "$FILE_PATH")\n$(file -Lb --mime-type "$FILE_PATH")"
+        exit 1
+    else
+        printf "%s" "$1"
+        exit 2
+    fi
+}
+
+check_and_append_to_json_db() {
+    if [ -s "$THUMBNAIL_CACHE/$1" ]; then
+
+        if [ -s "$THUMBNAIL_JSON_DB" ]; then
+            local new_db
+            new_db="$(
+                jq -r --arg "$JSON_DB_KEY" "$1" ". + {\"$JSON_DB_KEY\": \"$1\"}" "$THUMBNAIL_JSON_DB"
+            )"
+            printf "%s\n" "$new_db" >"$THUMBNAIL_JSON_DB"
+
+        else
+            echo -e "{\n\"$JSON_DB_KEY\": \"$1\"\n}" >"$THUMBNAIL_JSON_DB"
+        fi
+        echo "$THUMBNAIL_CACHE/$1"
+        exit 0
+
+    else
+        rm -f "$THUMBNAIL_CACHE/$1"
+    fi
+}
+
+generate_pdf_thumbnail() {
+    local thumbnail_name
+    thumbnail_name="$(uuidgen).jpg"
+
+    if pdftoppm -singlefile -jpeg -scale-to 2160 "$FILE_PATH" >"$THUMBNAIL_CACHE/$thumbnail_name"; then
+        check_and_append_to_json_db "$thumbnail_name"
+    else
+        rm -f "$THUMBNAIL_CACHE/$thumbnail_name"
+    fi
+}
+
+generate_video_thumbnail() {
+    local thumbnail_name
+    thumbnail_name="$(uuidgen).jpg"
+
+    if ffmpegthumbnailer -f -m -i "$FILE_PATH" -o "$THUMBNAIL_CACHE/$thumbnail_name" -s 0 2>/dev/null; then
+        check_and_append_to_json_db "$thumbnail_name"
+    else
+        rm -f "$THUMBNAIL_CACHE/$thumbnail_name"
+    fi
+}
+
+get_thumbnail() {
+    if [ -s "$THUMBNAIL_JSON_DB" ]; then
+        local thumbnail_name
+        thumbnail_name="$(jq -r ". \"$JSON_DB_KEY\"" <"$THUMBNAIL_JSON_DB")"
+
+        if [[ "$thumbnail_name" != "null" ]]; then
+            if [ -s "$THUMBNAIL_CACHE/$thumbnail_name" ]; then
+                # Thumbnail found, echo back full path
+                echo "$THUMBNAIL_CACHE/$thumbnail_name"
+                exit 0
+            else
+                # Thumbnail does not exist, delete key
+                new_db="$(
+                    jq "del(.\"$JSON_DB_KEY\")" "$THUMBNAIL_JSON_DB"
+                )"
+                printf "%s\n" "$new_db" >"$THUMBNAIL_JSON_DB"
+                exit 0
+
+            fi
+        fi
+    fi
+}
+
+highlight_text() {
+    if highlight --out-format ansi --style="solarized-light" --max-size=1M "$FILE_PATH"; then
+        exit 1
+    elif [ "$(du -sb "$FILE_PATH" | cut -f1)" -lt 1000000 ]; then
+        head -n 100 "$FILE_PATH"
+        exit 1
+    fi
+}
+
+# ---------- By MIME ----------
+case "$MIMETYPE" in
+
+text/x-ms-regedit)
+    head -n 60 "$FILE_PATH"
+    exit 1
+    ;;
+
+text/*)
+    highlight_text
+    ;;
+
+image/vnd.adobe.photoshop)
+    # Exclude psd file from previewing
+    :
+    ;;
+
+image/*)
+    show_image "$FILE_PATH"
+    ;;
+
+video/*)
+    thumbnail="$(get_thumbnail)"
+    if [ -n "$thumbnail" ]; then
+        show_image "$thumbnail"
+    fi
+
+    thumbnail="$(generate_video_thumbnail)"
+    if [ -n "$thumbnail" ]; then
+        show_image "$thumbnail"
+    fi
+    ;;
+
+application/json)
+    highlight_text
+    ;;
+
+application/javascript)
+    highlight_text
+    ;;
+
+application/pdf)
+    thumbnail="$(get_thumbnail)"
+    if [ -n "$thumbnail" ]; then
+        show_image "$thumbnail"
+    fi
+
+    thumbnail="$(generate_pdf_thumbnail)"
+    if [ -n "$thumbnail" ]; then
+        show_image "$thumbnail"
+    fi
+    ;;
+
+*)
+    :
+    ;;
+
+esac
+
+# ---------- By extensions ----------
+FILE_EXTENSION="${FILE_PATH##*.}"
+FILE_EXTENSION_LOWER="$(
+    printf "%s" "${FILE_EXTENSION}" | tr '[:upper:]' '[:lower:]'
+)"
+
+if [ "$FILE_SIZE_IN_BYTE" -lt 10000000 ]; then
+    case "${FILE_EXTENSION_LOWER}" in
+    a | ace | alz | arc | arj | bz | bz2 | cab | cpio | deb | gz | \
+        jar | lha | lz | lzh | lzma | lzo | rpm | rz | t7z | tar | \
+        tbz | tbz2 | tgz | tlz | txz | tZ | tzo | war | xpi | xz | \
+        Z | zip | zst)
+        atool --list -- "${FILE_PATH}" && exit 1
+        tar --list --file "${FILE_PATH}" && exit 1
+        bsdtar --list --file "${FILE_PATH}" && exit 1
+        gzip --list "${FILE_PATH}" && exit 1
+        ;;
+    rar)
+        ## Avoid password prompt by providing empty password
+        unrar l -p- -- "${FILE_PATH}" | tail -n +6
+        exit 1
+        ;;
+    7z)
+        ## Avoid password prompt by providing empty password
+        7z l -p -- "${FILE_PATH}" | tail -n +18
+        exit 1
+        ;;
+    esac
+fi
+
+# ---------- Catch all ----------
+echo -e "----- File Type Classification -----\n$(file --dereference --brief -- "$FILE_PATH")\n$MIMETYPE"
+exit 1

@@ -1,0 +1,7 @@
+defaults: default_options.yaml
+from: markdown
+to: revealjs
+embed-resources: true
+html-math-method:
+    method: katex
+    url: /home/hugh/misc/repo/katex/

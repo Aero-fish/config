@@ -1,0 +1,11 @@
+direction: right
+vars: {
+    d2-config: {
+        theme-id: 1
+        # dark-theme-id: 200
+        pad: 10
+        # center: true
+        # sketch: true
+        layout-engine: elk
+    }
+}

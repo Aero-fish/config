@@ -1,0 +1,14 @@
+#!/bin/bash
+set -e
+
+mounted_volume_info="$(gio mount -l | grep -E '^ *Mount' | grep -e "gphoto2://" -e "mtp://" | sed -E 's,.*(mtp|gphoto2)://,\1://,' | sort -u)"
+
+phone_info="$(gio mount -li | grep -e 'activation_root=gphoto2://' -e 'activation_root=mtp://' | sed -E 's,.*(mtp|gphoto2)://,\1://,' | sort -u)"
+
+readarray -td '' arr < <(comm -3 <(echo "$mounted_volume_info") <(echo "$phone_info") | sed -e '/^$/d' -e 's/^\s*//' | fzf -i --multi --exact --reverse --prompt="Mount MTP:" --print0)
+
+for device in "${arr[@]}"; do
+    echo "Mounting $device ..."
+    gio mount "$device"
+    echo "Done"
+done

@@ -1,0 +1,10 @@
+filters:
+    - pandoc-plot
+    - pandoc-crossref
+    - citeproc
+standalone: true
+listings: true
+metadata-files:
+    - default_meta.yaml
+# metadata:
+#     revealjs-url: /home/hugh/misc/repo/revealjs

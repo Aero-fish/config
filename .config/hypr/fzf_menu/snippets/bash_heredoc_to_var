@@ -1,0 +1,3 @@
+read -r -d '' VAR <<EOF
+content
+EOF

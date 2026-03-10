@@ -1,0 +1,61 @@
+---
+# aspectratio
+#    slide aspect ratio (43 for 4:3 [default], 169 for 16:9, 1610 for 16:10, 149 for 14:9, 141 for 1.41:1, 54 for 5:4, 32 for 3:2)
+#beameroption
+#    add extra beamer option with \setbeameroption{}
+#institute
+#    author affiliations: can be a list when there are multiple authors
+#logo
+#    logo image for slides
+#navigation
+#    controls navigation symbols (default is empty for no navigation symbols; other valid values are frame, vertical, and horizontal)
+#section-titles
+#    enables “title pages” for new sections (default is true)
+#theme, colortheme, fonttheme, innertheme, outertheme
+#    beamer themes
+#themeoptions
+#    options for LaTeX beamer themes (a list).
+#titlegraphic
+#    image for title slide
+
+header-includes:
+    - |
+        ```{=latex}
+        \RequirePackage{amsmath,amssymb,amsfonts,mathrsfs}
+        \RequirePackage{xspace}
+        \xspaceaddexceptions{[]()}
+        \newcommand{\Zp}{\ensuremath{\mathbb{Z}^+}\xspace}
+        \newcommand{\Gg}{\ensuremath{\mathscr{G}}\xspace}
+        % A4 handout
+        %\usepackage{pgfpages}
+        %\pgfpagesuselayout{4 on 1}[a4paper,border shrink=5mm]
+        ```
+## Disable animation globally. Use either option.
+# classoption:
+#     - handout
+# handout: true
+
+title: "My wonderful presentation"
+author: "Alexey Gumirov"
+institute: "My home office"
+topic: "Pandoc how-to"
+theme: "Frankfurt"
+# themeoptions:
+colortheme: "beaver"
+fonttheme: "professionalfonts"
+# innertheme:
+# outertheme:
+# mainfont: "Hack Nerd Font"
+# fontsize: 11pt
+urlcolor: red
+linkstyle: bold
+aspectratio: 169
+# titlegraphic: images/GitHub-logo.png
+# logo: img/aleph0-small.png
+# beameroption: show notes # \setbeameroption{}
+date:
+# navigation: horizontal # navigation symbols at bottom right, empty/frame/vertical/horizontal
+section-titles: false # title pages for new sections
+toc: true
+---
+

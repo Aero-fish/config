@@ -1,0 +1,29 @@
+$include /etc/inputrc
+# ----- bash -----
+# Must be before user keybinding to prevent override.
+set editing-mode vi    # Bash vi mode
+
+"\C-k":history-search-backward
+"\C-j":history-search-forward
+
+set colored-stats On
+set completion-ignore-case On
+set completion-prefix-display-length 3
+set mark-symlinked-directories On
+set show-all-if-ambiguous On
+set show-all-if-unmodified On
+set visible-stats Onset completion-ignore-case on
+
+set show-mode-in-prompt on    # Bash show vi mode in prompt
+
+# Restore CTRL+L binding to clear screen
+$if mode=vi
+
+set keymap vi-command
+# these are for vi-command mode
+Control-l: clear-screen
+
+set keymap vi-insert
+# these are for vi-insert mode
+Control-l: clear-screen
+$endif

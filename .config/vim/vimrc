@@ -1,0 +1,276 @@
+" Autoload directory. Current value can be checked using 'set runtimepath?'
+let rtp=&runtimepath
+set runtimepath=~/.config/vim
+let &runtimepath.=','.rtp.',~/.config/vim/after'
+
+" viminfo path
+set viminfo+=n~/.cache/vim/viminfo
+
+" Search into sub-directories
+set path+=**
+
+" Set path for backup, swap, and undo
+" The '//' at the end instructs vim to save also the directory path in the filename. Something like home%documents%letter2mama.tex.swp will be used.
+" set backupdir=~/.config/vim/backup//,.,~/tmp,~/
+" set directory=~/.config/vim/swap//,.,~/tmp,/var/tmp,/tmp
+" set undodir=~/.config/vim/undo//,.
+
+" Settings
+set autoread
+set cmdheight=2
+set conceallevel=0
+set cursorline
+set expandtab
+set formatoptions-=cro
+set hlsearch
+set ignorecase
+set incsearch
+set laststatus=2
+set list
+set listchars=tab:→\ ,nbsp:␣,trail:•,extends:⟩,precedes:⟨
+set nobackup
+" set noswapfile
+set noundofile
+set number
+set numberwidth=4
+" set relativenumber
+set scrolloff=8
+set shiftwidth=4
+set showbreak="↪ "
+set showtabline=2
+set sidescrolloff=8
+set signcolumn="yes"
+set smartcase
+set smartindent
+set splitbelow
+set splitright
+set tabstop=4
+" set timeoutlen=500
+" set ttimeoutlen=50
+set wrap
+set wildmenu
+
+syntax on
+
+" Leader key
+nnoremap <SPACE> <Nop>
+xnoremap <SPACE> <Nop>
+let mapleader = "\<Space>"
+
+" Use jj, jk to escape
+" imap jj <Esc>
+imap jk <Esc>
+imap kj <Esc>
+
+" Move by screen line
+nnoremap <expr> k v:count == 0 ? 'gk' : 'k'
+nnoremap <expr> j v:count == 0 ? 'gj' : 'j'
+nnoremap gj j
+nnoremap gk k
+xnoremap <expr> k v:count == 0 ? 'gk' : 'k'
+xnoremap <expr> j v:count == 0 ? 'gj' : 'j'
+
+" Use system clipboard under Wayland
+" (For now, elect in terminal using mouse and use <C-S-c> and <C-S-v>)
+xnoremap <leader>y y:call system("wl-copy", @")<cr>
+xnoremap <leader>c y:call system("wl-copy", @")<cr>gvc
+xnoremap <leader>d y:call system("wl-copy", @")<cr>gvd
+xnoremap <leader>s y:call system("wl-copy", @")<cr>gvs
+xnoremap <leader>x y:call system("wl-copy", @")<cr>gvx
+
+nnoremap <leader>p :let @"=substitute(system("wl-paste --no-newline"), '<C-v><C-m>', '', 'g')<cr>p
+nnoremap <leader>P :let @"=substitute(system("wl-paste --no-newline"), '<C-v><C-m>', '', 'g')<cr>P
+xnoremap <leader>p <esc>:let @"=substitute(system("wl-paste --no-newline"), '<C-v><C-m>', '', 'g')<cr>gv"_dhp
+xnoremap <leader>P <esc>:let @"=substitute(system("wl-paste --no-newline"), '<C-v><C-m>', '', 'g')<cr>gv"_dhP
+
+" Clear search highlight
+nnoremap <Leader>n <Cmd>noh<CR>
+xnoremap <Leader>n <Cmd>noh<CR>
+
+" Move line up/down
+execute "set <M-j>=\ej"
+execute "set <M-k>=\ek"
+nnoremap <M-j> <Cmd>move .+1<CR>
+nnoremap <M-k> <Cmd>move .-2<CR>
+inoremap <M-j> <Cmd>move .+1<CR>
+inoremap <M-k> <Cmd>move .-2<CR>
+xnoremap <M-j> :move '>+1<CR>gv-gv
+xnoremap <M-k> :move '<-2<CR>gv-gv
+
+" Paste without saving deleted content
+xnoremap p "_dP
+
+" Ctrl-a to select all
+nnoremap <C-a> gg0VG
+inoremap <C-a> <Esc>gg0VG
+xnoremap <C-a> <C-c>gg0VG
+
+" Goto beginning/end of line
+inoremap <C-b> <C-o>I
+inoremap <C-e> <End>
+
+" Navidate within insert mode
+inoremap <C-h> <Left>
+inoremap <C-j> <Down>
+inoremap <C-k> <Up>
+inoremap <C-l> <Right>
+
+" Ctrl-s to save
+nnoremap <C-s> <Cmd>w<CR>
+inoremap <C-s> <Cmd>w<CR>
+xnoremap <C-s> <Cmd>w<CR>
+
+" Save
+nnoremap <Leader>w <Cmd>w<CR>
+xnoremap <Leader>W <Cmd>wa<CR>
+
+" Ctrl-v to paste
+nnoremap <C-v> "+p
+inoremap <C-v> <C-o>"+p
+xnoremap <C-v> "+p
+
+" Ctrl-z to undo
+nnoremap <C-z> u
+inoremap <C-z> <C-o>u
+xnoremap <C-z> <C-c>u
+
+" New line
+inoremap <C-Enter> <C-o>o
+
+" Indentation
+xnoremap > >gv
+xnoremap < <gv
+xnoremap <Tab> >gv
+xnoremap <S-Tab> <gv
+
+" Delete and backspace
+inoremap <C-;> <BS>
+inoremap <C-'> <Del>
+
+" Switch between windows
+nnoremap <C-h> <C-w>h
+nnoremap <C-l> <C-w>l
+nnoremap <C-j> <C-w>j
+nnoremap <C-k> <C-w>k
+
+" Switch between windows
+nnoremap <C-Up> <Cmd>resize +2<CR>
+nnoremap <C-Down> <Cmd>resize -2<CR>
+nnoremap <C-Right> <Cmd>vertical resize +2<CR>
+nnoremap <C-Left> <Cmd>vertical resize -2<CR>
+
+" Add blank lines
+nnoremap ]<Space> o<Esc>k
+nnoremap [<Space> O<Esc>j
+
+" Ctrl-c to copy
+xnoremap <C-c> y:call system("wl-copy", @")<cr>
+
+" Ctrl-x to copy
+xnoremap <C-x> "+d
+
+" Quit
+nnoremap <Leader>q <Cmd>qa<CR>
+xnoremap <Leader>q <Cmd>qa<CR>
+nnoremap <Leader>Q <Cmd>qa!<CR>
+xnoremap <Leader>Q <Cmd>qa!<CR>
+
+" Move line up/down
+execute "set <M-w>=\ew"
+execute "set <M-S-w>=\eW"
+nnoremap <A-j> <Cmd>move .+1<CR>
+nnoremap <A-k> <Cmd>move .-2<CR>
+inoremap <A-j> <Cmd>move .+1<CR>
+inoremap <A-k> <Cmd>move .-2<CR>
+
+" Close current buffer
+nnoremap <C-w> <Cmd>bdelete<CR>
+inoremap <C-w> <Cmd>bdelete<CR>
+vnoremap <C-w> <Cmd>bdelete<CR>
+nnoremap <C-S-w> <Cmd>bdelete!<CR>
+inoremap <C-S-w> <Cmd>bdelete!<CR>
+vnoremap <C-S-w> <Cmd>bdelete!<CR>
+
+" Cycle buffers
+execute "set <M-h>=\eh"
+execute "set <M-l>=\el"
+nnoremap <M-h> <Cmd>bprevious<CR>
+nnoremap <M-l> <Cmd>bnext<CR>
+
+" Window manage
+nnoremap <Leader>c <Cmd>close<CR>
+nnoremap <Leader>h <Cmd>split<CR>
+nnoremap <Leader>v <Cmd>vsplit<CR>
+
+" Explorer
+function! ToggleNetrw()
+        let i = bufnr("$")
+        let wasOpen = 0
+        while (i >= 1)
+            if (getbufvar(i, "&filetype") == "netrw")
+                silent exe "bwipeout " . i
+                let wasOpen = 1
+            endif
+            let i-=1
+        endwhile
+    if !wasOpen
+        silent Lexplore
+    endif
+endfunction
+nnoremap <Leader>e <Cmd>call ToggleNetrw()<CR>
+
+" Buffer
+nnoremap <Leader>bn <Cmd>enew<CR>
+
+" Toggles
+nnoremap <Leader>tw <Cmd>set wrap!<CR>
+xnoremap <Leader>tw <Cmd>set wrap!<CR>
+nnoremap <Leader>tl <Cmd>set number!<CR>
+xnoremap <Leader>tl <Cmd>set number!<CR>
+nnoremap <Leader>tr <Cmd>set relativenumber!<CR>
+xnoremap <Leader>tr <Cmd>set relativenumber!<CR>
+nnoremap <Leader>t<Space> <Cmd>set list!<CR>
+xnoremap <Leader>t<Space> <Cmd>set list!<CR>
+
+" Change cursor shape depending on mode
+" Reference chart of values:
+"   Ps = 0  -> blinking block.
+"   Ps = 1  -> blinking block (default).
+"   Ps = 2  -> steady block.
+"   Ps = 3  -> blinking underline.
+"   Ps = 4  -> steady underline.
+"   Ps = 5  -> blinking bar (xterm).
+"   Ps = 6  -> steady bar (xterm).
+
+" Method 1
+" if has("autocmd")
+  " au VimEnter,InsertLeave * silent execute '!echo -ne "\e[1 q"' | redraw!
+"   au InsertEnter,InsertChange *
+"     \ if v:insertmode == 'i' |
+"     \   silent execute '!echo -ne "\e[6 q"' | redraw! |
+"     \ elseif v:insertmode == 'r' |
+"     \   silent execute '!echo -ne "\e[22 q"' | redraw! |
+"     \ endif
+"   au VimLeave * silent execute '!echo -ne "\e[ q"' | redraw!
+" endif
+
+" Method 2
+let &t_SI = "\e[6 q"
+let &t_EI = "\e[2 q"
+
+
+" Auto trim tailing space
+autocmd BufWritePre * :exe "norm m`" | %s/\s\+$//e | norm g``
+
+" Enable 256 colours
+set t_Co=256
+
+" Theme
+colorscheme solarized
+" let &t_ut=''
+
+if $TERM == 'linux'
+    set background=dark
+else
+    set background=light
+endif

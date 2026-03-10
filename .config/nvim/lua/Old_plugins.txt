@@ -1,0 +1,24 @@
+autopairs    -- More annoying than useful
+bufferline   -- Using tab
+comment      -- Builtin since 0.10.
+cybu         -- Buffer list popup when switching. Use telescope.
+fidget       -- Live LSP server status
+glow         -- Preview markdown with highlight in terminal. Just use treesitter conceal.
+goto-preview -- Show definition in popup. Trying treesitter module 'lsp_interop' as replacement
+lf_vim       -- Cannot open in current view, always new window
+litee        -- Display outgoing calls. Replaced using "trouble.nvim"
+live-command -- Preview commands. Cannot find user case. Substitute has builtin preview.
+markdown-preview -- Not maintained
+memento      -- Recently closed files. Use telescope old file
+neogit       -- Use lazy git
+neorg        -- Using markdown instead of neorg
+nnn          -- Cannot open file in current instance of nvim
+nvim-tree    -- Crash if using telescope without first open a buffer
+obsidian     -- Rely on obsidian to generate index. Link format is not support for pandoc.
+table_mode   -- Auto resize markdown table cell. Replaced by prettier formatter
+tabout       -- Tab to move over brackets
+texmagic     -- Using per project LSP setting instead
+markview     -- render-markdown is better. Better table alignment, syntax highlighting in code block. But no emoji, and worse foot note label.
+
+Bug:
+-   pcall(require, "mod") returns true and load 'mod.lua' in the cwd, if it does not in typical $HOME/.local/nvim

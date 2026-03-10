@@ -1,0 +1,7 @@
+let g:netrw_dirhistmax  =10
+let g:netrw_dirhistcnt =5
+let g:netrw_dirhist_5='/home/hugh/test/snacks.nvim'
+let g:netrw_dirhist_4='/home/hugh/test/cspell-lsp'
+let g:netrw_dirhist_3='/home/hugh/.config/aerc'
+let g:netrw_dirhist_2='/home/hugh/win_d/Games/Dynasty Warriors - Origins/steam_settings'
+let g:netrw_dirhist_1='/home/hugh/Downloads/Downloads/[Pixiv] farmthis (10460533)'

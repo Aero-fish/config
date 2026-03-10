@@ -1,0 +1,89 @@
+format = '''
+$directory$git_branch$git_state$git_status$fill $status$cmd_duration$jobs$python$username$hostname$env_var$time
+$character
+'''
+
+[character]
+success_symbol = "[❯](green)"
+error_symbol = "[❯](red)"
+vimcmd_symbol = "[❮](green)"
+vimcmd_replace_one_symbol = "[❮](purple)"
+vimcmd_replace_symbol = "[❮](purple)"
+vimcmd_visual_symbol = "[❮](yellow)"
+
+[cmd_duration]
+format = "[$duration]($style) "
+style = "yellow"
+
+[directory]
+style = "blue"
+read_only_style = "blue"
+read_only = " "
+truncation_symbol = "…/"
+format = "[$read_only]($read_only_style)[$path]($style) "
+truncation_length = 4
+fish_style_pwd_dir_length = 3
+# truncate_to_repo = false
+
+[env_var.LF_LEVEL]
+style = "yellow"
+variable = "LF_LEVEL"
+format = "([lf $env_value]($style) )"
+
+[fill]
+symbol = "·"
+style = "green"
+
+[git_branch]
+symbol = ""
+format = "[$symbol$branch(:$remote_branch)]($style) "
+style = "purple"
+# truncation_length = 10
+
+[git_state]
+style = "yellow"
+
+[git_status]
+ahead = "⇡${count}"
+diverged = "⇡${ahead_count}⇣${behind_count}"
+behind = "⇣${count}"
+style = "red"
+
+[hostname]
+ssh_only = false
+# ssh_symbol = "🌏"
+style = "black"
+format = "[@$ssh_symbol$hostname]($style) "
+
+[jobs]
+symbol = "≡"
+style = "blue"
+
+[python]
+symbol = ' '
+style = "cyan"
+format = '[${symbol}($virtualenv )]($style)'
+detect_extensions = []
+detect_files = []
+
+[status]
+style = "red"
+format = '[$symbol($common_meaning )($signal_name )$int]($style) '
+symbol = "✘ "
+not_found_symbol = "✘ "
+sigint_symbol = "✘ "
+signal_symbol = "󰉁"
+map_symbol = true
+disabled = false
+
+[time]
+format = "[$time]($style) "
+use_12hr = true
+disabled = false
+style = "cyan"
+
+[username]
+style_root = "bold red"
+style_user = "black"
+format = "[$user]($style)"
+show_always = true

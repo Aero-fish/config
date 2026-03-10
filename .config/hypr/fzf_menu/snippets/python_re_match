@@ -1,0 +1,3 @@
+results = re.match(r"""REGEX_MATCHING_FULL_STR_(?P<GROUP_NAME>[0-9-]+)""", INPUT_STR)
+group_value = results.group("GROUP_NAME")
+group_value = results.group(0)

@@ -1,0 +1,13 @@
+#!/usr/bin/sh
+set -e
+fd --exact-depth 1 --type file --type symlink \
+    ".*" "$HOME/.config/hypr/fzf_menu/snippets" | sort |
+    fzf --print0 -i --no-multi --exact --delimiter / --with-nth -1 --preview 'cat {}' \
+        --prompt="Edit snippet:" --info=default --layout=reverse \
+        --tiebreak=index |
+    xargs -0 --no-run-if-empty nvim-reuse
+
+# [ -z "$selected" ] && exit
+
+# nvim-reuse "$selected"
+# swaymsg "[app_id=\"foot\" title=\".*/${selected##*/} - Neovim\"] focus"

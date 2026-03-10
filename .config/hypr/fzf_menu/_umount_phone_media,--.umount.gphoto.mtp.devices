@@ -1,0 +1,10 @@
+#!/bin/bash
+set -e
+
+readarray -td '' arr < <(gio mount -l | grep -E '^ *Mount' | grep -e "gphoto2://" -e "mtp://" | sed -E 's,.*(mtp|gphoto2)://,\1://,' | sort -u | fzf -i --multi --exact --reverse --prompt="Eject MTP:" --print0)
+
+for device in "${arr[@]}"; do
+    echo "Unmounting $device"
+    gio mount -u "$device"
+    echo "done"
+done

@@ -1,0 +1,13 @@
+font=MonaspiceNe Nerd Font 12
+default-timeout=6000
+# anchor=top-center
+anchor=bottom-right
+background-color=#291d2dd0
+border-size=2
+text-color=#fbe5e5
+border-color=#f99d53
+width=500
+height=200
+padding=15
+border-radius=0
+on-button-left=dismiss

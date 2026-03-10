@@ -1,0 +1,4 @@
+#!/usr/bin/bash
+set -e
+
+"$HOME/.local/bin/stop_llm.sh"

@@ -1,0 +1,5 @@
+#!/usr/bin/bash
+if [ -n "$_NVIM_" ] || [ "$TERM" = "linux" ]; then
+    exit 0
+fi
+kitty +kitten icat --clear --stdin no --silent --transfer-mode file < /dev/null > /dev/tty

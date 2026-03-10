@@ -1,0 +1,264 @@
+* {
+    border: none;
+    border-radius: 0;
+    font-family: monospace;
+    font-size: 12pt;
+    min-height: 0px;
+}
+
+window#waybar {
+    background: transparent;
+    color: white;
+}
+
+tooltip {
+    border-radius: 0.5em;
+    background-color: rgba(80, 80, 80, 0.95);
+}
+
+/* Foreground color */
+tooltip label {
+    color: white;
+}
+
+#workspaces {
+    background-color: rgba(0, 0, 0, 0.3);
+    margin-left: 0.5em;
+    margin-right: 0.5em;
+    margin-top: 0.3em;
+    margin-bottom: 0.2em;
+    border-radius: 1em;
+}
+
+#workspaces button {
+    color: white;
+    padding-right: 1em;
+    padding-left: 0.8em;
+    border: 0.3ex solid transparent;
+}
+
+/* Disable default hover animation */
+#workspaces button:hover {
+    background: transparent;
+    box-shadow: none;
+    text-shadow: none;
+}
+
+/* Original color #43dfb8 */
+/* Shades */
+/* 43dfb8 3cc9a6 36b293 2f9c81 28866e 22705c 1b594a 144337 0d2d25 071612 */
+/* 43dfb8 56e2bf 69e5c6 7be9cd 8eecd4 a1efdc b4f2e3 c7f5ea d9f9f1 ecfcf8 */
+#workspaces button.focused {
+    /*sway*/
+    color: #a1efdc;
+    border-radius: 1em;
+    border: 0.3ex solid #a1efdc;
+}
+
+#workspaces button.active {
+    /*hyprland*/
+    color: #a1efdc;
+    border-radius: 1em;
+    border: 0.3ex solid #a1efdc;
+}
+
+#custom-scratchpad-indicator {
+    padding-right: 0.5em;
+    padding-left: 0.5em;
+    /* border-right: 1px solid rgba(255, 255, 255, 0.3); */
+}
+
+#workspaces button.urgent {
+    color: #ff7518;
+}
+
+#mode,
+#submap {
+    border: 0.3ex solid white;
+}
+
+#battery,
+#cpu,
+#custom-clock,
+#custom-config_repo,
+#custom-eq,
+#custom-file_operation,
+#custom-home-storage,
+#custom-llm,
+#custom-mail,
+#custom-mail_sync,
+#custom-pacman,
+#custom-power_button,
+#custom-recorder,
+#custom-replay,
+#custom-temp,
+#custom-todo,
+#idle_inhibitor,
+#memory,
+#mode,
+#network,
+#pulseaudio,
+#submap,
+#tray {
+    /* text-shadow: 0 0 5px rgba(0, 0, 0, 0.377); */
+    color: white; /* New version no longer follows 'window#waybar', default to grey */
+    padding-right: 0.4em;
+    padding-left: 0.4em;
+    /* background-color: transparent; */
+    background-color: rgba(0, 0, 0, 0.3);
+    margin-top: 0.3em;
+    margin-bottom: 0.2em;
+}
+
+/* Bold text for clarity */
+#cpu,
+#custom-clock,
+#custom-file_operation,
+#custom-mail,
+#custom-pacman,
+#custom-temp,
+#custom-todo,
+#custom-weather,
+#memory,
+#mode,
+#network,
+#submap,
+#workspaces {
+    font-weight: bold;
+}
+
+/* Match tray icons colour */
+/* #custom-win-storage, */
+/* #custom-config_repo, */
+/* #custom-eq, */
+/* #pulseaudio, */
+/* #custom-home-storage { */
+/*     color: #dfdfdf; */
+/* } */
+
+/* Left side round corners */
+#custom-mail,
+#custom-temp,
+#tray {
+    padding-left: 0.8em;
+    border-top-left-radius: 1em;
+    border-bottom-left-radius: 1em;
+}
+
+/* Right side round corners */
+#custom-home-storage,
+#custom-pacman,
+#memory {
+    padding-right: 0.8em;
+    border-top-right-radius: 1em;
+    border-bottom-right-radius: 1em;
+}
+
+/* Both sides round corners */
+#custom-clock,
+#custom-todo,
+#mode,
+#network,
+#submap {
+    padding-right: 0.8em;
+    padding-left: 0.8em;
+    border-radius: 1em;
+}
+
+/* Both sides round corners with specific margin */
+#idle_inhibitor {
+    border-radius: 1em;
+}
+
+#idle_inhibitor.deactivated {
+    padding-right: 0.9em;
+    padding-left: 0.6em;
+}
+
+#idle_inhibitor.activated {
+    padding-right: 0.8em;
+    padding-left: 0.5em;
+}
+
+#custom-power_button {
+    padding-right: 0.65em;
+    padding-left: 0.65em;
+    border-radius: 1em;
+}
+
+#custom-file_operation {
+    padding-right: 0.9em;
+    padding-left: 0.6em;
+    border-radius: 1em;
+}
+
+/* Remove space between mail and mail_sync */
+#custom-mail_sync {
+    padding-left: 0em;
+    padding-right: 0em;
+}
+#custom-mail {
+    padding-right: 0em;
+}
+#custom-pacman {
+    padding-left: 0.8em;
+}
+
+/* Space to separate modules */
+#custom-clock,
+#custom-file_operation,
+#custom-home-storage,
+#custom-pacman,
+#custom-power_button,
+#custom-todo,
+#memory,
+#network {
+    margin-right: 0.5em;
+}
+
+/* Color icons */
+#custom-replay {
+    color: lawngreen;
+}
+
+#custom-recorder {
+    color: tomato;
+}
+
+#custom-llm {
+    color: gold;
+}
+
+#battery.warning {
+    color: gold;
+}
+
+#battery.critical {
+    color: tomato;
+}
+
+@keyframes blink {
+    to {
+        background-color: #ffffff;
+        color: black;
+    }
+}
+
+#battery.critical:not(.charging) {
+    color: white;
+    animation-name: blink;
+    animation-duration: 0.8s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+}
+
+/*
+#network.disconnected {
+    background: #f53c3c;
+}
+*/
+
+#custom-spotify {
+    color: rgb(102, 220, 105);
+}

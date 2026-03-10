@@ -1,0 +1,118 @@
+---
+## Just need the html file and background folder. All other media are encoded in html
+
+## Check 'Variables for HTML etc.' and 'Metadata variables' at https://pandoc.org/MANUAL.html
+# header-includes: |
+#     <style>
+#     blockquote {
+#         font-style: italic;
+#     }
+#     tr.even {
+#         background-color: #f0f0f0;
+#     }
+#     td, th {
+#         padding: 0.5em 2em 0.5em 0.5em;
+#     }
+#     tbody {
+#         border-bottom: none;
+#     }
+#     </style>
+## or call with --include-in-header=style.css
+
+## Math equations flush left
+# classoption:
+#     - fleqn
+
+header-includes: |
+    <style>
+    * {
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+    }
+    .title {
+        font-size: 3em !important;
+    }
+    .subtitle {
+        font-style: italic !important;
+        text-decoration: underline;
+    }
+    .slide {
+        /* Additional offset on top */
+        margin-top: 8%;
+        text-align: left;
+    }
+    h1,h2,h3,h4,h5,h6 {
+        text-align: center;
+    }
+    figure {
+        font-style: italic !important;
+        text-align: center;
+    }
+    figcaption {
+        font-style: italic;
+        text-align: center;
+        color: grey;
+    }
+    code {
+        background-color: white;
+        white-space: pre-wrap;
+    }
+    /* Also '.title' '.quarto-title-author-name' '.date', need to add '!important' */
+    </style>
+# include-in-header: "style.css" # Not work
+## Globally static background
+background-image: "background/bg4.jpg"
+
+## Globally parallax background, use either 'parallaxBackgroundSize' or set
+## vertical/horizontal separately.
+# parallaxBackgroundImage: "background/bg4.jpg"
+# parallaxBackgroundSize: cover
+# parallaxBackgroundSize: "2100px 900px"
+# parallaxBackgroundHorizontal: 200
+# parallaxBackgroundVertical: 50
+
+## Set title page only
+# title-slide-attributes:
+#     class: "center"
+#     data-background-image: "background/bg4.jpg"
+#     data-background-size: contain
+#     background-repeat: no-repeat
+#     # data-background-size: cover
+#     # data-background-size: 30% # by width
+#     # data-background-size: 30% 50% # by width
+#     # data-background-size: 5em
+#     data-background-opacity: "0.5"
+
+## Options
+## Right click in browser to the source code of the html. All options are at the end.
+slideNumber: "true"
+transition: "fade" # none/fade/slide/convex/concave/zoom
+transitionSpeed: "fast" # default/fast/slow
+margin: 0.1 # use css for better control
+# width: "1600"
+# height: "900"
+# fragments: "false" # E.g., Do not show bullet points one by one
+center: "false" # Vertically center contents of slides
+# controls: "false" # Show controls
+
+## All other option can be found in https://revealjs.com/config/
+## Themes at https://revealjs.com/themes/
+## black/white/league/beige/night/serif/simple/solarized/moon/dracula/sky/blood
+theme: "serif"
+
+title: This is title
+author: Author
+institute: University
+subtitle: subtitle 2099
+date:
+---
+
+## Outline
+
+outline goes here
+
+# Section 1 {.center}
+
+## Section 1.a
+

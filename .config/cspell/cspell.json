@@ -1,0 +1,10 @@
+{
+    "allowCompoundWords": false,
+    "ignorePaths": ["node_modules/**"],
+    "ignoreWords": [],
+    "language": "en-GB",
+    "useGitignore": false,
+    "version": "0.2",
+    "words": [],
+    "userWords": []
+}

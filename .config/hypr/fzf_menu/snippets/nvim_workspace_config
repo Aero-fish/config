@@ -1,0 +1,163 @@
+---------- Override extension settings ----------
+local additional_extension_settings = {
+    -- ["telescope"] = {
+    --     pickers = {
+    --         find_files = {
+    --             find_command = {
+    --                 "fd", "--type", "f", "--follow",
+    --                 "--strip-cwd-prefix",
+    --                 "--exclude", "*.kdb", "--exclude", "*.kdbx", "--exclude", "*.key",
+    --                 "--exclude", "*cache/", "--exclude", ".cargo/", "--exclude", ".cert",
+    --                 "--exclude", ".fpm/", "--exclude", ".git/", "--exclude", ".gnupg/",
+    --                 "--exclude", ".gphoto/", "--exclude", ".hyprland/",
+    --                 "--exclude", ".ipython/", "--exclude", ".jupyter/",
+    --                 "--exclude", ".keepass/", "--exclude", ".keepassxc/",
+    --                 "--exclude", ".lastpass/", "--exclude", ".npm/", "--exclude", ".nv",
+    --                 "--exclude", ".password-store/", "--exclude", ".perl5/",
+    --                 "--exclude", ".pki/", "--exclude", ".snapshots/", "--exclude",
+    --                 ".ssh/",
+    --                 "--exclude", ".svn/", "--exclude", ".texlive/",
+    --                 "--exclude", ".vscode-oss/", "--exclude", ".wine/",
+    --                 "--exclude", "Bitwarden/", "--exclude", "KeePass/",
+    --                 "--exclude", "KeePassXCrc/", "--exclude", "__pycache__/",
+    --                 "--exclude", "containers/", "--exclude", "go/", "--exclude",
+    --                 "keepass/",
+    --                 "--exclude", "keepassx/", "--exclude", "keepassxc/",
+    --                 "--exclude", "keyrings/", "--exclude", "lost+found",
+    --                 "--exclude", "mozilla*/", "--exclude", "node_modules/",
+    --                 "--exclude", "rclone/", "--exclude", "thunderbird/",
+    --             },
+    --         },
+    --     },
+    -- },
+}
+
+---------- Override LSP settings ----------
+local additional_lsp_settings = {
+    -- ["ltex"] = {
+    --     settings = {
+    --         ltex = {
+    --             latex = {
+    --                 commands = {
+    --                     ["\\label{}"] = "ignore",
+    --                     ["\\documentclass[]{}"] = "ignore",
+    --                     ["\\cite{}"] = "dummy",
+    --                     ["\\apple"] = "vowelDummy",
+    --                     ["\\cars"] = "pluralDummy",
+    --                 },
+    --                 environments = {
+    --                     ["lstlisting"] = "ignore",
+    --                     ["verbatim"] = "ignore",
+    --                     ["alltt"] = "ignore",
+    --                     ["align"] = "ignore",
+    --                 },
+    --             },
+    --         },
+    --     },
+    -- },
+    -- ["texlab"] = {
+    --     settings = {
+    --         texlab = {
+    --             build = {
+    --                 args = {
+    --                     "-pdf", "-interaction=nonstopmode", "-synctex=1",
+    --                     "-aux-directory=aux", "-emulate-aux-dir", "-shell-escape", "%f"
+    --                 },
+    --             },
+    --         }
+    --     }
+    -- },
+    -- ["basedpyright"] = {
+    --     settings = {
+    --         python = {
+    --             pythonPath = "~/workspace/coding/.venv/bin/python3",
+    --         },
+    --         basedpyright = {
+    --             analysis = {
+    --                 -- diagnosticMode = "workspace",
+    --                 diagnosticMode = "openFilesOnly",
+    --                 typeCheckingMode = "strict",
+    --                 -- extraPaths = { "path1", "path2" },
+    --             },
+    --         },
+    --     },
+    -- },
+}
+
+---------- Override default build and create template ----------
+-- local my_func_ok, my_func = pcall(require, "core.my_func")
+-- local overseer_ok, overseer = pcall(require, "overseer")
+-- if my_func_ok and overseer_ok then
+--     keymap = my_func.get_empty_keymap_table()
+--     keymap.leaderleader.n.b = {
+--     function()
+--         local filetype = vim.bo.filetype
+--         if filetype == "markdown" then
+--             overseer.run_template({ name = "Markdown to revealjs" }, nil)
+--         else
+--             my_func.build()
+--         end
+--     end,
+--     "build/compile"
+-- }
+-- my_func.set_keymap(keymap)
+--
+-- end
+
+-- if overseer_ok then
+--     overseer.register_template({
+--         name = "My project task",
+--         params = {},
+--         condition = {
+--             -- This makes the template only available in the current directory
+--             -- In case you :cd out later
+--             dir = vim.fn.getcwd(),
+--         },
+--         builder = function()
+--             return {
+--                 cmd = { "echo" },
+--                 args = { "Hello", "world" },
+--             }
+--         end,
+--     })
+-- end
+
+---------- Override builtin options ----------
+local options = {
+    -- makeprg = "" -- Program to use for the ":make" command
+    -- makeef = "" -- Name of the errorfile for the :make command
+}
+
+---------- Apply settings ----------
+for ext_name, workspace_config in pairs(additional_extension_settings) do
+    local ext_ok, ext = pcall(require, ext_name)
+    if ext_ok then
+        ext.setup(workspace_config)
+    end
+end
+
+local lspconfig_ok, lspconfig = pcall(require, "lspconfig")
+local local_config_ok, local_config = pcall(require, "lsp.configs")
+if lspconfig_ok and local_config_ok then
+    for server, workspace_config in pairs(additional_lsp_settings) do
+        local opts = {
+            on_attach = local_config.on_attach,
+            capabilities = local_config.capabilities,
+            -- flags = lsp_flags,
+        }
+        -- Append custom settings for the language server
+        local has_custom_opts, server_custom_opts = pcall(require,
+            "lsp.settings." .. server)
+        if has_custom_opts then
+            opts = vim.tbl_deep_extend("force", opts, server_custom_opts)
+        end
+
+        opts = vim.tbl_deep_extend("force", opts, workspace_config)
+        lspconfig[server].setup(opts)
+    end
+end
+
+for k, v in pairs(options) do
+    vim.opt[k] = v
+end
+

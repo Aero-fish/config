@@ -1,0 +1,4 @@
+#!/usr/bin/sh
+set -e
+exec "$HOME"/misc/repo/sway-launcher-desktop/sway-launcher-desktop.sh
+

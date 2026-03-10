@@ -1,0 +1,110 @@
+---
+title: "PDF title"
+# author: [first author, second author]
+# date: "2017-02-20"
+# subject: "Markdown"
+# keywords: [Markdown, Example]
+# subtitle: "Aesculeae domus vincemur et Veneris adsuetus lapsum"
+# Tags: [SEBTS, M. Div., papers]
+# lang: "en"
+# classoption: [oneside]
+bibliography: [mybib.bib]
+
+## pandoc options
+# toc: true
+# toc-depth: 1
+# toc-title: Outline
+
+## pandoc attributes/variables
+# title, author, date
+
+## Pandoc-plot
+# See .pandoc-plot.yml
+# plot-configuration: /path/to/file.yml
+
+# '|' starts a literal block of text, the block text starts one indent level higher than the current
+# line. Ends when indent is equal or less then current line.
+# '|+' keep blank line.
+# '- |' Raw attribute.
+
+# header-includes:
+#     - |
+#         ```{=latex}
+#         \RequirePackage{amsmath,amssymb,amsfonts,mathrsfs}
+#         \RequirePackage{xspace}
+#         \xspaceaddexceptions{[]()}
+#         \newcommand{\Zp}{\ensuremath{\mathbb{Z}^+}\xspace}
+#         \newcommand{\Gg}{\ensuremath{\mathscr{G}}\xspace}
+#         ```
+
+# pandoc-latex-environment:
+#     noteblock: [note]
+#     tipblock: [tip]
+#     warningblock: [warning]
+#     cautionblock: [caution]
+#     importantblock: [important]
+
+## Options for eisvogel template
+# titlepage: false
+# titlepage-color: "D8DE2C"
+# titlepage-text-color: "5F5F5F"
+# titlepage-rule-color: "435488"
+# titlepage-rule-height: 4
+# titlepage-logo: "path_to_logo_image_related_to_where_pandoc_is_executing"
+# titlepage-background: "path_to_background_image"
+# page-background: "path_to_background_image_for_non_title_page"
+# page-background-opacity: 0.2
+# caption-justification: "raggedright" # justification parameter of the [caption] package
+# toc-own-page: false
+# listings-disable-line-numbers: false # Line number for source code in listings
+# listings-no-page-break: false # Avoid page break within a listing
+# disable-header-and-footer: false
+
+## Text in header and footer
+# header-left: "default title"
+# header-center: "default empty"
+# header-right: "default date"
+# footer-left: "default author"
+# footer-center: "default empty"
+# footer-right: "default page number"
+# footnotes-disable-backlinks: false # Enabling requires [footnotebackref]
+
+# book: false # Typeset as book
+# logo-width: 35mm # units: pt, pc, in, bp, cm, mm, dd, cc, sp, ex, em, px
+# first-chapter: 1 # index for the first chapter
+# float-placement-figure: "H" # Or can be "htbp"
+# table-use-row-colors: false # Row colors for tables
+# code-block-font-size: '\small'
+---
+# titlepage: false
+# titlepage-color: "D8DE2C"
+# titlepage-text-color: "5F5F5F"
+# titlepage-rule-color: "435488"
+# titlepage-rule-height: 4
+# titlepage-logo: "path_to_logo_image_related_to_where_pandoc_is_executing"
+# titlepage-background: "path_to_background_image"
+# page-background: "path_to_background_image_for_non_title_page"
+# page-background-opacity: 0.2
+# caption-justification: "raggedright" # justification parameter of the [caption] package
+# toc-own-page: false
+# listings-disable-line-numbers: false # Line number for source code in listings
+# listings-no-page-break: false # Avoid page break within a listing
+# disable-header-and-footer: false
+
+## Text in header and footer
+# header-left: "default title"
+# header-center: "default empty"
+# header-right: "default date"
+# footer-left: "default author"
+# footer-center: "default empty"
+# footer-right: "default page number"
+# footnotes-disable-backlinks: false # Enabling requires [footnotebackref]
+
+# book: false # Typeset as book
+# logo-width: 35mm # units: pt, pc, in, bp, cm, mm, dd, cc, sp, ex, em, px
+# first-chapter: 1 # index for the first chapter
+# float-placement-figure: "H" # Or can be "htbp"
+# table-use-row-colors: false # Row colors for tables
+# code-block-font-size: '\small'
+---
+

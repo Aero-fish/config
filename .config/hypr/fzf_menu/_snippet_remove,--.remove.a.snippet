@@ -1,0 +1,12 @@
+#!/usr/bin/sh
+set -e
+fd --unrestricted --exact-depth 1 --type file --type symlink \
+    ".*" "$HOME/.config/sway/fzf_menu/snippets" | sort |
+    fzf --print0 -i --no-multi --exact --delimiter / --with-nth -1 --preview 'cat {}' \
+        --prompt="Delete snippet:" --info=default --layout=reverse \
+        --tiebreak=index |
+    xargs -0 --no-run-if-empty rm
+
+# [ -z "$selected" ] && exit
+
+# rm "$selected"

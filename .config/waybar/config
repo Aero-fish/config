@@ -1,0 +1,316 @@
+{
+    "layer": "top",
+    "position": "bottom",
+    "modules-left": [ "hyprland/workspaces", "hyprland/submap" ],
+    "modules-center":[ "custom/clock", "idle_inhibitor" ],
+    "modules-right": [  "tray", "custom/replay", "custom/recorder", "custom/llm", "battery", "pulseaudio#output", "pulseaudio#mic", "custom/config_repo", "custom/home-storage", "network", "custom/file_operation", "custom/mail", "custom/mail_sync", "custom/pacman", "custom/temp", "cpu", "memory", "custom/power_button" ],
+
+    "hyprland/workspaces": {
+        "format": "{name}. {windows}",
+        "format-window-separator": " ",
+        "on-scroll-up": "hyprctl dispatch workspace e+1",
+        "on-scroll-down": "hyprctl dispatch workspace e-1",
+        "workspace-taskbar": {
+            "enable": false,
+        },
+        "window-rewrite-default": "",
+        "window-rewrite": {
+            "class<.*[.]exe>": "",
+            "class<Google-chrome>": "",
+            "class<Spotify>": "",
+            "class<YACReader>": "",
+            "class<aerc>": "",
+            "class<arch_update>": "",
+            "class<baidunetdisk>": "",
+            "class<blueberry.py>": "",
+            "class<calibre-ebook-edit>": "",
+            "class<calibre-ebook-viewer>": "",
+            "class<calibre-gui>": "",
+            "class<chrome-transfer-frame__-Default>": "",
+            "class<chromium-browser>": "󰎱",
+            "class<chromium>": "",
+            "class<cmake-gui>": "",
+            "class<code-oss>": "󰘐",
+            "class<com.github.maoschanz.drawing>": "",
+            "class<com.github.phase1geo.minder>": "",
+            "class<com.github.wwmm.easyeffects>": "󰺢",
+            "class<com.xnview.XnView>": "",
+            "class<config_repo>": "",
+            "class<darktable>": "",
+            "class<dconf-editor>": "",
+            "class<file_operation_progress>": "󰆏",
+            "class<firefox>": "",
+            "class<firewall-config>": "󱨑",
+            "class<foot>": "",
+            "class<gnucash>": "",
+            "class<kitty>": "",
+            "class<launcher>": "",
+            "class<libreoffice-base>": "",
+            "class<libreoffice-calc>": "",
+            "class<libreoffice-draw>": "",
+            "class<libreoffice-impress>": "",
+            "class<libreoffice-math>": "󰍘",
+            "class<libreoffice-startcenter>": "󰏆",
+            "class<libreoffice-writer>": "",
+            "class<librewolf>": "",
+            "class<localsend_app>": "󰆨",
+            "class<mcomixstarter.py>": "",
+            "class<mpv>": "",
+            "class<nethogs>": "",
+            "class<nm-connection-editor>": "",
+            "class<nnn>": "",
+            "class<onion.torzu_emu.torzu>": "",
+            "class<org.bunkus.mkvtoolnix-gui>": "",
+            "class<org.gnome.Calculator>": "󱖦",
+            "class<org.gnome.DiskUtility>": "",
+            "class<org.gnome.Evince>": "",
+            "class<org.gnome.FileRoller>": "",
+            "class<org.gnome.Meld>": "󰆊",
+            "class<org.gnome.Nautilus>": "",
+            "class<org.gnome.NautilusPreviewer>": "",
+            "class<org.gnome.Papers>": "",
+            "class<org.gnome.SystemMonitor>": "",
+            "class<org.gnome.baobab>": "",
+            "class<org.gnome.clocks>": "",
+            "class<org.gnome.gThumb>": "",
+            "class<org.kde.konversation>": "󰻞",
+            "class<org.kde.okular>": "",
+            "class<org.keepassxc.KeePassXC>": "",
+            "class<org.yuzu_emu.yuzu>": " ",
+            "class<pavucontrol>": "󰴸",
+            "class<prop>": "",
+            "class<remote-viewer>": "",
+            "class<scratchpad>": "",
+            "class<simple-scan>": "󰚫",
+            "class<soffice>": "󰏆",
+            "class<steam>": "",
+            "class<steam_app.*>": "",
+            "class<swappy>": "",
+            "class<system-config-printer>": "",
+            "class<term_file_manager>": "",
+            "class<thunderbird>": "",
+            "class<virt-manager>": "",
+            "class<virt-viewer>": "",
+            "class<wally>": "",
+            "class<wdisplays>": "󱒃",
+            "class<zoom>": "",
+            "title<.*(LibreWolf|Firefox) Private Browsing>": "",
+            "title<.*115生活.*- Chromium>": "󰎱",
+            "title<Picture-in-Picture>": "",
+        }
+    },
+
+    "custom/power_button": {
+        "format": "<b> </b>",
+        "on-click": "uwsm app -- nwg-bar -f -i 128 -p bottom -mb 80",
+        "tooltip": false
+    },
+
+    "custom/clock": {
+        "exec-if": "[ -x $HOME/.config/waybar/scripts/get-timedate.sh ]",
+        "exec": "$HOME/.config/waybar/scripts/get-timedate.sh",
+        "format": "{}",
+        "interval":10,
+        "on-click-middle": "[ -x /usr/bin/vdirsyncer ] && systemctl --user --no-block start vdirsyncer.service",
+        "on-click-right": "[ -x /usr/local/share/khal-via-desktop ] && uwsm app -- /usr/local/share/khal-via-desktop",
+        "smooth-scrolling-threshold":1,
+        "return-type": "json",
+        "tooltip": true
+    },
+
+    "idle_inhibitor": {
+        "format": "{icon}",
+        "format-icons": {
+            "activated": " ",
+            "deactivated": ""
+        },
+        "on-click-middle": "hyprctl dispatch workspace empty",
+        "on-click-right": "[ -x /usr/bin/makoctl ] && /usr/bin/makoctl restore",
+    },
+
+    "battery": {
+        "format-charging": "{icon}",
+        "format-full": "󰂄",
+        "format-icons": {
+            "charging": [ "󰂇 " ],
+            "default": [ " ", " ", " ", " " ]
+        },
+        "format": "{icon}",
+        "interval": 2,
+        "states": {
+            "warning": 20,
+            "critical": 10
+        },
+        "tooltip-format": "At {capacity}%. {timeTo}"
+    },
+
+    "pulseaudio#mic": {
+        "format-source-muted": "<b> </b>",
+        "format-source": " <b></b> ",
+        "format": "{format_source}",
+        "on-click-right": "[ \"$(hyprctl dispatch focuswindow class:org.pulseaudio.pavucontrol)\" != \"ok\" ] && uwsm app -- pavucontrol",
+        "on-click": "swayosd-client --input-volume mute-toggle",
+        "on-scroll-down": "swayosd-client --input-volume lower",
+        "on-scroll-up": "swayosd-client --input-volume raise",
+        "smooth-scrolling-threshold":1,
+        "tooltip": false
+    },
+
+    "pulseaudio#output": {
+        "format": "{icon}",
+        "format-bluetooth": "{icon}",
+        "format-bluetooth-muted": "{icon}",
+        "format-muted": "󰖁",
+        "format-icons": {
+            "headphone": "",
+            "hands-free": "",
+            "headset": "",
+            "phone": "",
+            "portable": "",
+            "car": "",
+            "default": ["󰕿", "󰖀", "󰕾"]
+        },
+        "on-click": "swayosd-client --output-volume mute-toggle",
+        "on-click-right": "[ \"$(hyprctl dispatch focuswindow class:org.pulseaudio.pavucontrol)\" != \"ok\" ] && uwsm app -- pavucontrol",
+        "on-scroll-down": "swayosd-client --output-volume lower",
+        "on-scroll-up": "swayosd-client --output-volume raise",
+        "scroll-step": 1,
+        "smooth-scrolling-threshold":1,
+        "tooltip-format": "{desc}\nAt {volume}%",
+    },
+
+    "memory": {
+        "format": "{percentage:>2} ",
+        "interval": 1,
+        "on-click-right": "[ \"$(hyprctl dispatch focuswindow class:org.gnome.SystemMonitor)\" != \"ok\" ] && uwsm app -- gnome-system-monitor",
+        "tooltip-format": "{used:0.1f}/{total:0.1f} Gib used, {avail:0.1f} Gib free"
+    },
+
+    "cpu": {
+        "format": "{usage:>2} ",
+        "interval": 1,
+        "on-click-right": "[ \"$(hyprctl dispatch focuswindow class:org.gnome.SystemMonitor)\" != \"ok\" ] && uwsm app -- gnome-system-monitor",
+    },
+
+    "custom/temp": {
+        "exec-if": "[ -x \"$HOME\"/.config/waybar/scripts/get-temperature.sh ]",
+        "exec": "\"$HOME\"/.config/waybar/scripts/get-temperature.sh",
+        "format": "{:>2}",
+        "interval": 1,
+        "on-click-right": "uwsm app -- kitty -- watch -n 0.5 \"$HOME/.config/waybar/scripts/get-temperature.sh\"",
+        "return-type": "json",
+        "tooltip": true
+    },
+
+    "tray": {
+        "icon-size": 18,
+        "spacing": 10
+    },
+
+    "network": {
+        // "interface": "wl*",
+        "format-disconnected": "",
+        "format": "{bandwidthUpOctets:>}󰜷 {bandwidthDownOctets:>}󰜮",
+        "interval": 1,
+        "on-click-right": "[ \"$(hyprctl dispatch focuswindow class:netdog)\" != \"ok\" ] && uwsm app -- kitty --class nethogs -- nethogs -v 4",
+        "tooltip-format-disconnected": "Disconnected",
+        "tooltip-format-ethernet": "{ifname}\nIP: {ipaddr}/{cidr}",
+        "tooltip-format-wifi": "SSID: {essid}\nStrength: {signalStrength}%\nIP: {ipaddr}/{cidr}"
+    },
+
+    "custom/pacman": {
+        "exec-if": "[ -f /usr/bin/checkupdates ] && [ -f $HOME/.config/waybar/scripts/arch-checkupdates.py ]",
+        "exec": "$HOME/.config/waybar/scripts/arch-checkupdates.py",
+        "format": "{} ",
+        "interval": 21600,
+        "on-click-right": "if /usr/bin/checkupdates >/dev/null; then [ \"$(hyprctl dispatch focuswindow class:arch_update)\" != \"ok\" ] && uwsm app -- kitty --class arch_update -- sh -c 'echo Update Arch...; sudo pacman -Syu; echo Done - Press enter to exit; read; pkill -SIGRTMIN+8 -u \"$(id -n -u)\" -x waybar;'; fi",
+        "on-click": "pkill -SIGRTMIN+8 -u \"$(id -n -u)\" -x waybar",
+        "return-type": "json",
+        "signal": 8
+    },
+
+    "custom/mail": {
+        "exec-if": "[ -f $HOME/.config/waybar/scripts/get-mail-unread.sh ]",
+        "exec": "$HOME/.config/waybar/scripts/get-mail-unread.sh",
+        "format": "{} ",
+        "interval":"once",
+        "on-click-right": "[ \"$(hyprctl dispatch focuswindow class:aerc)\" != \"ok\" ] && uwsm app -- zsh --interactive -c 'kitty --class aerc -- aerc'",
+        "on-click-middle": "systemctl --user --no-block start mbsync.service",
+        "on-click": "pkill -SIGRTMIN+9 -u \"$(id -n -u)\" -x waybar",
+        "return-type": "json",
+        "signal": 9,
+        "tooltip": true
+    },
+
+    "custom/mail_sync": {
+        "exec-if": "[ -f /usr/bin/mbsync ]",
+        "exec": "pgrep -x mbsync || pgrep -x vdirsyncer",
+        "format": " ",
+        "interval": 5,
+        "signal": 10,
+        "tooltip": false,
+    },
+
+    "custom/home-storage": {
+        "exec-if": "[ -f $HOME/.config/waybar/scripts/storage.sh ] && [ -d \"$HOME\" ] && grep -qs -E \"\\s$HOME\\s\" /proc/mounts",
+        "exec": "$HOME/.config/waybar/scripts/storage.sh \"$HOME\"",
+        "format": " ",
+        "interval": 30,
+        "on-click-right": "uwsm app -- zsh --interactive -c 'exec kitty -- /usr/bin/lf'",
+        "on-click": "pkill -SIGRTMIN+11 -u \"$(id -n -u)\" -x waybar",
+        "return-type": "json",
+        "signal": 11,
+        "tooltip": true
+    },
+
+    "custom/replay": {
+        "exec-if": "[ -f /usr/bin/gpu-screen-recorder ]",
+        "exec": "pgrep -f '^((/usr)?/bin)?gpu-screen-recorder -r'",
+        "on-click-right": "pgrep -INT -f '^((/usr)?/bin)?gpu-screen-recorder -r'",
+        "format": " ",
+        "interval": 5,
+        "signal": 12,
+        "tooltip": false,
+    },
+
+    "custom/recorder": {
+        "exec-if": "[ -f /usr/bin/gpu-screen-recorder ]",
+        "exec": "pgrep -f '^((/usr)?/bin)?gpu-screen-recorder -w'",
+        "on-click-right": "pgrep -INT -f '^((/usr)?/bin)?gpu-screen-recorder -w'",
+        "format": " ",
+        "interval": 5,
+        "signal": 12,
+        "tooltip": false,
+    },
+
+    "custom/llm": {
+        "exec-if": "[ -f $HOME/.config/waybar/scripts/check-llm.sh ]",
+        "exec": "$HOME/.config/waybar/scripts/check-llm.sh",
+        "format": "{}",
+        "interval": 5,
+        "return-type": "json",
+        "tooltip": true,
+    },
+
+    "custom/config_repo": {
+        "exec-if": "[ -f $HOME/.config/waybar/scripts/check-config-repo.sh ]",
+        "exec": "$HOME/.config/waybar/scripts/check-config-repo.sh",
+        "format": "{}",
+        "on-click-right": "[ \"$(hyprctl dispatch focuswindow class:config_repo)\" != \"ok\" ] && uwsm app -- zsh --interactive -c 'exec kitty --class config_repo -- lazygit --path $HOME/.backup/config/shared_github'",
+        "signal": 14,
+        "return-type": "json",
+        "tooltip": true,
+    },
+
+    "custom/file_operation": {
+        "exec-if": "ls $XDG_RUNTIME_DIR/lf_progress/*.sh >/dev/null 2>&1",
+        "exec": "$HOME/.config/waybar/scripts/get-file-operation-status.sh",
+        "format": "{}󰆏",
+        "interval": 2,
+        "on-click-right": "[ \"$(hyprctl dispatch focuswindow class:file_operation_progress)\" != \"ok\" ] && \"$HOME/.config/hypr/fzf_menu/_view_file_opteration,--.view.file.operation\"",
+        "return-type": "json",
+        "signal": 15,
+        "tooltip": true
+    },
+}
+

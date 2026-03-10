@@ -1,0 +1,44 @@
+\documentclass[convert={convertexe={magick},density=300,size=1080x800,outext=.png},tikz]{standalone}
+\RequirePackage{xspace} % Smart space.
+\RequirePackage{amsmath,amssymb,amsfonts}
+\xspaceaddexceptions{[]()} % No smart space if followed by a 'bracket' chktex 36
+\RequirePackage[nolist, nohyperlinks]{acronym} % Automatic acronyms.
+\RequirePackage{mathrsfs} % for math calligraphic letters (\mathsrc{})
+
+\usetikzlibrary{calc}
+\usetikzlibrary{decorations.pathreplacing} % Brace over a segment of line
+\usetikzlibrary{intersections} % Compute interceptions
+\usetikzlibrary{math}
+\usetikzlibrary{positioning} % Verbo relative positioning
+\usetikzlibrary{shapes.misc} % Cross shape 'x'
+\usetikzlibrary{shapes} % Shapes other than triangle
+\usetikzlibrary{shadows.blur}
+
+\tikzstyle{node} = [draw,fill=white,circle,minimum width=10mm,blur shadow]
+\tikzstyle{edge} = [>=stealth]
+
+\newcommand{\gear}{\ensuremath{gear}\xspace}
+\newcommand{\clk}{\ensuremath{clk}\xspace}
+\newcommand{\trans}{\ensuremath{transT}\xspace}
+\newcommand{\act}{\ensuremath{active}\xspace}
+
+\newcommand{\Ff}{\ensuremath{\mathscr{F}}\xspace}
+\newcommand{\RR}{\ensuremath{\mathbb{R}}\xspace}
+
+\begin{document}
+
+\begin{tikzpicture}
+    \node[draw=none] (clk) {$\clk$};
+    \node [draw,fill=white,right=16mm of clk,minimum width=50mm,minimum height=21mm,blur shadow] (container) {};
+    \node [node,anchor=left,right=5mm of container.west,label={[above]:{$\gear(n_i)$}}] (ni) {$n_i$};
+    \node [node,anchor=right,left=5mm of container.east,label={[above]:{$\gear(n_j)$}},label={[below=of nj.south]:{$M_{i,j}$}}] (nj) {$n_j$};
+
+    %arrows
+    \draw [edge,thick,->] (clk) -- (container) node [midway,above] {\gear(\Ff)};
+    \draw [edge,->] (ni) -- (nj) node [midway,above] {$e_{i,j}$} node [midway,below]{$\trans(e_{i,j})$};
+
+    \useasboundingbox ($(current bounding box.south east)+(1.5mm,-1.5mm)$);
+\end{tikzpicture}
+
+\end{document}
+

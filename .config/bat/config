@@ -1,0 +1,6 @@
+--theme="Solarized (light)"
+--italic-text=always
+--terminal-width="-5"
+
+# Use C++ syntax for Arduino .ino files
+--map-syntax "*.ino:C++"

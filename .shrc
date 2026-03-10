@@ -1,0 +1,1130 @@
+#
+# ${HOME}/.shrc
+#
+
+#  ====================
+# Environment variables
+# ====================
+
+# ---------- set time zone ----------
+if [ ! -f "$HOME/.config/tz" ]; then
+    echo '## Use tzselect to find the name of time zone' >"$HOME/.config/tz"
+    echo 'export TZ="Pacific/Auckland"' >>"$HOME/.config/tz"
+fi
+source "$HOME/.config/tz"
+
+# ---------- Var for this script ----------
+this_shell="$(ps -hp $$ | awk '{print $5}' | sed -E -e 's:^(.*/)?-*::')"
+
+# ---------- Settings ----------
+export EDITOR=nvim
+export VISUAL=nvim
+export PAGER=less
+export GPG_TTY=$(tty)
+
+# Perl and CPAN
+export PERL5LIB="${HOME}/.perl5/lib/perl5${PERL5LIB:+:${PERL5LIB}}"
+export PERL_LOCAL_LIB_ROOT="${HOME}/.perl5${PERL_LOCAL_LIB_ROOT:+:${PERL_LOCAL_LIB_ROOT}}"
+export PERL_MB_OPT="--install_base \"${HOME}/.perl5\""
+export PERL_MM_OPT="INSTALL_BASE=${HOME}/.perl5"
+
+# nodejs
+# export PATH="$HOME/.node_modules/bin:$PATH"
+export npm_config_prefix="$HOME/.node_modules"
+
+# WINE
+export WINEPREFIX=${HOME}/.wine/default
+
+# Add my scripts to PATH
+# export PATH="${HOME}/.cargo/bin:${PATH}"
+export PATH="${HOME}/.local/bin:${PATH}"
+
+# ---------- `less` pager style ----------
+export LESS="--clear-screen --ignore-case --no-lessopen --LONG-PROMPT --RAW-CONTROL-CHARS --HILITE-UNREAD --tabs=4 --no-init --incsearch --mouse --wordwrap"
+
+## No search history for `less`
+export LESSHISTFILE="/dev/null"
+
+# Scheme 1
+#export LESS_TERMCAP_mb=$'\E[1;31m'     # begin blink
+#export LESS_TERMCAP_md=$'\E[1;36m'     # begin bold
+#export LESS_TERMCAP_me=$'\E[0m'        # reset bold/blink
+#export LESS_TERMCAP_so=$'\E[01;44;33m' # begin reverse video
+#export LESS_TERMCAP_se=$'\E[0m'        # reset reverse video
+#export LESS_TERMCAP_us=$'\E[1;32m'     # begin underline
+#export LESS_TERMCAP_ue=$'\E[0m'        # reset underline
+
+# Scheme 2
+export LESS_TERMCAP_mb=$'\E[1;31m'
+export LESS_TERMCAP_md=$'\E[1;31m'
+export LESS_TERMCAP_me=$'\E[0m'
+export LESS_TERMCAP_se=$'\E[0m'
+#export LESS_TERMCAP_so=$'\E[1;44;33m'  # Ugly status line highlight
+export LESS_TERMCAP_ue=$'\E[0m'
+export LESS_TERMCAP_us=$'\E[1;32m'
+
+# ---------- sway ----------
+if [ -x /usr/bin/sway ]; then
+    alias sway-opengl="sway --unsupported-gpu >/dev/null 2>&1"
+    alias sway-vulkan="WLR_RENDERER=vulkan sway --unsupported-gpu >/dev/null 2>&1"
+fi
+
+# ---------- hyprland ----------
+if [ -x /usr/bin/Hyprland ]; then
+    alias hyprland-via-uwsm='uwsm start hyprland-uwsm.desktop'
+fi
+
+# ====================
+#  Aliases and functions
+# ====================
+# ---------- General ----------
+alias ..='cd ..'
+alias ...='cd ../..'
+alias .3='cd ../../..'
+alias .4='cd ../../../..'
+alias .5='cd ../../../../..'
+
+alias dh='dirs -v'
+
+alias diff='diff --color=auto'
+alias ip='ip --color=auto'
+
+alias h='history'
+alias gh='history|grep'
+alias j='jobs -l'
+
+alias c="printf '\e[3J\e[H'"
+alias cls="printf '\e[3J\e[H'"
+alias q='exit 0'
+alias :q='exit 0'
+
+alias wget='wget -c '
+alias sha='shasum -a 256 '
+# shellcheck disable=SC2142
+alias mnt="mount | awk -F' ' '{ printf \"%s\t%s\n\",\$1,\$3; }' | column -t | grep -E ^/dev/ | sort" # List all mounts
+
+alias path='echo -e ${PATH//:/\\n}'
+alias now='date +"%T"'
+alias nowtime=now
+alias nowdate='date +"%d-%m-%Y"'
+
+alias ping='ping -c 5'
+alias fastping='ping -c 100 -s.2'
+
+alias ve='python3 -m venv ./venv'
+alias va='source ./venv/bin/activate'
+alias bc='bc -l'
+
+alias nv='nvim'
+alias v='$EDITOR'
+alias vv='$EDITOR_GUI'
+
+alias incognito=' unset HISTFILE'
+
+_get_basename() {
+    fullname="${1##*/}"
+    echo "${fullname%.*}"
+}
+
+# ---------- Rust replacement ----------
+if [ -f /usr/bin/bat ]; then
+    alias cat="bat"
+    if [ "$TERM" = "linux" ]; then
+        export BAT_CONFIG_PATH="$HOME/.config/bat/config.tty"
+    fi
+fi
+
+# ---------- Backup ----------
+mirror() {
+    [ ! $# -eq 2 ] && {
+        echo -e "Mirror source to destination.\nUsage: mirror source_path destination_path"
+        return
+    }
+
+    scr_path="$1"
+    dest_path="$2"
+
+    ## Check destination path, never write to 'Bak' folder
+    if echo "${dest_path}" | grep -qEi -e ".*/(back|backup|.backup)/*"; then
+        echo -n "The destination is '${dest_path}', type YES to continue:"
+        read -r continue_mirror
+        [ ! "${continue_mirror}" = "YES" ] && return
+    fi
+    if [ ! -e "$scr_path" ]; then
+        echo "$scr_path does not exist"
+        return
+    fi
+    if [ ! -e "$dest_path" ]; then
+        echo "$dest_path does not exist"
+        return
+    fi
+
+    rsync -ah --delete --no-inc-recursive --info=progress2 --exclude "lost+found/" "${scr_path}" "${dest_path}"
+}
+
+mirror-bak() {
+    echo "mirror '/run/media/$(id -u -n)/T5_EVO/' to '/run/media/$(id -u -n)/Bak'"
+    mirror "/run/media/$(id -u -n)/T5_EVO/" "/run/media/$(id -u -n)/Bak"
+}
+# ---------- ls ----------
+glob_ignore_pattern='*cache|.cargo|.git|.gnupg|.gphoto|.ipython|.jupyter|.lastpass|.npm|.nv|.password-store|.perl5|.pki|.svn|.texlive|.vscode-oss|.wine|__pycache__|go|lost+found|mozilla*|node_modules|thunderbird'
+
+if [ -f /usr/bin/eza ]; then
+    # '--classify' indicates type at the end (*=exe, /=dir, |=FIFO, @=symbolic
+    alias ls='eza --colour=automatic --classify --group-directories-first'
+    alias ll='eza --colour=automatic --classify --long --group-directories-first --binary --group --links --modified'                   # long list
+    alias la='eza --colour=automatic --classify --long --all --group-directories-first --binary --group --links --modified'             # long list all
+    alias ld='eza --colour=automatic --classify --long --all --only-dirs --group-directories-first --binary --group --links --modified' # long list directory
+    alias l.='eza --colour=automatic --classify --long --all -d .* --group-directories-first --binary --group --links --modified'       # list hidden
+
+    alias llm='eza --colour=automatic --classify --long --reverse --sort=modified --group-directories-first --binary --group --links --modified' # long list sort by modified date
+    alias lls='eza --colour=automatic --classify --long --reverse --sort=size --group-directories-first --binary --group --links --modified'     # long list sort by size
+
+    # shellcheck disable=SC2139
+    alias ltree="eza --colour=automatic --classify --tree --level=3 --all --group-directories-first --sort=name --ignore-glob=\"$glob_ignore_pattern\""
+
+else
+    alias ls='ls --color=auto --classify --group-directories-first'
+    alias ll='ls --color=auto --classify --group-directories-first --human-readable -l'                  # long list
+    alias la='ls --color=auto --classify --group-directories-first --human-readable -l --almost-all'     # long list all
+    alias ld='ls --color=auto --human-readable -l --almost-all --directory */ .*/'                       # long list directory
+    alias l.='ls --color=auto --human-readable --group-directories-first -l --almost-all --directory .*' # list hidden
+
+    alias llm='ls --color=auto --classify --group-directories-first --human-readable -l --sort=time' # long list sort by modified date
+    alias lls='ls --color=auto --classify --group-directories-first --human-readable -l --sort=size' # long list sort by size
+
+    # shellcheck disable=SC2139
+    alias ltree="tree -L 3 -F --dirsfirst --sort=name --ignore-case -I \"$glob_ignore_pattern\"" # tree-view
+fi
+unset ignore_glob_pattern
+
+# ---------- head / tail / grep / VIM /sort ----------
+alias grep='grep --color=auto'
+alias sgrep='grep -R -n -H -C 5 --exclude-dir={.git,.svn,CVS} '
+alias egrep='egrep --color=auto'
+alias fgrep='fgrep --color=auto'
+
+alias t='tail -f'
+
+# ---------- RC file ----------
+alias bashrc='${EDITOR} ${HOME}/.bashrc'
+alias shrc='${EDITOR} ${HOME}/.shrc'
+alias vimrc='${EDITOR} ${HOME}/.config/vim/vimrc'
+alias zshrc='${EDITOR} ${HOME}/.zshrc'
+
+# ---------- pacman ----------
+alias pac='sudo pacman -Sy --need'                      # Install
+alias pacu='sudo pacman -Syu'                           # Update
+alias pacr='sudo pacman -Rns'                           # Remove
+alias pacs='pacman -Ss'                                 # Search
+alias paci='pacman -Si'                                 # Info
+alias paclo='pacman -Qdt'                               # List orphans
+alias pacro='paclo && sudo pacman -Rns $(pacman -Qtdq)' # Remove orphans
+alias pacc='sudo acman -Scc'                            # Clean cache
+alias paclf='pacman -Ql'                                # List files for a package
+alias pacls='pacman -Qe'                                # List explicitly installed package
+
+# ---------- rm / mv / cp / chmod / chown ----------
+alias rm='rm --preserve-root'
+alias mv='mv -i'
+alias cp='cp -i'
+alias ln='ln -i'
+
+alias chown='chown --preserve-root'
+alias chmod='chmod --preserve-root'
+alias chgrp='chgrp --preserve-root'
+
+# ---------- storage ----------
+alias df='df -H'
+alias du='du -sh'
+alias dud='du -d 1 -h'
+
+alias count-file='find . -type f | wc -l'
+
+# ---------- Permission fix ---------
+permission-fix() {
+    if [ -d "$1" ]; then
+        find "$1" -type f -exec /usr/bin/chmod 600 {} \; && find "$1" -type d -exec /usr/bin/chmod 700 {} \;
+    else
+        echo 'Change permission of all files/directories to 600 and 700'
+        echo 'Usage: permission-fix-tight <directory>'
+        echo 'E.g., "permission-fix-tight .", "permission-fix-tight ~/dir"'
+    fi
+}
+
+# ---------- ffmpeg ----------
+ffmpeg-ls-video-streams() {
+    ffprobe "$1" 2>&1 >/dev/null | grep Stream
+}
+
+ffmpeg-stream-extract() {
+    ffmpeg -i "$1" -map 0:"$2" -c copy "$3"
+}
+
+mkv-stream-extract() {
+    mkvextract "$1" tracks "$2:$3"
+}
+
+ffmpeg-audio-downmix-to-aac() {
+    ffmpeg -i "$1" -map 0:v:0 -map 0:a:0 -map 0:s -af "pan=stereo|FL=0.5*FC+0.707*FL+0.707*BL+0.5*LFE|FR=0.5*FC+0.707*FR+0.707*BR+0.5*LFE" -c copy -c:a aac -b:a 256K "$(_get_basename "$1").new.mkv"
+    echo "Output to '$(_get_basename "$1").new.mkv'."
+}
+
+ffmpeg-audio-convert-to-ac3() {
+    ffmpeg -i "$1" -map 0 -c copy -c:a ac3 -b:a 640K "$(_get_basename "$1").new.mkv"
+    echo "Output to '$(_get_basename "$1").new.mkv'."
+}
+
+ffmpeg-compress-video() {
+    ## Ignore metadata
+    ffmpeg -i "$1" -c:v libx265 -x265-params crf=23 -c:a copy -c:s copy "$(_get_basename "$1").new.mkv"
+
+    ## Also copy metadata
+    #ffmpeg -i "$1" -map 0 -c:v libx265 -x265-params crf=23 -c:a copy -c:s copy "${basename}.new.mkv"
+
+    echo "Output to '$(_get_basename "$1").new.mkv'."
+}
+
+# ---------- archiver ----------
+archive-to-single-tar-zstd() {
+    # Guess the common dir
+    common_dir=""
+    for f in "${@}"; do
+        if [ -z "$common_dir" ]; then
+            common_dir="$(dirname -- "$f")"
+        else
+            current_file_dir="$(dirname -- "$f")"
+            common_dir="$(
+                printf "%s\n%s\n" "$common_dir" "$current_file_dir" |
+                    sed -e 'N;s/^\(.*\).*\n\1.*$/\1/'
+            )"
+        fi
+
+        if [ "$common_dir" = "/" ]; then
+            break
+        fi
+    done
+    # Add tailing slash
+    if [ "$common_dir" != "/" ]; then
+        prefix="${common_dir}/"
+    else
+        prefix="$common_dir"
+    fi
+
+    arr_trim=("${@#"$prefix"}")
+
+    local tar_cmd=("tar" "--owner=0" "--group=0" "-C" "$common_dir" "-cpf" "-")
+    local du_cmd=("du" "-cbs")
+
+    tar_cmd+=("${arr_trim[@]}")
+    du_cmd+=("${@}")
+
+    if [ "$#" -eq 1 ]; then
+        file_name="$(basename -- "$1")"
+    else
+        printf "Enter output file name without extension: "
+        read -r file_name
+    fi
+
+    if [ -z "$file_name" ]; then
+        echo "Empty file name"
+        return
+    fi
+    dest="${PWD}/${file_name}.tar.zst"
+
+    # Check if file of same name exists
+    if [ -e "$dest" ]; then
+        read -n 1 -r -p "'$dest' already exists, overwrite? [y/n] " res
+        echo
+        case "$res" in
+        [Yy]) rm -r "$dest" ;;
+        *) exit 0 ;;
+        esac
+    fi
+
+    "${tar_cmd[@]}" | pv -s "$("${du_cmd[@]}" | tail -1 |
+        awk '{print $1}')" |
+        zstdmt >"$dest"
+
+    notify-send "shell: Archive competed $dest"
+    lf -remote "send reload"
+
+}
+
+# ---------- archive extractor ----------
+## usage: ex <file>
+ex() {
+    if [ "$#" -ne 1 ]; then
+        echo "usage: ex <file>"
+    elif [ -f "$1" ]; then
+        case $1 in
+        *.tar.bz2) pv "$1" | tar -xjpf - ;;
+        *.tar.gz) pv "$1" | tar -xzpf - ;;
+        *.tar.xz) pv "$1" | tar -I pixz -xpf - ;;
+        *.tar.zst) pv "$1" | tar --zstd -xpf - ;;
+        *.bz2) bunzip2 -kc "$1" >./"$(basename -- "$1" | sed -E 's:\\.bz2$::')" ;;
+        *.rar) unrar x "$1" ;;
+        *.gz) gunzip -kc "$1" >./"$(basename -- "$1" | sed -E 's:\\.gz$::')" ;;
+        *.tar) pv "$1" | tar -xpf - ;;
+        *.tbz2) pv "$1" | tar -xjpf - ;;
+        *.tgz) pv "$1" | tar -xzpf - ;;
+        *.zip) unzip "$1" ;;
+        *.Z) uncompress "$1" ;;
+        *.deb) ar -x "$1" ;;
+        *.7z) 7z x "$1" ;;
+        *.iso) 7z x "$1" ;;
+        *.rpm) rpmextract.sh "$1" ;;
+        *.AppImage)
+            if [ ! -x "$1" ]; then
+                if [ ! -w "$1" ]; then
+                    echo "'$1' is not executable, and cannot chmod"
+                    return
+                fi
+
+                if [ -O "$1" ]; then
+                    chmod u+x "$1"
+                elif [ -G "$1" ]; then
+                    chmod g+x "$1"
+                else
+                    chmod o+x "$1"
+                fi
+            fi
+            work_path="$(dirname -- "$(realpath --no-symlinks -- "$1")")"
+            file_name="$(basename -- "$1")"
+            echo "Extracting '$1'"
+            bwrap \
+                --unshare-user \
+                --unshare-ipc \
+                --unshare-pid \
+                --unshare-uts \
+                --unshare-cgroup-try \
+                \
+                --disable-userns \
+                --hostname my-pc \
+                --proc /proc \
+                --cap-drop ALL \
+                --new-session \
+                --die-with-parent \
+                --seccomp 9 \
+                \
+                --ro-bind-try "/usr" "/usr" \
+                --symlink "/usr/bin" "/bin" \
+                --symlink "/usr/bin" "/sbin" \
+                --symlink "/usr/lib" "/lib" \
+                --symlink "/usr/lib" "/lib64" \
+                --bind-try "$work_path" "$work_path" \
+                "$work_path/$file_name" --appimage-extract 9</usr/local/share/seccomp-filter/default_seccomp_filter.bpf >/dev/null
+            ;;
+        *) echo "'$1' cannot be extracted via ex()" ;;
+        esac
+    else
+        echo "'$1' is not a valid file"
+    fi
+}
+
+# ---------- git ----------
+alias addup='git add -u'
+alias addall='git add .'
+alias branch='git branch'
+alias checkout='git checkout'
+alias commit='git commit -m'
+alias fetch='git fetch'
+alias pull='git pull origin'
+alias push='git push origin'
+alias status='git status'
+alias tag='git tag'
+alias newtag='git tag -a'
+
+# ---------- gpg encryption ----------
+# verify signature for ISOs
+alias gpg-check="gpg2 --keyserver-options auto-key-retrieve --verify"
+# receive the key of a developer
+alias gpg-retrieve="gpg2 --keyserver-options auto-key-retrieve --receive-keys"
+
+# ---------- youtube-dl ----------
+yt-info() {
+    local COOKIE_PATH="$(find "$HOME/Documents/youtube-log/mozilla-ytdl" -type d -regex '.*default-release' | head -n 1)"
+    /usr/local/bin/generic_bwrap \
+        --bind-try "$COOKIE_PATH" "$HOME/.cache/yt" \
+        --ro-bind-try "$HOME"/misc/repo/ffmpeg-yt-dlp "$HOME"/misc/repo/ffmpeg-yt-dlp \
+        --ro-bind-try "$HOME"/misc/repo/yt-dlp "$HOME"/misc/repo/yt-dlp \
+        "$HOME"/misc/repo/yt-dlp/bin/yt-dlp \
+        --ffmpeg-location "$HOME/misc/repo/ffmpeg-yt-dlp" \
+        --js-runtimes node \
+        --cookies-from-browser firefox:"$HOME/.cache/yt" \
+        --print filename \
+        --output "https://www.youtube.com/channel/%(channel_id)s/videos,%(channel)s" \
+        "$1"
+}
+
+ytdl() {
+    local COOKIE_PATH="$(find "$HOME/Documents/youtube-log/mozilla-ytdl" -type d -regex '.*default-release' | head -n 1)"
+    echo -e "\e[31mDownload to Desktop\e[0m"
+    /usr/local/bin/generic_bwrap \
+        --bind-try "$COOKIE_PATH" "$HOME/.cache/yt" \
+        --ro-bind-try "$HOME"/misc/repo/ffmpeg-yt-dlp "$HOME"/misc/repo/ffmpeg-yt-dlp \
+        --ro-bind-try "$HOME"/misc/repo/yt-dlp "$HOME"/misc/repo/yt-dlp \
+        "$HOME"/misc/repo/yt-dlp/bin/yt-dlp \
+        --ffmpeg-location "$HOME/misc/repo/ffmpeg-yt-dlp" \
+        --js-runtimes node \
+        --cookies-from-browser firefox:"$HOME/.cache/yt" \
+        --merge-output-format mp4 \
+        --continue -N 3 \
+        --retries "infinite" \
+        --all-subs --embed-subs --add-metadata --embed-thumbnail \
+        --no-restrict-filenames --windows-filenames \
+        --output "$HOME/Desktop/%(upload_date).8s %(title).40s.%(ext)s" \
+        "$1"
+}
+
+# ---------- number conversion ----------
+hex2dec() {
+    printf "%d\n" "0x$1"
+}
+dec2hex() {
+    printf '%x\n' "$1"
+}
+
+# ---------- show documents ----------
+if [ -f /usr/bin/bat ]; then
+    cmd="bat"
+else
+    cmd="less"
+fi
+# shellcheck disable=SC2139
+alias show-code-keybinding="${cmd} ${HOME}/Documents/Notebook/code_keybinding.md"
+# shellcheck disable=SC2139
+alias show-regex-ref="${cmd} ${HOME}/Documents/Notebook/regex.md"
+# shellcheck disable=SC2139
+alias show-vim-ref="${cmd} ${HOME}/Documents/Notebook/vim.md"
+unset cmd
+
+# ---------- fzf ----------
+# fzf, fuzzy search in current dir
+# <Ctrl T> fuzzy search files+folders (Can select multiple file)
+# <Ctrl R> fuzzy search history
+# <Alt C> fuzzy change dir
+# COMMAND [DIRECTORY/][FUZZY_PATTERN]**<TAB>
+# Use Ctrl+J Ctrl+k to move around the list, and <TAB> to select multiple.
+#
+# ^music    # prefix-exact-match
+# .mp3$     # suffix-exact-match
+# 'wild     # exact-match(quoted)
+# !fire     # inverse-exact-match
+# !.mp3$    # inverse-suffix-exact-match
+# E.g., ^core go$ | rb$ | py$
+# kill -9 <TAB>
+# unset **<TAB>
+# export **<TAB>
+# unalias **<TAB>
+# ssh **<TAB>
+# telnet **<TAB>
+
+fd_ignore_pattern=(
+    "--exclude"
+    "*.kdb"
+    "--exclude"
+    "*.kdbx"
+    "--exclude"
+    "*.key"
+    "--exclude"
+    "*cache/"
+    "--exclude"
+    ".cargo/"
+    "--exclude"
+    ".cert"
+    "--exclude"
+    ".fpm/"
+    "--exclude"
+    ".git/"
+    "--exclude"
+    ".gnupg/"
+    "--exclude"
+    ".gphoto/"
+    "--exclude"
+    ".hyprland/"
+    "--exclude"
+    ".ipython/"
+    "--exclude"
+    ".jupyter/"
+    "--exclude"
+    ".keepass/"
+    "--exclude"
+    ".keepassxc/"
+    "--exclude"
+    ".lastpass/"
+    "--exclude"
+    ".npm/"
+    "--exclude"
+    ".nv"
+    "--exclude"
+    ".password-store/"
+    "--exclude"
+    ".perl5/"
+    "--exclude"
+    ".pki/"
+    "--exclude"
+    ".snapshots/"
+    "--exclude"
+    ".ssh/"
+    "--exclude"
+    ".svn/"
+    "--exclude"
+    ".texlive/"
+    "--exclude"
+    ".vscode-oss/"
+    "--exclude"
+    ".wine/"
+    "--exclude"
+    "Bitwarden/"
+    "--exclude"
+    "KeePass/"
+    "--exclude"
+    "KeePassXCrc/"
+    "--exclude"
+    "__pycache__/"
+    "--exclude"
+    "containers/"
+    "--exclude"
+    "go/"
+    "--exclude"
+    "keepass/"
+    "--exclude"
+    "keepassx/"
+    "--exclude"
+    "keepassxc/"
+    "--exclude"
+    "keyrings/"
+    "--exclude"
+    "lost+found"
+    "--exclude"
+    "mozilla*/"
+    "--exclude"
+    "node_modules/"
+    "--exclude"
+    "rclone/"
+    "--exclude"
+    "thunderbird/"
+)
+
+export FZF_DEFAULT_COMMAND="fd --unrestricted --follow --ignore-case ${fd_ignore_pattern[*]}"
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+export FZF_ALT_C_COMMAND="$FZF_DEFAULT_COMMAND --type d"
+export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS -m --bind ctrl-a:select-all,ctrl-d:deselect-all,ctrl-t:toggle-all"
+
+_fzf_compgen_path() {
+    fd --unrestricted --ignore-case --follow "${fd_ignore_pattern[@]}" . "$1"
+}
+
+_fzf_compgen_dir() {
+    fd --type d --unrestricted --ignore-case --follow "${fd_ignore_pattern[@]}" . "$1"
+}
+
+if [ "$this_shell" == "bash" ]; then
+    [ -f /usr/share/fzf/key-bindings.bash ] && source /usr/share/fzf/key-bindings.bash
+    [ -f /usr/share/fzf/completion.bash ] && source /usr/share/fzf/completion.bash
+
+elif [ "$this_shell" == "zsh" ]; then
+    # shellcheck disable=SC1094
+    [ -f /usr/share/fzf/completion.zsh ] && source /usr/share/fzf/completion.zsh
+    # shellcheck disable=SC1094
+    [ -f /usr/share/fzf/key-bindings.zsh ] && source /usr/share/fzf/key-bindings.zsh
+
+fi
+
+unset fd_ignore_pattern
+
+# ---------- z ----------
+# `z` for jump, `zi` for interactive jump
+if [ -r /usr/bin/zoxide ]; then
+    export _ZO_DATA_DIR=${HOME}/.cache/zsh
+    eval "$(zoxide init "$this_shell")"
+fi
+
+# ---------- nnn ----------
+if [ -x /usr/bin/nnn ]; then
+    alias N="sudo -E nnn -H"
+    alias ncp="cat \${NNN_SEL:-\${XDG_CONFIG_HOME:-\$HOME/.config}/nnn/.selection} | tr '\0' '\n'"
+
+    if [ -f "$HOME/.config/nnn/env" ]; then
+        source "$HOME/.config/nnn/env"
+    fi
+
+    # cd on quit via ^g, provide function 'n'
+    if [ -f /usr/share/nnn/quitcd/quitcd.bash_sh_zsh ]; then
+        # shellcheck disable=SC1091
+        source /usr/share/nnn/quitcd/quitcd.bash_sh_zsh
+    fi
+fi
+
+# Sort order, capitalise to reverse
+# 'a'pparent disk usage / 'd'isk usage / file 'e'xtension / 'r'everse / 's'ize / 't'ime / 'v'ersion
+
+# ---------- lf ----------
+# [ -n "$LF_LEVEL" ] && PS1="$PS1""(lf level: $LF_LEVEL) "
+if [ -x /usr/bin/lf ]; then
+    # cd on quit
+    if [ -f /etc/profile.d/lfcd.sh ]; then
+        source /etc/profile.d/lfcd.sh
+        alias lf=lfcd
+    fi
+fi
+
+# ---------- yazi ----------
+if [ -x /usr/bin/yazi ]; then
+    # cd on quit
+    function y() {
+        local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+        /usr/bin/yazi "$@" --cwd-file="$tmp"
+        if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+            builtin cd -- "$cwd"
+        fi
+        rm -f -- "$tmp"
+    }
+    alias yazi=y
+fi
+
+# ---------- System ----------
+## get top process eating memory ##
+alias psmem='ps auxf | sort -nr -k 4'
+alias psmem10='ps auxf | sort -nr -k 4 | head -10'
+
+## get top process eating cpu ##
+alias pscpu='ps auxf | sort -nr -k 3'
+alias pscpu10='ps auxf | sort -nr -k 3 | head -10'
+
+# shutdown or reboot
+alias ssn="sudo shutdown now"
+alias sr="sudo reboot"
+
+# get error messages from journalctl. Use 'jctl -1' for previous boot.
+alias jctl="journalctl -p 3 -xb"
+
+# DEC850 router tty access
+alias dec850-tty="screen /dev/ttyUSB0 115200"
+
+# Use for ssh if foot is not recognized
+alias foot-with-terminfo="foot --term xterm-256color"
+
+alias check-cpu-vulnerabilities="grep -r . /sys/devices/system/cpu/vulnerabilities/"
+alias ls-installed-packages="pacman -Qe | cut -d' ' -f1'"
+alias watch-cpu-freq=$'watch -n 1 "cat /proc/cpuinfo | grep \'^[c]pu MHz\'"'
+
+alias clean-zsh-history='\rm -f "$HOME/.cache/zsh"/*'
+alias test-terminal-bell="echo -e '\07'"
+alias soft-reboot="systemctl soft-reboot"
+
+# Container for building
+alias aur-container="podman run -it --rm -v \$HOME/misc/repo:/home/user/aur --userns keep-id -u user localhost/archlinux-aur-build bash"
+
+ls-network-program-connections() {
+    printf "%s\n%s" "$(ss -tup)" "$(ss -ltup | tail -n +2)" |
+        awk -F' ' '$7!=""' |
+        awk '{print $7,"\t",$5,"\t",$6,"\t",$1--ignore-case,"\t",$2}' |
+        sort |
+        column -t
+}
+
+ls-network-program-bandwidth-usage() {
+    nethogs -v 4
+}
+
+ls-dbus() {
+    echo "---------- System ----------"
+    dbus-send --system --print-reply \
+        --dest=org.freedesktop.DBus \
+        /org/freedesktop/DBus \
+        org.freedesktop.DBus.ListNames
+    echo "---------- User ----------"
+    dbus-send --print-reply \
+        --dest=org.freedesktop.DBus \
+        /org/freedesktop/DBus \
+        org.freedesktop.DBus.ListNames
+}
+
+ls-timer() {
+    echo "---------- System ----------"
+    systemctl --no-pager list-timers
+    echo "---------- User ----------"
+    systemctl --no-pager --user list-timers
+}
+
+ls-dbus-method() {
+    if [ $# -ne 1 ]; then
+        echo "E.g., ls-dbus-method org.gnome.NautilusPreviewer"
+        return
+    fi
+    dest="$1"
+    addr="/${dest//.//}"
+    dbus-send --type=method_call --print-reply \
+        --dest="$dest" \
+        "$addr" \
+        org.freedesktop.DBus.Introspectable.Introspect
+}
+
+ls-enabled-services() {
+    echo "---------- System ----------"
+    systemctl list-unit-files | grep enabled
+    echo "---------- User ----------"
+    systemctl --user list-unit-files | grep enabled
+}
+
+ls-running-services() {
+    echo "---------- System ----------"
+    systemctl | grep running
+    echo "---------- User ----------"
+    systemctl --user | grep running
+}
+
+ls-fonts() {
+    fc-list -v |
+        grep -E "^\s*(family:|familylang:|style:|fullname:|file:|postscriptname:|Pattern has)" |
+        sed -E "s:Pattern has.*:\n----------:" | sed -E "s:^\s*::"
+}
+
+alias ls-kitty-fonts="kitty +list-fonts --psnames"
+
+ls-IOMMU() {
+    # shopt -s nullglob
+    for g in "/sys/kernel/iommu_groups"/*; do
+        echo "IOMMU Group ${g##*/}:"
+        for d in "$g/devices"/*; do
+            echo
+            echo -e "\t$(lspci -nns "${d##*/}")"
+        done
+        echo "----------"
+    done
+}
+
+ls-IOMMU-usb() {
+    for usb_ctrl in /sys/bus/pci/devices/*/usb*; do
+        pci_path="${usb_ctrl%/*}"
+        iommu_group=$(readlink "${pci_path}/iommu_group")
+        if [ -f "$usb_ctrl/busnum" ]; then
+            echo "Bus $(cat "${usb_ctrl}/busnum") --> ${pci_path##*/} (IOMMU group ${iommu_group##*/})"
+            lsusb -s "${usb_ctrl#*/usb}":
+            echo
+        fi
+    done
+}
+
+refresh-desktop-mime() {
+    mkdir -p "${HOME}"/.local/share/mime/packages
+    rm -f "${HOME}"/.local/share/applications/wine-extension*.desktop
+    rm -f "${HOME}"/.local/share/icons/hicolor/*/*/application-x-wine-extension*
+    rm -f "${HOME}"/.local/share/applications/mimeinfo.cache
+    rm -f "${HOME}"/.local/share/mime/packages/x-wine*
+    rm -f "${HOME}"/.local/share/mime/application/x-wine-extension*
+    update-desktop-database "${HOME}"/.local/share/applications
+    update-mime-database "${HOME}"/.local/share/mime/
+}
+
+# Inhibit from suspension
+no-suspend() {
+    if pgrep -x sway >/dev/null 2>&1 || pgrep -x Hyprland >/dev/null 2>&1; then
+        bash -c 'sleep infinity; echo no-suspension ended'
+    elif pgrep -x gnome-shell >/dev/null 2>&1; then
+        gnome-session-inhibit --inhibit suspend --inhibit-only
+    else
+        echo "Unknown DE"
+    fi
+}
+
+spawn() {
+    arg=("$@")
+    setsid "${arg[@]}" >/dev/null 2>&1 </dev/null &
+}
+
+print-24bit-colours() {
+    # width=50  # Width, default terminal width
+    # height=1  # Number of lines, default 1
+    awk -v term_cols="${width:-$(tput cols || echo 80)}" \
+        -v term_lines="${height:-1}" \
+        'BEGIN{
+        s="/\\";
+        total_cols=term_cols*term_lines;
+        for (colnum = 0; colnum<total_cols; colnum++) {
+            r = 255-(colnum*255/total_cols);
+            g = (colnum*510/total_cols);
+            b = (colnum*255/total_cols);
+            if (g>255) g = 510-g;
+            printf "\033[48;2;%d;%d;%dm", r,g,b;
+            printf "\033[38;2;%d;%d;%dm", 255-r,255-g,255-b;
+            printf "%s\033[0m", substr(s,colnum%2+1,1);
+            if (colnum%term_cols==term_cols) printf "\n";
+        }
+        printf "\n";}'
+    unset width height
+}
+
+# alias scan-network-printers="lpinfo --include-schemes dnssd -v"
+alias scan-network-printers="driverless --std-ipp-uris"
+alias scan-bonjour="avahi-browse --all --resolve"
+alias get-printer-protocol="/usr/lib/cups/backend/snmp"
+
+lg() {
+    export LAZYGIT_NEW_DIR_FILE=~/.cache/lazygit/newdir
+
+    lazygit "$@"
+
+    if [ -f $LAZYGIT_NEW_DIR_FILE ]; then
+        cd "$(cat $LAZYGIT_NEW_DIR_FILE)" || true
+        rm -f $LAZYGIT_NEW_DIR_FILE >/dev/null
+    fi
+}
+
+trash() {
+    [ $# -eq 0 ] && {
+        echo "Trash file/folder under 50MB, otherwise rm it. Usage: trash FILE..."
+        return
+    }
+    for f in "$@"; do
+        [ ! -e "$f" ] && continue
+        if [ "$(du -s --apparent-size --block-size=1M "$f" | tail -1 | awk '{print $1}')" -gt 50 ]; then
+            echo "rm -rf \"$f\""
+            rm -rf "$f"
+        else
+            echo "trash-put --force \"$f\""
+            trash-put --force "$f"
+        fi
+    done
+    echo "Done"
+}
+
+check-smart() {
+    local result
+    for d in $(smartctl --scan -d scsi | cut -d' ' -f1); do
+        result="$(smartctl -H -d sat "$d" | grep "self-assessment test result:" | sed 's/^[^:]*:\s*//')"
+        mode="sat"
+        if [ -z "$result" ]; then
+            result="$(smartctl -H -d scsi "$d" | grep "SMART Health Status:" | sed 's/^[^:]*:\s*//')"
+            mode="scsi"
+        fi
+        echo "$d: $mode: $result"
+    done
+}
+
+rank-pacman-mirror() {
+    if [ ! -f /etc/pacman.d/mirrorlist.backup ]; then
+        echo "Make backup for /etc/pacman.d/mirrorlist"
+        sudo install -m 644 /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.backup
+    fi
+
+    echo "Ranking servers from NZ and AU"
+    printf "%s\n%s" \
+        "$(awk "/^## (New Zealand)$/{f=1; next}f==0{next}/^\$/{exit}{print substr(\$0, 1);}" /etc/pacman.d/mirrorlist.backup)" \
+        "$(awk "/^## (Australia)$/{f=1; next}f==0{next}/^\$/{exit}{print substr(\$0, 1);}" /etc/pacman.d/mirrorlist.backup)" |
+        sed "s/^#Server/Server/" |
+        rankmirrors -n 10 - |
+        sodu tee /etc/pacman.d/mirrorlist >/dev/null
+}
+# ---------- MIME ----------
+alias get-mime="file -Lb --mime-type "
+get-mime-default() {
+    gio mime "$(file -Lb --mime-type "$1")"
+}
+set-mime-default() {
+    if [ $# -ne 2 ]; then
+        echo "set-default-mime <mimetype> <program_name>.desktop"
+        return
+    fi
+    gio mime "$1" "$2"
+}
+
+open() {
+    local file_type="$(file -Lb --mime-type "$1")"
+    local opener="$(gio mime "$file_type" | head -n1)"
+    if [[ "$opener" == "No default applications"* ]]; then
+        echo "No default program to open the file"
+
+    else
+        opener="$(echo "$opener" | sed -E 's/.*:\s*(.*)$/\1/')"
+        echo "opening file '$1' of type '$file_type' with '$opener'"
+        (setsid gio open "$1" >/dev/null 2>&1 </dev/null)
+    fi
+}
+
+# ---------- rclone ----------
+alias rclone="rclone --progress"
+
+# shellcheck disable=SC2034
+rclone_args="--verbose --links"
+
+# shellcheck disable=SC2034
+declare -A rclone_paths=(
+    # ["5"]="$HOME/5_RAUTANGI_RD"
+    # ["workspace"]="$HOME/workspace"
+    # ["documents"]="$HOME/Documents"
+    # ["gnucash"]="$HOME/.backup/gnucash"
+)
+
+_rclone_ignore_list() {
+    local rsync_dir="$1"
+    local ignore_config_name=".rclone_ignore"
+    local exclude_list=""
+    while read -rd $'\0' ignore_file_path; do
+        dir_path="$(dirname "$ignore_file_path" | sed 's:\/:\\/:g')"
+        if [ "$dir_path" = "." ]; then
+            exclude_list="$exclude_list$(cat "$rsync_dir/$ignore_file_path")"$'\n'
+            continue
+        fi
+        exclude_list="$exclude_list$(sed -e "/^[^/]/s/^/$dir_path\/{,**\/}/" -e "/^\//s/^/$dir_path/" "$rsync_dir/$ignore_file_path")"
+    done < <(fd -t f --unrestricted --base-directory="$1" --strip-cwd-prefix=always --print0 "$ignore_config_name")
+
+    echo "$exclude_list"
+}
+
+# Aliases are created in zshrc and bashrc due to different syntax
+
+# ---------- PDFs and images ----------
+image-to-pdf() {
+    if [ "$#" == 0 ]; then
+        echo "Usage: image-to-pdf input-files [output.pdf]"
+        return
+    fi
+
+    local pdf_name
+    pdf_name="pdf_output.pdf" # Default name for the output pdf
+
+    if [ "$#" -gt 1 ]; then
+        local last_arg last_arg_lower
+
+        ## zsh only
+        # last_arg_lower="$(basename -- "${@[${#}]}" | tr '[:upper:]' '[:lower:]')"
+
+        ## bash only
+        # last_arg_lower="$(echo "${@:-1}" | tr '[:upper:]' '[:lower:]')"
+
+        ## Universal
+        for f in "$@"; do last_arg="$f"; done
+        last_arg_lower="$(echo "$last_arg" | tr '[:upper:]' '[:lower:]')"
+
+        if [[ "$last_arg_lower" == *"."* ]] && [ ".${last_arg_lower##*.}" = ".pdf" ]; then
+            # shellcheck disable=SC2124
+            pdf_name="$last_arg"        # use last argument as pdf name,
+            set -- "${@:1:$(($# - 1))}" # Remove the last argument
+        fi
+    fi
+
+    magick "$@" \
+        -background white -density 72 -units PixelsPerInch -page A4 "$pdf_name"
+}
+
+image-to-gray-scale() {
+    if [ "$#" == 0 ]; then
+        echo "Usage: image-to-gray-scale input.jpg [output.jpg]"
+        return
+    fi
+
+    local img_name
+    if [ "$#" -gt 1 ]; then
+        img_name="$2"
+    else
+        img_name="$(basename -- "$1").gs.jpg"
+    fi
+
+    magick "$1" -colorspace Gray -separate -evaluate-sequence Mean "$img_name"
+}
+
+combine-pdf() {
+    if [ "$#" == 0 ]; then
+        echo "Usage: combine-pdf input-files [output.pdf]"
+        return
+    fi
+
+    local output_name
+    output_name="output.pdf" # Default name for the output pdf
+
+    if [ "$#" -gt 1 ]; then
+        local last_arg
+        for f in "$@"; do last_arg="$f"; done
+
+        if [ ! -e "$last_arg" ]; then
+            output_name="$last_arg"
+            set -- "${@:1:$(($# - 1))}" # Remove the last argument
+        fi
+    fi
+
+    pdfunite "$@" "$output_name"
+}
+
+convert-pdf-to-png() {
+    magick -density 300 "$1" "$(_get_basename "$1").png"
+}
+
+# ---------- wine ----------
+alias kill-default-wine="WINEPREFIX=\"\$HOME/.wine/default\" wineserver -k 15"
+alias kill-games-wine="WINEPREFIX=\"\$HOME/.wine/games\" wineserver -k 15"
+alias kill-net-wine="WINEPREFIX=\"\$HOME/.wine/net\" wineserver -k 15"
+alias kill-tools-wine="WINEPREFIX=\"\$HOME/.wine/tools\" wineserver -k 15"
+alias kill-all-exe="pkill -9 -f '.exe'"
+
+## Keep consistency with texlab LSP for neovim. It only parse log in root dir.
+alias latex-to-pdf="latexmk -pdf -aux-directory=aux -emulate-aux-dir -interaction=nonstopmode -synctex=1"
+## Lualatex cannot detect update for tikz externalise.
+# alias latex-to-pdf="latexmk -pdflua -interaction=nonstopmode -synctex=1"
+
+# ---------- pandoc ----------
+md-to-pdf() {
+    pandoc --defaults md_to_pdf.yaml -i "$1" -o "$(_get_basename "$1").pdf" "${@:2}"
+}
+
+md-to-beamer() {
+    pandoc --defaults md_to_beamer.yaml -i "$1" -o "$(_get_basename "$1")_beamer.pdf" "${@:2}"
+}
+
+md-to-revealjs() {
+    pandoc --defaults md_to_revealjs -i "$1" -o "$(_get_basename "$1").html" "${@:2}"
+}
+
+md-to-html-easy-template() {
+    _md-to-html "$1" "easy_template.html" "${@:2}"
+}
+
+md-to-html-bootstrap-menu() {
+    _md-to-html "$1" "bootstrap_menu.html" "${@:2}"
+}
+
+md-to-html-clean-menu() {
+    _md-to-html "$1" "clean_menu.html" "${@:2}"
+}
+
+md-to-html-elegant-bootstrap-menu() {
+    _md-to-html "$1" "elegant_bootstrap_menu.html" "${@:2}"
+}
+
+md-to-html-uikit() {
+    _md-to-html "$1" "uikit.html" "${@:2}"
+}
+
+print-256-colors() {
+    for i in {0..255}; do
+        printf '\e[48;5;%dm%3d ' "$i" "$i"
+        (((i + 3) % 18)) || printf '\e[0m\n'
+    done
+}
+
+# ---------- email ----------
+alias fetch-emails="systemctl --user start mbsync.service"
+alias sync_mail="systemctl --user --no-block start mbsync.service"
+alias sync_vdir="systemctl --user --no-block start vdirsyncer.service"
+
+# Allow broot to cd on exit. Use through lf for this function.
+# [ -f "$HOME/.config/broot/launcher/bash/br" ] && source "$HOME/.config/broot/launcher/bash/br"
+
+# Start starship. Use different config for the black background in tty
+if [ "$TERM" = "linux" ]; then
+    export STARSHIP_CONFIG=~/.config/starship.tty.toml
+fi
+eval "$(starship init "$this_shell")"
+
+# ---------- Wifi regdom ----------
+alias get-wifi-regom="iw reg get"
+alias get-wifi-hw-regom="journalctl -f -n 10 -kg \"\$(nmcli --get-values GENERAL.DEVICE device show | grep -E '^wlp*' | head -1)\""
+alias get-wifi-limits="iw list | grep -A 15 Frequencies:"
+
+# ---------- Utilities ----------
+alias aria2-downlaod='aria2c --dir="$HOME/Desktop" --continue=true'
+
+# ---------- Clean up ----------
+unset this_shell

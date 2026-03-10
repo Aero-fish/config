@@ -1,0 +1,163 @@
+#!/usr/bin/bash
+set -o pipefail
+
+pc_name="$(cat /proc/sys/kernel/hostname)"
+
+bind_path=(
+    "$HOME/.cache/lf_thumbnails"
+)
+
+hide_path=()
+
+bind=()
+hide=()
+
+generate_args() {
+    local arg_name="$1"
+    local -n paths=$2
+    local -n args=$3
+    local real_path
+
+    for p in "${paths[@]}"; do
+        real_path="$(readlink -f "$p")" || real_path="$p"
+
+        if [ "$arg_name" == "--tmpfs" ]; then
+            if [ -f "$real_path" ]; then
+                args+=("--ro-bind" "/dev/null" "$p")
+            else
+                args+=("--tmpfs" "$p")
+            fi
+        else
+            args+=("$arg_name" "$p" "$p")
+        fi
+    done
+}
+
+generate_hide_args() {
+    local -n paths=$1
+    local -n args=$2
+    local real_path
+
+    for p in "${paths[@]}"; do
+        real_path=""
+        if [ -L "$p" ]; then
+            real_path="$(readlink -f "$p")" || continue
+        else
+            real_path="$p"
+        fi
+
+        if [ -f "$real_path" ]; then
+            args+=("--ro-bind" "/dev/null" "$p")
+        else
+            args+=("--tmpfs" "$p")
+        fi
+
+    done
+}
+
+generate_hide_default() {
+    local paths_to_hide=(
+        ".cert"
+        ".gnupg"
+        ".ssh"
+        ".local/share/keyrings"
+        ".cache/keepassxc"
+        ".config/keepassxc"
+        ".cache/rclone"
+        ".config/rclone"
+        "cookies.sqlite"
+        "places.sqlite"
+        ".config/aerc"
+        ".config/isyncrc"
+        ".config/syncthing"
+        ".config/thunderbird"
+        ".config/vdirsyncer"
+        ".local/PIM"
+    )
+
+    for d in "$HOME"/.backup/config/pc/*/; do
+        for p in "${paths_to_hide[@]}"; do
+            if [ -d "${d}${p}" ] || [ -f "${d}${p}" ]; then
+                hide_path+=("${d}${p}")
+            fi
+        done
+
+        for p in "$d"*.tar.zst; do
+            [ ! -f "$p" ] && break
+            hide_path+=("${p}")
+        done
+    done
+
+    local browser=(
+        "mozilla-safe/firefox"
+        "librewolf"
+        "librewolf-nvim"
+    )
+    for b in "${browser[@]}"; do
+        for d in "$HOME/.config/$b/"*.default-*; do
+            [ -f "$d/cookies.sqlite" ] && hide_path+=("$d/cookies.sqlite")
+            [ -f "$d/places.sqlite" ] && hide_path+=("$d/places.sqlite")
+        done
+    done
+
+    hide_path+=(
+        "$HOME/.backup/install_scripts/on_usb/SecureBoot"
+        "$HOME/.backup/gnucash"
+        "$HOME/.backup/install_scripts/Secureboot.tar.zst"
+        "$HOME/.backup/keepass"
+        "$HOME/.cache"
+        "$HOME/.local/PIM"
+        "$HOME/.pki"
+        "$HOME/.snapshots"
+        "$HOME/.wine"
+        "$HOME/Sync/Bak/Linux"
+        "$HOME/Sync/Bak/Pass"
+        "$HOME/Sync/Bak/Photo Collection"
+        "$HOME/lost+found"
+    )
+}
+
+generate_hide_default
+generate_args "--bind-try" bind_path bind
+generate_hide_default hide_path hide
+
+res="$(
+    bwrap \
+        --unshare-user \
+        --unshare-ipc \
+        --unshare-pid \
+        --unshare-net \
+        --unshare-uts \
+        --unshare-cgroup \
+        \
+        --disable-userns \
+        --hostname my-pc \
+        --proc /proc \
+        --cap-drop ALL \
+        --new-session \
+        --die-with-parent \
+        --seccomp 9 \
+        9</usr/local/share/seccomp-filter/default_seccomp_filter.bpf \
+        \
+        --dev-bind / / \
+        --ro-bind "$HOME" "$HOME" \
+        --ro-bind "/var" "/var" \
+        --tmpfs "/tmp" \
+        --tmpfs "/run" \
+        --ro-bind /run/media /run/media \
+        "${bind[@]}" \
+        "${hide[@]}" \
+        bash "$HOME"/.config/lf/lf_kitty_preview "$@"
+)"
+
+error_code="$?"
+
+if [ -n "${_NVIM_+1}" ] || [ "$error_code" -eq 1 ]; then
+    printf "%s" "$res"
+
+elif [ "$error_code" -eq 2 ]; then
+    kitty +kitten icat --silent --stdin no --transfer-mode file --place "${2}x${3}@${4}x${5}" "$res" </dev/null >/dev/tty
+
+fi
+
+exit 1

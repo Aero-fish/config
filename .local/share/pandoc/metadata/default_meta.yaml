@@ -1,0 +1,36 @@
+# pandoc
+numbersections: true # Needed for cross referercing sections
+# toc: true
+# toc-title: "Toc Title"
+# toc-depth: 1
+# geometry:
+#     - top=30mm
+#     - bottom=30mm
+#     - left=20mm
+#     - right=20mm
+# bibliography: [mybib.bib]
+
+# citeproc
+csl: /usr/share/texmf-dist/tex/latex/citation-style-language/styles/ieee.csl
+reference-section-title: References
+link-citations: true
+link-bibliography: true
+
+# pandoc-crossref
+codeBlockCaptions: true
+listings: true
+figureTitle: "Figure"
+tableTitle: "Table"
+listingTitle: "Algorithm"
+figPrefix: "Fig."
+eqnPrefix: "Equ."
+tblPrefix: "Table"
+lstPrefix: "Alg."
+secPrefix: "Sec."
+# cref: true # Use \cref from [cleveref] package
+# chapters: true # No use to laTeX. Use --top-level-division=chapter.
+# numberSections: true # Better than pandoc numbering, can control depth and no 0 in numbering. But does not support section referencing.
+
+# revealjs writer
+revealjs-url: /home/hugh/misc/repo/revealjs
+

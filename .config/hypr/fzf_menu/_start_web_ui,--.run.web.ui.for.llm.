@@ -1,0 +1,4 @@
+#!/usr/bin/sh
+set -e
+
+"$HOME"/misc/programs/ai/run_web_ui.sh
