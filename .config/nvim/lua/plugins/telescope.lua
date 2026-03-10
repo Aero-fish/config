@@ -247,14 +247,14 @@ return {
         keys = {
             {
                 "<C-p>",
-                function() require("telescope.builtin").buffers() end,
-                desc = "Find buffers",
+                function() require("telescope.builtin").find_files() end,
+                desc = "Find files",
                 mode = { "n", "x", "i" }
             },
             {
                 "<C-S-p>",
-                function() require("telescope.builtin").find_files() end,
-                desc = "Find files",
+                function() require("telescope.builtin").buffers() end,
+                desc = "Find buffers",
                 mode = { "n", "x", "i" }
             },
             {
