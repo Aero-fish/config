@@ -1,12 +1,6 @@
 return {
     {
         "olimorris/codecompanion.nvim",
-        lazy = false,
-        version = "19.2.0",
-        -- dependencies = {
-        --     "nvim-lua/plenary.nvim",
-        --     "nvim-treesitter/nvim-treesitter",
-        -- },
         opts = {
             opts = {
                 log_level = "ERROR",
