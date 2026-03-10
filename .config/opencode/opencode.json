@@ -9,10 +9,13 @@
             },
             "models": {
                 "local_model": {
+                    "name": "local_model",
                     "reasoning": true,
                     "tool_call": true
                 }
             }
         }
-    }
+    },
+    "model": "local/local_model",
+    "small_model": "local/local_model"
 }
