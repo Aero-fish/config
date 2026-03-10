@@ -22,7 +22,6 @@ run_container() {
     local framework_args=()
 
     echo "Launching LLM: $selected_model"
-    notify-send "Launching LLM: $selected_model"
 
     # ----- Container arguments -----
     if [ "$daemon_mode" = 1 ]; then
