@@ -108,7 +108,17 @@ fi
 
 case "$selected_model" in
 
-*/Qwen*)
+*/Qwen3-Coder-*)
+    if [ "$framework" = "sglang" ]; then
+        run_container --context-length 262144 --tool-call-parser qwen3_coder
+
+    elif [ "$framework" = "vllm" ]; then
+        run_container --max-model-len 262144 --enable-prefix-caching \
+            --enable-auto-tool-choice --tool-call-parser qwen3_coder
+    fi
+    ;;
+
+*/Qwen3.5-*)
     if [ "$framework" = "sglang" ]; then
         run_container --context-length 262144 --reasoning-parser qwen3 \
             --tool-call-parser qwen3_coder
