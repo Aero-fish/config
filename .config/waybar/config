@@ -37,7 +37,7 @@
             "class<com.xnview.XnView>": "",
             "class<config_repo>": "",
             "class<darktable>": "",
-            "class<dconf-editor>": "",
+            "class<ca.desrt.dconf-editor>": "",
             "class<file_operation_progress>": "󰆏",
             "class<firefox>": "",
             "class<firewall-config>": "󱨑",
