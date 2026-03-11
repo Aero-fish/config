@@ -2,7 +2,7 @@
 set -e
 
 # ---------- Config ----------
-STORAGE_DIR="$HOME/AI/models"
+STORAGE_DIR="$HOME/workspace/AI/models"
 VLLM_MEM_UTILISATION=0.85
 SGLANG_MEM_UTILISATION=0.92
 PORT=8000

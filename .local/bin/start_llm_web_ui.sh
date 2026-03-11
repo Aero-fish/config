@@ -2,7 +2,7 @@
 set -e
 
 # ---------- Config ----------
-STORAGE_DIR="$HOME/AI/webUI"
+STORAGE_DIR="$HOME/workspace/AI/webUI"
 
 # ---------- Check conditions to run ----------
 if podman container exists open-webui; then
