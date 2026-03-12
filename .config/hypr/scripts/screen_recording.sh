@@ -81,7 +81,13 @@ else
     fi
 fi
 
-# Play start sound
+# ----- GPU specific settings -----
+if lspci | grep -E "(VGA|Display controller)" | grep -q "NVIDIA"; then
+    # Treat input as yuv444, default is yuv420
+    extra_cmd+=("-ffmpeg-video-opts" "-rgb_mode=yuv444;-tune=uhq")
+fi
+
+# ----- Play start sound -----
 if [[ "$codec" =~ .*_hdr ]]; then
     if [ "$mode" = "toggle_replay" ]; then
         pw-play "$HOME/.config/my-config/notification_tones/Replay_start_hdr.wav"
@@ -96,6 +102,7 @@ else
     fi
 fi
 
+# ----- Start recording -----
 # Replay save using end time, normal recording uses start time, therefore
 # overlap if transition from replay to normal.
 # Replay default has "Replay" prefix in the file name, and normal recording don't
@@ -105,12 +112,17 @@ else
     output="$HOME/Pictures/ScreenRecording/$(date "+%Y-%m-%d_%H-%M-%S.%2N").mkv"
 fi
 
-setsid gpu-screen-recorder "${extra_cmd[@]}" -f 60 \
+# setsid gpu-screen-recorder "${extra_cmd[@]}" -pixfmt yuv444 -f 60 \
+#     -a default_output -ac opus -ab 256 -v no \
+#     -k "$codec" -q very_high -bm qp -fm vfr -cr full -encoder gpu \
+#     -o "$output" \
+#     >/dev/null 2>&1 </dev/null &
+
+gpu-screen-recorder "${extra_cmd[@]}" -pixfmt yuv444 -f 60 \
     -a default_output -ac opus -ab 256 -v no \
     -k "$codec" -q very_high -bm qp -fm vfr -cr full -encoder gpu \
-    -o "$output" \
-    >/dev/null 2>&1 </dev/null &
+    -o "$output"
 
-sleep 0.5
+# sleep 0.5
 
-pkill -SIGRTMIN+12 -u "$(id -n -u)" -x waybar
+# pkill -SIGRTMIN+12 -u "$(id -n -u)" -x waybar
