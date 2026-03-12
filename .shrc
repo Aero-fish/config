@@ -442,8 +442,9 @@ alias gpg-check="gpg2 --keyserver-options auto-key-retrieve --verify"
 alias gpg-retrieve="gpg2 --keyserver-options auto-key-retrieve --receive-keys"
 
 # ---------- youtube-dl ----------
-yt-info() {
+_ytdl() {
     local COOKIE_PATH="$(find "$HOME/Documents/youtube-log/mozilla-ytdl" -type d -regex '.*default-release' | head -n 1)"
+    echo -e "\e[31mDownloading to Desktop\e[0m"
     /usr/local/bin/generic_bwrap \
         --bind-try "$COOKIE_PATH" "$HOME/.cache/yt" \
         --ro-bind-try "$HOME"/misc/repo/ffmpeg-yt-dlp "$HOME"/misc/repo/ffmpeg-yt-dlp \
@@ -452,28 +453,32 @@ yt-info() {
         --ffmpeg-location "$HOME/misc/repo/ffmpeg-yt-dlp" \
         --js-runtimes node \
         --cookies-from-browser firefox:"$HOME/.cache/yt" \
-        --print filename \
+        "$@"
+}
+
+yt-info() {
+    _ytdl --print filename \
         --output "https://www.youtube.com/channel/%(channel_id)s/videos,%(channel)s" \
         "$1"
 }
 
 ytdl() {
-    local COOKIE_PATH="$(find "$HOME/Documents/youtube-log/mozilla-ytdl" -type d -regex '.*default-release' | head -n 1)"
-    echo -e "\e[31mDownload to Desktop\e[0m"
-    /usr/local/bin/generic_bwrap \
-        --bind-try "$COOKIE_PATH" "$HOME/.cache/yt" \
-        --ro-bind-try "$HOME"/misc/repo/ffmpeg-yt-dlp "$HOME"/misc/repo/ffmpeg-yt-dlp \
-        --ro-bind-try "$HOME"/misc/repo/yt-dlp "$HOME"/misc/repo/yt-dlp \
-        "$HOME"/misc/repo/yt-dlp/bin/yt-dlp \
-        --ffmpeg-location "$HOME/misc/repo/ffmpeg-yt-dlp" \
-        --js-runtimes node \
-        --cookies-from-browser firefox:"$HOME/.cache/yt" \
-        --merge-output-format mp4 \
+    _ytdl --merge-output-format mp4 \
         --continue -N 3 \
         --retries "infinite" \
         --all-subs --embed-subs --add-metadata --embed-thumbnail \
         --no-restrict-filenames --windows-filenames \
         --output "$HOME/Desktop/%(upload_date).8s %(title).40s.%(ext)s" \
+        "$1"
+}
+
+ytdl_long_name() {
+    _ytdl --merge-output-format mp4 \
+        --continue -N 3 \
+        --retries "infinite" \
+        --all-subs --embed-subs --add-metadata --embed-thumbnail \
+        --no-restrict-filenames --windows-filenames \
+        --output "$HOME/Desktop/%(upload_date).8s %(title)s.%(ext)s" \
         "$1"
 }
 
