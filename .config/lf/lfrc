@@ -1960,10 +1960,8 @@ map gr          cd ~/misc/repo
 map gs          cd ~/Sync
 map gt          cd ~/.local/share/Trash
 map gu          goto_usb
-map gc          cd ~/workspace/coding
 map gv          cd ~/workspace/vm_share
-map gw          cd ~/workspace/writing
-map gW          cd ~/workspace
+map gw          cd ~/workspace
 map ;           push :cd<space>
 
 ##### Sort #####
