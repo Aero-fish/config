@@ -9,6 +9,14 @@ MODEL_AUTHOR="${MODEL%%'/'*}"
 MODEL_PATH="$STORAGE_DIR/${MODEL_AUTHOR}_${MODEL_NAME}"
 shift
 
+include_paths=()
+for p in "$@"; do
+    if [[ "$p" != *.* ]] && [[ "$p" != */ ]]; then
+        p="$p/"
+    fi
+    include_paths+=("--include" "$p")
+done
+
 if [ -d "$MODEL_PATH" ]; then
     download_date="$(find "$MODEL_PATH" -regex ".*/Download_[0-9-]*" -printf "%f\n" | head -n1 | sed "s:^Download_::")"
     if [ -n "$download_date" ]; then
@@ -23,6 +31,9 @@ if [ -d "$MODEL_PATH" ]; then
 fi
 
 mkdir -p "$MODEL_PATH"
-HF_HUB_DISABLE_TELEMETRY=1 hf download --local-dir "$MODEL_PATH" "$MODEL" "$@"
+HF_HUB_DISABLE_TELEMETRY=1 hf download --local-dir "$MODEL_PATH" "$MODEL" "${include_paths[@]}"
 
-touch "$MODEL_PATH/Download_$(date "+%Y-%m-%d")"
+exit_code="$?"
+if [ "$exit_code" = 0 ]; then
+    touch "$MODEL_PATH/Download_$(date "+%Y-%m-%d")"
+fi
