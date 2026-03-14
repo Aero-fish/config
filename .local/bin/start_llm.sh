@@ -6,21 +6,34 @@ STORAGE_DIR="$HOME/workspace/AI/models"
 VLLM_MEM_UTILISATION=0.85
 SGLANG_MEM_UTILISATION=0.92
 PORT=8000
+declare -A AVAILABLE_FRAMEWORKS=(
+    ["sglang"]=1
+    ["vllm"]=1
+    ["llama.cpp"]=1
+)
 
 # ---------- Variables ----------
 daemon_mode=0
-framework="sglang" # vllm or sglang
+framework="sglang" # sglang, vllm or llama.cpp
 selected_model=""
 
 # ---------- Call container ----------
 run_container() {
+    local model_source_path="$STORAGE_DIR/$selected_model"
+    local model_container_path="/models"
+    local input_path_for_framework="/models"
     local model_name="${selected_model##*'/'}"
-    local model_author="${selected_model%%'/'*}"
-    local model_container_path="/root/.cache/huggingface/${model_author}_${model_name}"
-    local container_image_url=""
     local container_args=()
     local framework_args=()
+    local container_image_url
+    local gguf_file_name
 
+    # Convert 'selected_model' to lower case before comparison
+    if [[ "${selected_model,,}" =~ .*-gguf([$|-])* ]]; then
+        gguf_file_name="$(find "$STORAGE_DIR/$selected_model" -name "*.gguf" -printf "%P\n" | head -n1)"
+        input_path_for_framework="$input_path_for_framework/$gguf_file_name"
+        model_name="$(basename --suffix=.gguf -- "$model_name")"
+    fi
     echo "Launching LLM: $selected_model"
 
     # ----- Container arguments -----
@@ -33,19 +46,28 @@ run_container() {
     fi
 
     # ----- Framework arguments -----
-    if [ "$framework" = "vllm" ]; then
+
+    if [ "$framework" = "sglang" ]; then
+        container_image_url="docker.io/lmsysorg/sglang:dev-cu13"
+        framework_args+=(
+            "sglang" "serve" "--model-path" "$input_path_for_framework"
+            "--served-model-name" "$model_name" "--host" "0.0.0.0" "--port" "$PORT"
+            "--attention-backend" "triton" "--mem-fraction-static" "$SGLANG_MEM_UTILISATION"
+        )
+
+    elif [ "$framework" = "vllm" ]; then
         container_image_url="docker.io/vllm/vllm-openai:cu130-nightly"
         framework_args+=(
-            "$model_container_path" "--served-model-name" "$model_name"
+            "$input_path_for_framework" "--served-model-name" "$model_name"
             "--host" "0.0.0.0" "--port" "$PORT"
             "--gpu_memory_utilization" "$VLLM_MEM_UTILISATION"
         )
 
-    elif [ "$framework" = "sglang" ]; then
-        container_image_url="docker.io/lmsysorg/sglang:dev-cu13"
-        framework_args+=("sglang" "serve" "--model-path" "$model_container_path"
-            "--served-model-name" "$model_name" "--host" "0.0.0.0" "--port" "$PORT"
-            "--attention-backend" "triton" "--mem-fraction-static" "$SGLANG_MEM_UTILISATION"
+    elif [ "$framework" = "llama.cpp" ]; then
+        container_image_url="ghcr.io/ggml-org/llama.cpp:full-cuda"
+        framework_args+=(
+            "--server" "--model" "$input_path_for_framework" "--alias" "$model_name"
+            "--host" "0.0.0.0" "--port" "$PORT" "--parallel" "2"
         )
 
     else
@@ -64,7 +86,7 @@ run_container() {
     # ----- Run container -----
     podman run --name "$model_name" --label llm \
         --network llm --ip "192.168.0.1" --mac-address "44:33:22:11:00:01" -p 8000:8000 \
-        -v "$STORAGE_DIR":/root/.cache/huggingface \
+        -v "$model_source_path":"$model_container_path" \
         --rm -it --ipc=host "${container_args[@]}" \
         "$container_image_url" "${framework_args[@]}" "$@"
 }
@@ -84,7 +106,7 @@ if [ "$1" = "-d" ]; then
     shift
 fi
 
-if [[ "$1" =~ (vllm|sglang) ]]; then
+if [ -n "$1" ] && [[ ${AVAILABLE_FRAMEWORKS["$1"]} ]]; then
     framework="$1"
     shift
 fi
@@ -95,9 +117,14 @@ if [ -n "$1" ]; then
 fi
 
 if [ -z "$selected_model" ]; then
+    framework="$(
+        printf '%s\n' "${!AVAILABLE_FRAMEWORKS[@]}" |
+            grep -v "^$" |
+            fzf --ignore-case --exact --reverse --prompt="LLM in $STORAGE_DIR:" --no-multi
+    )"
+
     selected_model="$(
         find "$STORAGE_DIR" -mindepth 1 -maxdepth 1 ! -name ".*" -type d -printf '%P\n' |
-            sed -E "s:^([^_]*)_:\1/:" |
             sort |
             grep -v "^$" |
             fzf --ignore-case --exact --reverse --prompt="LLM in $STORAGE_DIR:" --no-multi
@@ -108,17 +135,22 @@ fi
 
 case "$selected_model" in
 
-*/Qwen3-Coder-*)
+*_Qwen3-Coder-*)
+
     if [ "$framework" = "sglang" ]; then
         run_container --context-length 262144 --tool-call-parser qwen3_coder
 
     elif [ "$framework" = "vllm" ]; then
         run_container --max-model-len 262144 --enable-prefix-caching \
             --enable-auto-tool-choice --tool-call-parser qwen3_coder
+
+    elif [ "$framework" = "llama.cpp" ]; then
+        run_container --ctx-size 262144
+
     fi
     ;;
 
-*/Qwen3.5-*)
+*_Qwen3.5-*)
     if [ "$framework" = "sglang" ]; then
         run_container --context-length 262144 --reasoning-parser qwen3 \
             --tool-call-parser qwen3_coder
@@ -127,6 +159,10 @@ case "$selected_model" in
         run_container --max-model-len 262144 --enable-prefix-caching \
             --reasoning-parser qwen3\ --enable-auto-tool-choice \
             --tool-call-parser qwen3_coder
+
+    elif [ "$framework" = "llama.cpp" ]; then
+        run_container --ctx-size 262144
+
     fi
     ;;
 
