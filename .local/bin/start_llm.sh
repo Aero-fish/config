@@ -161,7 +161,7 @@ case "$selected_model" in
             --tool-call-parser qwen3_coder
 
     elif [ "$framework" = "llama.cpp" ]; then
-        run_container --ctx-size 262144
+        run_container --ctx-size 262144 --chat-template-kwargs '{"enable_thinking":true}'
 
     fi
     ;;
