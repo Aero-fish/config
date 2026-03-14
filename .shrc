@@ -728,17 +728,9 @@ alias soft-reboot="systemctl soft-reboot"
 # Container for building
 alias aur-container="podman run -it --rm -v \$HOME/misc/repo:/home/user/aur --userns keep-id -u user localhost/archlinux-aur-build bash"
 
-ls-network-program-connections() {
-    printf "%s\n%s" "$(ss -tup)" "$(ss -ltup | tail -n +2)" |
-        awk -F' ' '$7!=""' |
-        awk '{print $7,"\t",$5,"\t",$6,"\t",$1--ignore-case,"\t",$2}' |
-        sort |
-        column -t
-}
-
-ls-network-program-bandwidth-usage() {
-    nethogs -v 4
-}
+alias ls-network-connections="ss --tcp --udp --processes"
+alias ls-network-port-listening="ss --listening --tcp --udp --processes"
+alias ls-network-bandwidth-usage="nethogs -v 4"
 
 ls-dbus() {
     echo "---------- System ----------"
