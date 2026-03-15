@@ -23,7 +23,7 @@ export HISTCONTROL=erasedups:ignorespace
 # Append to the history instead of overwriting (good for multiple connections)
 shopt -s histappend
 
-export HISTIGNORE='?:??:...:....:.....:.*:[ \t]*:bashrc:bg *:cd *:cd..:clear:cls:dec2hex *:dud:duf:ex *:exa:exit:exit *:ffmpeg-audio-convert-to-ac3 *:ffmpeg-audio-downmix-to-aac *:ffmpeg-ls-video-streams *:ffmpeg-stream-extract *:ffmpeg-compress-video *:fg *:fkill *:fnet:ftop:ftree:gpg-check *:gpg-retrieve *:h *:hex2dec *:history *:j *:jctl:jobs:jobs *:mnt:mount:mount *:now:nowdate:nowtime:path:permission-fix *:permission-fix-super-tight *:permission-fix-tight *:pscpu:pscpu10:psmem:psmem10:pwd:reset:sha *:shrc:tar-zstd-archive *:umount:umount *:yta-aac *:yta-best *:yta-flac *:yta-m4a *:yta-mp3 *:yta-opus *:yta-vorbis *:yta-wav *:ytv-best *:z *:zshrc:incognito:mirror:no-suspend:dec850-tty:aur-container:sudo *:'
+export HISTIGNORE="?:??:...:....:.....:.*:[ \\t]*:cd *:cd..:dec2hex *:hex2dec *:ex *:bg *|fg *:ffmpeg-*:mkv-stream-extract *:history *:job *:mount *:permission-fix *:sha *:shasum *:archive-to-single-tar-zstd *:umount *:ytdl*:yt-info *:mirror *:ls-*:hf-download.sh *:sudo *:"
 
 ## ---------- Other settings ----------
 # Go to path without cs
@@ -42,7 +42,7 @@ export HISTFILE=${HOME}/.cache/bash/bash_history
 
 # ---------- rclone ----------
 # Needs '$rclone_args' and '$rclone_paths' from shrc, must be after sourcing it.
-if [ -n "${rclone_args+x}" ] && [ -n ${rclone_paths+x} ]; then
+if [ -n "${rclone_args+x}" ] && [ -n "${rclone_paths+x}" ]; then
     for alias_name in "${!rclone_paths[@]}"; do
         local_path="${rclone_paths[$alias_name]}"
         remote_path="onedrive_encrypt:$(basename "$local_path")"

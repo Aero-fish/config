@@ -113,7 +113,7 @@ setopt HIST_IGNORE_SPACE    # Do not add commands that start with a space
 setopt HIST_NO_FUNCTIONS    # Do not store functions
 setopt INC_APPEND_HISTORY    # Immediate append command to histoy
 
-export HISTORY_IGNORE='(?|??|...|....|.....|.*|bashrc|cd#( *)#|clear|cls|dud|duf|exa|fnet|ftop|ftree|jctl|mnt|now|nowdate|nowtime|path|pscpu#(10)#|psmem#(10)#|pwd|reset|shrc|zshrc|([bf]g|dec2hex|ex|exit|ffmpeg-(audio-convert-to-ac3|audio-downmix-to-aac|ls-video-streams|stream-extract|compress-video)|fkill|gpg-check|gpg-retrieve|h|hex2dec|history|j|jobs|mount|permission-fix|permission-fix-(super-tight|tight)|sha|tar-zstd-archive|umount|ytdl|ytdl-librewolf-cookie|yt-info|z|incognito|mirror|no-suspend|dec850-tty|aur-container|sudo)#( *)#)'
+export HISTORY_IGNORE='(?|??|...|....|.....|.*|cd#( *)#|dec2hex *|hex2dec *|ex *|bg *|fg *|ffmpeg-*|mkv-stream-extract *|history *|jobs *|mount *|permission-fix *|sha *|shasum *|archive-to-single-tar-zstd *|umount *|ytdl*|yt-info *|mirror *|ls-*|hf-download.sh *|sudo *)'
 
 # Do not store failed commands
  zshaddhistory() { whence ${${(z)1}[1]} >| /dev/null || return 1 }
