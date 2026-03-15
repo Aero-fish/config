@@ -157,8 +157,9 @@ case "$selected_model" in
 
     elif [ "$framework" = "vllm" ]; then
         run_container --max-model-len 262144 --enable-prefix-caching \
-            --reasoning-parser qwen3\ --enable-auto-tool-choice \
-            --tool-call-parser qwen3_coder
+            --reasoning-parser qwen3 --enable-auto-tool-choice \
+            --tool-call-parser qwen3_coder \
+            --default-chat-template-kwargs '{"enable_thinking":false}'
 
     elif [ "$framework" = "llama.cpp" ]; then
         run_container --ctx-size 262144 --chat-template-kwargs '{"enable_thinking":true}'
