@@ -2,10 +2,14 @@
 set -e
 
 # ---------- Config ----------
-STORAGE_DIR="$HOME/workspace/AI/models"
-VLLM_MEM_UTILISATION=0.85
+MODEL_DIR="$HOME/workspace/AI/models"
+TEMPLATE_DIR="$HOME/workspace/AI/templates"
+TEMPLATE_CONTAINER_PATH="/templates"
+VLLM_MEM_UTILISATION=0.90
 SGLANG_MEM_UTILISATION=0.92
 PORT=8000
+UNIVERSAL_MODEL_NAME="local_model"
+
 declare -A AVAILABLE_FRAMEWORKS=(
     ["sglang"]=1
     ["vllm"]=1
@@ -19,7 +23,7 @@ selected_model=""
 
 # ---------- Call container ----------
 run_container() {
-    local model_source_path="$STORAGE_DIR/$selected_model"
+    local model_source_path="$MODEL_DIR/$selected_model"
     local model_container_path="/models"
     local input_path_for_framework="/models"
     local model_name="${selected_model##*'/'}"
@@ -30,7 +34,7 @@ run_container() {
 
     # Convert 'selected_model' to lower case before comparison
     if [[ "${selected_model,,}" =~ .*-gguf([$|-])* ]]; then
-        gguf_file_name="$(find "$STORAGE_DIR/$selected_model" -name "*.gguf" -printf "%P\n" | head -n1)"
+        gguf_file_name="$(find "$MODEL_DIR/$selected_model" -name "*.gguf" -printf "%P\n" | head -n1)"
         input_path_for_framework="$input_path_for_framework/$gguf_file_name"
         model_name="$(basename --suffix=.gguf -- "$model_name")"
     fi
@@ -51,14 +55,14 @@ run_container() {
         container_image_url="docker.io/lmsysorg/sglang:dev-cu13"
         framework_args+=(
             "sglang" "serve" "--model-path" "$input_path_for_framework"
-            "--served-model-name" "$model_name" "--host" "0.0.0.0" "--port" "$PORT"
+            "--served-model-name" "$UNIVERSAL_MODEL_NAME" "--host" "0.0.0.0" "--port" "$PORT"
             "--attention-backend" "triton" "--mem-fraction-static" "$SGLANG_MEM_UTILISATION"
         )
 
     elif [ "$framework" = "vllm" ]; then
         container_image_url="docker.io/vllm/vllm-openai:cu130-nightly"
         framework_args+=(
-            "$input_path_for_framework" "--served-model-name" "$model_name"
+            "$input_path_for_framework" "--served-model-name" "$UNIVERSAL_MODEL_NAME"
             "--host" "0.0.0.0" "--port" "$PORT"
             "--gpu_memory_utilization" "$VLLM_MEM_UTILISATION"
         )
@@ -66,7 +70,7 @@ run_container() {
     elif [ "$framework" = "llama.cpp" ]; then
         container_image_url="ghcr.io/ggml-org/llama.cpp:full-cuda"
         framework_args+=(
-            "--server" "--model" "$input_path_for_framework" "--alias" "$model_name"
+            "--server" "--model" "$input_path_for_framework" "--alias" "$UNIVERSAL_MODEL_NAME"
             "--host" "0.0.0.0" "--port" "$PORT" "--parallel" "2"
         )
 
@@ -84,9 +88,10 @@ run_container() {
     fi
 
     # ----- Run container -----
-    podman run --name "$model_name" --label llm \
+    podman run --name "$framework-$model_name" --label llm \
         --network llm --ip "192.168.0.1" --mac-address "44:33:22:11:00:01" -p 8000:8000 \
         -v "$model_source_path":"$model_container_path" \
+        -v "$TEMPLATE_DIR":"$TEMPLATE_CONTAINER_PATH" \
         --rm -it --ipc=host "${container_args[@]}" \
         "$container_image_url" "${framework_args[@]}" "$@"
 }
@@ -99,6 +104,9 @@ if [ -n "$running_llm" ]; then
     notify-send "A LLM is already running"
     exit 0
 fi
+
+# ---------- House keeping ----------
+mkdir -p "$MODEL_DIR" "$TEMPLATE_DIR"
 
 # ---------- Process arguments ----------
 if [ "$1" = "-d" ]; then
@@ -120,14 +128,14 @@ if [ -z "$selected_model" ]; then
     framework="$(
         printf '%s\n' "${!AVAILABLE_FRAMEWORKS[@]}" |
             grep -v "^$" |
-            fzf --ignore-case --exact --reverse --prompt="LLM in $STORAGE_DIR:" --no-multi
+            fzf --ignore-case --exact --reverse --prompt="LLM in $MODEL_DIR:" --no-multi
     )"
 
     selected_model="$(
-        find "$STORAGE_DIR" -mindepth 1 -maxdepth 1 ! -name ".*" -type d -printf '%P\n' |
+        find "$MODEL_DIR" -mindepth 1 -maxdepth 1 ! -name ".*" -type d -printf '%P\n' |
             sort |
             grep -v "^$" |
-            fzf --ignore-case --exact --reverse --prompt="LLM in $STORAGE_DIR:" --no-multi
+            fzf --ignore-case --exact --reverse --prompt="LLM in $MODEL_DIR:" --no-multi
     )"
 fi
 
@@ -138,31 +146,51 @@ case "$selected_model" in
 *_Qwen3-Coder-*)
 
     if [ "$framework" = "sglang" ]; then
-        run_container --context-length 262144 --tool-call-parser qwen3_coder
+        ## WARNING server_args.py:2046: Disabling overlap schedule since
+        ## mamba no_buffer is not compatible with overlap schedule, try to
+        ## use --disable-radix-cache if overlap schedule is necessary
+        ## Temp solution: --mamba-scheduler-strategy extra_buffer
+
+        run_container --context-length 262144 --kv-cache-dtype fp8_e4m3 \
+            --tool-call-parser qwen3_coder \
+            --mamba-scheduler-strategy extra_buffer
 
     elif [ "$framework" = "vllm" ]; then
         run_container --max-model-len 262144 --enable-prefix-caching \
+            --kv_cache_dtype fp8_e4m3 \
             --enable-auto-tool-choice --tool-call-parser qwen3_coder
 
     elif [ "$framework" = "llama.cpp" ]; then
-        run_container --ctx-size 262144
+        run_container --ctx-size 262144 --cache-type-k q8_0 --cache-type-v q8_0
 
     fi
     ;;
 
 *_Qwen3.5-*)
     if [ "$framework" = "sglang" ]; then
-        run_container --context-length 262144 --reasoning-parser qwen3 \
-            --tool-call-parser qwen3_coder
+        ## WARNING server_args.py:2046: Disabling overlap schedule since
+        ## mamba no_buffer is not compatible with overlap schedule, try to
+        ## use --disable-radix-cache if overlap schedule is necessary
+        ## Temp solution: --mamba-scheduler-strategy extra_buffer
+
+        ## Use customised template to disable thinking. However, disable thinking
+        ## is in conflict with --reasoning-parser qwen3
+
+        run_container --context-length 262144 --kv-cache-dtype fp8_e4m3 \
+            --tool-call-parser qwen3_coder \
+            --chat-template "$TEMPLATE_CONTAINER_PATH/qwen3.5.jinja" \
+            --mamba-scheduler-strategy extra_buffer
 
     elif [ "$framework" = "vllm" ]; then
+        ## Disable thinking is in conflict with --reasoning-parser qwen3
         run_container --max-model-len 262144 --enable-prefix-caching \
-            --reasoning-parser qwen3 --enable-auto-tool-choice \
-            --tool-call-parser qwen3_coder \
+            --kv_cache_dtype fp8_e4m3 \
+            --enable-auto-tool-choice --tool-call-parser qwen3_coder \
             --default-chat-template-kwargs '{"enable_thinking":false}'
 
     elif [ "$framework" = "llama.cpp" ]; then
-        run_container --ctx-size 262144 --chat-template-kwargs '{"enable_thinking":true}'
+        run_container --ctx-size 262144 --cache-type-k q8_0 --cache-type-v q8_0 \
+            --chat-template-kwargs '{"enable_thinking":false}'
 
     fi
     ;;
