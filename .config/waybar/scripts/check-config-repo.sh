@@ -2,7 +2,7 @@
 set -e
 ## Return 0 if there is an update
 
-cd "$HOME/.backup/config/shared_github" || exit 1
+cd "$HOME/.backup/user_data/shared_github" || exit 1
 if ! git fetch; then
         printf '{"text":"%s", "tooltip": "%s"}' " " "Cannot fetch repo"
         exit 0
