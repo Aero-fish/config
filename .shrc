@@ -602,6 +602,8 @@ alias sr="sudo reboot"
 
 # get error messages from journalctl. Use 'jctl -1' for previous boot.
 alias jctl="journalctl -p 3 -xb"
+alias jctl-tail10="journalctl --follow --lines=10"
+alias jctl-error-tail10="journalctl --follow --lines=10 --priority=4"
 
 # DEC850 router tty access
 alias dec850-tty="screen /dev/ttyUSB0 115200"
