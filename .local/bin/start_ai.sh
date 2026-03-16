@@ -79,8 +79,11 @@ run_container() {
         )
 
     else
-        echo "Unknown serving framework: $framework"
-        notify-send "Unknown serving framework: $framework"
+        if [ "$daemon_mode" -eq 1 ]; then
+            notify-send "Unknown serving framework: $framework"
+        else
+            echo "Unknown serving framework: $framework"
+        fi
         exit 1
 
     fi
@@ -101,8 +104,8 @@ run_container() {
 }
 
 ##### Wait for openAI compatible model to be ready #####
-wait_for_model_ready() {
-    cat <<EOF >"$XDG_RUNTIME_DIR/wait_for_ai_ready.sh"
+notify_on_open_ai_compatable_model_ready() {
+    cat <<EOF >"$XDG_RUNTIME_DIR/wait_open_ai_compatible_model_ready.sh"
 #!/usr/bin/bash
 while true; do
     sleep 3
@@ -121,16 +124,19 @@ done
 rm "\$0"
 EOF
 
-    setsid /usr/bin/bash "$XDG_RUNTIME_DIR/wait_for_ai_ready.sh" >/dev/null 2>&1 </dev/null &
+    setsid /usr/bin/bash "$XDG_RUNTIME_DIR/wait_open_ai_compatible_model_ready.sh" >/dev/null 2>&1 </dev/null &
 
 }
 
 # ---------- Check conditions to run ----------
-# Exit if llm is already running
-running_llm="$(podman container ls --filter label=llm --format "{{.Names}}")"
-if [ -n "$running_llm" ]; then
-    echo "A LLM is already running"
-    notify-send "A LLM is already running"
+# Exit if AI model is already running
+running_model="$(podman container ls --filter label="$AI_CONTAINER_LABEL" --format "{{.Names}}")"
+if [ -n "$running_model" ]; then
+    if [ "$daemon_mode" = 1 ]; then
+        notify-send "AI container is already running"
+    else
+        echo "AI container is already running"
+    fi
     exit 0
 fi
 
@@ -170,7 +176,6 @@ if [ -z "$selected_model" ]; then
 fi
 
 # ---------- Run ----------
-
 case "$selected_model" in
 
 *_Qwen3-Coder-*)
@@ -196,7 +201,7 @@ case "$selected_model" in
     fi
 
     if [ "$daemon_mode" -eq 1 ]; then
-        wait_for_model_ready
+        notify_on_open_ai_compatable_model_ready
     fi
     ;;
 
@@ -224,7 +229,7 @@ case "$selected_model" in
 
     elif [ "$framework" = "llama.cpp" ]; then
         if [ "$daemon_mode" -eq 1 ]; then
-            wait_for_model_ready
+            notify_on_open_ai_compatable_model_ready
         fi
         run_container --ctx-size 262144 --cache-type-k q8_0 --cache-type-v q8_0 \
             --chat-template-kwargs '{"enable_thinking":false}'
@@ -232,7 +237,7 @@ case "$selected_model" in
     fi
 
     if [ "$daemon_mode" -eq 1 ]; then
-        wait_for_model_ready
+        notify_on_open_ai_compatable_model_ready
     fi
     ;;
 
