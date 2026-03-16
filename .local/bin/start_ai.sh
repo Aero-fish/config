@@ -33,7 +33,6 @@ run_container() {
     local container_args=()
     local framework_args=()
     local container_image_url
-    wait_for_model_ready
     local gguf_file_name
 
     # Convert 'selected_model' to lower case before comparison
