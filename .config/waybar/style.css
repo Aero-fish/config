@@ -84,7 +84,7 @@ tooltip label {
 #custom-eq,
 #custom-file_operation,
 #custom-home-storage,
-#custom-llm,
+#custom-ai,
 #custom-mail,
 #custom-mail_sync,
 #custom-pacman,
@@ -225,7 +225,7 @@ tooltip label {
     color: tomato;
 }
 
-#custom-llm {
+#custom-ai {
     color: gold;
 }
 

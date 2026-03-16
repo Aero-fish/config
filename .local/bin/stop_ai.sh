@@ -6,5 +6,5 @@ while IFS= read -r container_name; do
         continue
     fi
     podman container stop "$container_name"
-done <<< "$(podman container ls --filter label=llm --format "{{.Names}}")"
+done <<< "$(podman container ls --filter label="AI" --format "{{.Names}}")"
 

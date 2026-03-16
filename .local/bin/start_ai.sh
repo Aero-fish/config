@@ -5,10 +5,12 @@ set -e
 MODEL_DIR="$HOME/workspace/AI/models"
 TEMPLATE_DIR="$HOME/workspace/AI/templates"
 TEMPLATE_CONTAINER_PATH="/templates"
+AI_CONTAINER_LABEL="AI"
 VLLM_MEM_UTILISATION=0.90
 SGLANG_MEM_UTILISATION=0.92
 PORT=8000
 UNIVERSAL_MODEL_NAME="local_model"
+AI_READY_FLAG="$XDG_RUNTIME_DIR/ai_ready"
 
 declare -A AVAILABLE_FRAMEWORKS=(
     ["sglang"]=1
@@ -21,7 +23,8 @@ daemon_mode=0
 framework="sglang" # sglang, vllm or llama.cpp
 selected_model=""
 
-# ---------- Call container ----------
+# ---------- Functions ----------
+##### Run container #####
 run_container() {
     local model_source_path="$MODEL_DIR/$selected_model"
     local model_container_path="/models"
@@ -30,6 +33,7 @@ run_container() {
     local container_args=()
     local framework_args=()
     local container_image_url
+    wait_for_model_ready
     local gguf_file_name
 
     # Convert 'selected_model' to lower case before comparison
@@ -88,12 +92,37 @@ run_container() {
     fi
 
     # ----- Run container -----
-    podman run --name "$framework-$model_name" --label llm \
+    podman run --name "$framework-$model_name" --label "$AI_CONTAINER_LABEL" \
         --network llm --ip "192.168.0.1" --mac-address "44:33:22:11:00:01" -p 8000:8000 \
         -v "$model_source_path":"$model_container_path" \
         -v "$TEMPLATE_DIR":"$TEMPLATE_CONTAINER_PATH" \
         --rm -it --ipc=host "${container_args[@]}" \
         "$container_image_url" "${framework_args[@]}" "$@"
+}
+
+##### Wait for openAI compatible model to be ready #####
+wait_for_model_ready() {
+    cat <<EOF >"$XDG_RUNTIME_DIR/wait_for_ai_ready.sh"
+#!/usr/bin/bash
+while true; do
+    sleep 3
+    curl "127.0.0.1:8000/v1/models"
+    exit_code="\$?"
+    echo "\$exit_code"
+    if [ "\$exit_code" -eq 7 ]; then
+        notify-send "AI container is not running"
+        break
+    elif [ "\$exit_code" -eq 0 ]; then
+        touch "$AI_READY_FLAG"
+        break
+    fi
+done
+
+rm "\$0"
+EOF
+
+    setsid /usr/bin/bash "$XDG_RUNTIME_DIR/wait_for_ai_ready.sh" >/dev/null 2>&1 </dev/null &
+
 }
 
 # ---------- Check conditions to run ----------
@@ -107,6 +136,7 @@ fi
 
 # ---------- House keeping ----------
 mkdir -p "$MODEL_DIR" "$TEMPLATE_DIR"
+rm -f "$AI_READY_FLAG"
 
 # ---------- Process arguments ----------
 if [ "$1" = "-d" ]; then
@@ -164,6 +194,10 @@ case "$selected_model" in
         run_container --ctx-size 262144 --cache-type-k q8_0 --cache-type-v q8_0
 
     fi
+
+    if [ "$daemon_mode" -eq 1 ]; then
+        wait_for_model_ready
+    fi
     ;;
 
 *_Qwen3.5-*)
@@ -178,7 +212,7 @@ case "$selected_model" in
 
         run_container --context-length 262144 --kv-cache-dtype fp8_e4m3 \
             --tool-call-parser qwen3_coder \
-            --chat-template "$TEMPLATE_CONTAINER_PATH/qwen3.5.jinja" \
+            --chat-template "$TEMPLATE_CONTAINER_PATH/qwen3.5_no_thinking.jinja" \
             --mamba-scheduler-strategy extra_buffer
 
     elif [ "$framework" = "vllm" ]; then
@@ -189,9 +223,16 @@ case "$selected_model" in
             --default-chat-template-kwargs '{"enable_thinking":false}'
 
     elif [ "$framework" = "llama.cpp" ]; then
+        if [ "$daemon_mode" -eq 1 ]; then
+            wait_for_model_ready
+        fi
         run_container --ctx-size 262144 --cache-type-k q8_0 --cache-type-v q8_0 \
             --chat-template-kwargs '{"enable_thinking":false}'
 
+    fi
+
+    if [ "$daemon_mode" -eq 1 ]; then
+        wait_for_model_ready
     fi
     ;;
 

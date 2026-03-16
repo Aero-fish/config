@@ -3,7 +3,7 @@
     "position": "bottom",
     "modules-left": [ "hyprland/workspaces", "hyprland/submap" ],
     "modules-center":[ "custom/clock", "idle_inhibitor" ],
-    "modules-right": [  "tray", "custom/replay", "custom/recorder", "custom/llm", "battery", "pulseaudio#output", "pulseaudio#mic", "custom/config_repo", "custom/home-storage", "network", "custom/file_operation", "custom/mail", "custom/mail_sync", "custom/pacman", "custom/temp", "cpu", "memory", "custom/power_button" ],
+    "modules-right": [  "tray", "custom/replay", "custom/recorder", "custom/ai", "battery", "pulseaudio#output", "pulseaudio#mic", "custom/config_repo", "custom/home-storage", "network", "custom/file_operation", "custom/mail", "custom/mail_sync", "custom/pacman", "custom/temp", "cpu", "memory", "custom/power_button" ],
 
     "hyprland/workspaces": {
         "format": "{name}. {windows}",
@@ -283,9 +283,9 @@
         "tooltip": false,
     },
 
-    "custom/llm": {
-        "exec-if": "[ -f $HOME/.config/waybar/scripts/check-llm.sh ]",
-        "exec": "$HOME/.config/waybar/scripts/check-llm.sh",
+    "custom/ai": {
+        "exec-if": "[ -f $HOME/.config/waybar/scripts/check-ai-container.sh ]",
+        "exec": "$HOME/.config/waybar/scripts/check-ai-container.sh",
         "format": "{}",
         "interval": 5,
         "return-type": "json",

@@ -1,4 +1,0 @@
-#!/usr/bin/sh
-set -e
-
-"$HOME/.local/bin/stop_llm_web_ui.sh"

@@ -1,4 +1,0 @@
-#!/usr/bin/sh
-set -e
-
-"$HOME/.local/bin/start_llm_web_ui.sh"
