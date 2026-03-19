@@ -3,17 +3,9 @@ return {
     opts = {
         parser = {
             comments = { "#", "//" },
-            delimiter = {
-                default = ",",
-                ft = {
-                    tsv = "\t",
-                    csv = ",",
-                },
-            },
         },
         view = {
-            -- display_mode = "highlight",
-            display_mode = "border",
+            display_mode = "border", -- highlight | border
         },
         keymaps = {
             -- Text objects for selecting fields
@@ -33,9 +25,15 @@ return {
     keys = {
         {
             "<leader>tv",
-            function() require("csvview").toggle() end,
+            "<Cmd> CsvViewToggle header_lnum=false <Cr>",
             mode = { "n", "x" },
             desc = "CSV view"
+        },
+        {
+            "<leader>tV",
+            "<Cmd> CsvViewToggle header_lnum=1 <Cr>",
+            mode = { "n", "x" },
+            desc = "CSV view with header"
         },
     }
 }
