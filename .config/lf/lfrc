@@ -1709,7 +1709,7 @@ cmd open-with-file-roller       $(setsid file-roller "$f" &) >/dev/null 2>&1 </d
 cmd open-with-nautilus          $(setsid nautilus --new-window "$f" &) >/dev/null 2>&1 </dev/null
 cmd open-with-sudo-vim          $sudo vim "$f"
 cmd open-with-vim               $vim "$f"
-cmd open-with-yacreader         $(setsid "$HOME/.local/bin/YACReader.sh" "$f" &) >/dev/null 2>&1 </dev/null
+cmd open-with-yacreader         $(setsid "$HOME/.local/bin/yacreader.sh" "$f" &) >/dev/null 2>&1 </dev/null
 
 #----------
 cmd open-in-proton              $(setsid "$HOME/.local/bin/proton.sh" "$f" &) >/dev/null 2>&1 </dev/null
