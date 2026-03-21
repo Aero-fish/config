@@ -120,7 +120,7 @@ fi
 
 gpu-screen-recorder "${extra_cmd[@]}" -pixfmt yuv444 -f 60 \
     -a default_output -ac opus -ab 256 -v no \
-    -k "$codec" -q very_high -bm qp -fm vfr -cr full -encoder gpu \
+    -k "$codec" -q very_high -bm vbr -fm vfr -cr full -encoder gpu \
     -o "$output"
 
 # sleep 0.5
