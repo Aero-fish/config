@@ -23,7 +23,7 @@ fi
 date="$(date "+%Y-%m-%d_%H-%M-%S")"
 snapshots_dir=".snapshots/vm/${vm_name}"
 snapshot_path="$HOME/${snapshots_dir}"
-backup_path="$HOME/.backup/config/${pc_name}_archives/vm/${vm_name}"
+backup_path="$HOME/.backup/user_data/${pc_name}_archives/vm/${vm_name}"
 mkdir -p "$snapshot_path" "$backup_path"
 
 # Check if VM exist. If it exist, remove old backups
