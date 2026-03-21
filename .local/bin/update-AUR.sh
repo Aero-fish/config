@@ -59,10 +59,10 @@ if [ "$pc_name" = "$main_pc" ]; then
 
     ## clean up packages
     clean_up_packages=(
-        "hardinfo2-git"
         "steghide"
         "sworkstyle"
         "wdisplays"
+        "yacreader"
     )
     for d in "${clean_up_packages[@]}"; do
         if [ -d "$repo_dir/$d/pkg" ]; then
@@ -87,8 +87,9 @@ if [ "$pc_name" = "$main_pc" ]; then
             if [ -d "$repo_dir/$d/pkg/$d/opt/$program_name" ]; then
                 app="$repo_dir/$d/pkg/$d/opt/$program_name"
 
-            elif [ -f "$repo_dir/$d/pkg/$d/usr/bin/$program_name" ]; then
-                app="$repo_dir/$d/pkg/$d/usr/bin/$program_name"
+            elif [ -d "$repo_dir/$d/pkg/$d/usr/bin" ]; then
+                ## Sometime the program name has capital letter. E.g., YACReader
+                app="$(fd -tf --ignore-case --glob "$program_name" "$repo_dir/$d/pkg/$d/usr/bin/" | head -n1)"
 
             fi
 
@@ -132,7 +133,7 @@ dxvk-download() {
 }
 
 dxvk-update() {
-    dxvk_version_file="$(fd -tf -Ii --glob "dxvk_*.txt" "$work_path" | head -n1)"
+    dxvk_version_file="$(fd -tf --glob "dxvk_*.txt" "$work_path" | head -n1)"
     [ -z "$dxvk_version_file" ] && return
     dxvk_version_file="$(basename -- "$dxvk_version_file")"
 
@@ -165,7 +166,7 @@ dxvk-nvapi-download() {
 }
 
 dxvk-nvapi-update() {
-    dxvk_nvapi_version_file="$(fd -tf -Ii --glob "dxvk_nvapi_*.txt" "$work_path" | head -n1)"
+    dxvk_nvapi_version_file="$(fd -tf --glob "dxvk_nvapi_*.txt" "$work_path" | head -n1)"
     [ -z "$dxvk_nvapi_version_file" ] && return
     dxvk_nvapi_version_file="$(basename -- "$dxvk_nvapi_version_file")"
 
@@ -200,7 +201,7 @@ vkd3d-proton-download() {
 }
 
 vkd3d-proton-update() {
-    vkd3d_proton_version_file="$(fd -tf -Ii --glob "vkd3d_proton_*.txt" "$work_path" | head -n1)"
+    vkd3d_proton_version_file="$(fd -tf --glob "vkd3d_proton_*.txt" "$work_path" | head -n1)"
     [ -z "$vkd3d_proton_version_file" ] && return
     vkd3d_proton_version_file="$(basename -- "$vkd3d_proton_version_file")"
 
@@ -229,11 +230,9 @@ sway-autotiling-download() {
     curl -L "$download_url" --output "$work_path/$version.tar.gz"
 
     tar -xf "$work_path/$version.tar.gz" -C "$work_path"
-    fd -tf -Ii --glob "main.py" . \
-        --exec mv {} "$work_path/autotiling.py"
+    fd -tf --glob "main.py" "$work_path" --exec mv {} "$work_path/autotiling.py"
 
-    fd -Ii --exact-depth 1 --exclude "autotiling.py" . . \
-        --exec-batch rm -r {}
+    fd --exact-depth 1 --exclude "autotiling.py" "$work_path" --exec-batch rm -r {}
 
     sed -i '1 s:^.*$:#!/usr/bin/python3:' "$work_path"/autotiling.py
     chmod 700 "$work_path"/autotiling.py
@@ -310,8 +309,8 @@ localsend-download() {
         "${work_path}/squashfs-root" \
         "${work_path}"/org.localsend.localsend_app.desktop
 
-    fd --unrestricted -tf . "${work_path}" -X chmod 600 {}
-    fd --unrestricted -td . "${work_path}" -X chmod 700 {}
+    fd --unrestricted -tf . "${work_path}" --exec-batch chmod 600 {}
+    fd --unrestricted -td . "${work_path}" --exec-batch chmod 700 {}
     chmod 700 "${work_path}"/{AppRun,localsend_app}
 
 }
@@ -326,13 +325,13 @@ pandoc-eisvogel-template-download() {
     curl -L "$download_url" --output "${work_path}/${version}.tar.gz"
     tar -xf "${work_path}/${version}.tar.gz" -C "$work_path"
     rm "${work_path}/${version}.tar.gz"
-    find "${work_path}" -type f -exec /usr/bin/chmod 600 {} \;
-    find "${work_path}" -type d -exec /usr/bin/chmod 700 {} \;
+    fd --unrestricted -tf . "${work_path}" --exec-batch /usr/bin/chmod 600 {}
+    fd --unrestricted -td . "${work_path}" --exec-batch /usr/bin/chmod 700 {}
 }
 
 pandoc-eisvogel-template-update() {
     local template_path
-    template_path="$(find "$HOME/misc/repo/pandoc-eisvogel-template" -maxdepth 2 -type f -name "eisvogel.latex")"
+    template_path="$(fd -tf --ignore-case --max-depth 2 "eisvogel.latex" "$HOME/misc/repo/pandoc-eisvogel-template")"
     if [ -z "$template_path" ]; then
         echo -e "\e[31mCannot find eisvogel template.\e[0m"
         return
@@ -396,8 +395,6 @@ ltex-ls-plus-download() {
     rm "${work_path}/${version}.tar.gz"
     mv "${work_path}"/*/* "${work_path}"
     rmdir --ignore-fail-on-non-empty "${work_path}"/*/
-    # java_path="$(find ${work_path} -type f -name "java" -printf "%P" | head -n1)"
-    # sed -i "2i JAVACMD=\"\$HOME/${java_path}\"" "${work_path}/bin/ltex-ls-plus"
 }
 
 maple-mono-download() {
@@ -415,7 +412,7 @@ maple-mono-download() {
 maple-mono-update() {
     local dest_path="$HOME/.local/share/fonts/maple-mono"
     if [ -d "$dest_path" ]; then
-        version_file="$(fd -tf -Ii --glob "v*.txt" "$work_path" | head -n1)"
+        version_file="$(fd -tf --glob "v*.txt" "$work_path" | head -n1)"
         [ -z "$version_file" ] && return
         version_file="$(basename -- "$version_file")"
         if [ ! -f "$dest_path/$version_file" ]; then
@@ -515,6 +512,26 @@ for p in "${!github_packages[@]}"; do
 done
 
 ## ----- Update installed packages -----
+## General
+update_package=(
+    "cyrus-sasl-xoauth2-git"
+    "librewolf-bin"
+)
+for p in "${update_package[@]}"; do
+    if [ ! -d "$repo_dir/$p" ] || ! pacman -Q "$p" 1>/dev/null 2>&1; then
+        continue
+    fi
+
+    installed_version="$(pacman -Q "$p" | cut -d" " -f2)"
+    repo_version="$(fd -tf --glob "$p-*.pkg.tar.zst" "$repo_dir/$p" | head -n1 | sed -E "s:(.*/)?$p-(.*)-.*:\2:")"
+
+    if [ "$installed_version" != "$repo_version" ]; then
+        echo -e "\e[31mUpdating $p\e[0m"
+        fd -tf --glob "$p-*.pkg.tar.zst" "$repo_dir/$p" --exec-batch sudo pacman -U --noconfirm {}
+    fi
+
+done
+
 ## easy-pandoc-templates
 work_path="$repo_dir/easy-pandoc-templates"
 if [ -d "$work_path/html" ]; then
@@ -529,60 +546,32 @@ if [ -d "$work_path/html" ]; then
     done
 fi
 
-update_package=(
-    "cyrus-sasl-xoauth2-git"
-    "librewolf-bin"
-    "libunarr"
-    "python-nvidia-ml-py"
-    "yacreader"
-)
-for p in "${update_package[@]}"; do
-    if [ ! -d "$repo_dir/$p" ] || ! pacman -Q "$p" 1>/dev/null 2>&1; then
-        continue
+## libpdfium-nojs and libunarr
+if [ -d "$repo_dir/yacreader" ] && [ -d "$repo_dir/libpdfium-nojs" ] && [ -d "$repo_dir/libunarr" ]; then
+    LIB_PATH="$repo_dir/yacreader/lib"
+    mkdir -p "$LIB_PATH"
+
+    libpdfium_repo="$(fd -tf --glob "libpdfium-nojs-*.pkg.tar.zst" "$repo_dir/libpdfium-nojs" | head -n1 | sed -E 's:(.*/)?libpdfium-nojs-(.*)-x86_64.pkg.tar.zst:\2:')"
+
+    libpdfium_icu="$(fd -tf --glob "icu_*.txt" "$repo_dir/libpdfium-nojs" | head -n1 | sed -E 's:(.*/)?icu_(.*).txt:\2:')"
+
+    libunarr_repo="$(fd -tf --glob "libunarr-*.pkg.tar.zst" "$repo_dir/libunarr" | head -n1 | sed -E 's:(.*/)?libunarr-(.*)-x86_64.pkg.tar.zst:\2:')"
+
+    if [ -n "$libpdfium_repo" ] && [ -n "$libpdfium_icu" ] && [ -n "$libunarr_repo" ] &&
+        {
+            [ ! -f "$LIB_PATH/libpdfium-nojs_${libpdfium_repo}.txt" ] ||
+                [ ! -f "$LIB_PATH/icu_${libpdfium_icu}.txt" ] ||
+                [ ! -f "$LIB_PATH/libunarr_${libunarr_repo}.txt" ]
+        }; then
+        rm -rf "${LIB_PATH:?}"/*
+        tar --zstd --directory "$LIB_PATH" -xpf "$repo_dir/libpdfium-nojs/libpdfium-nojs-$libpdfium_repo-x86_64.pkg.tar.zst" usr/lib
+        tar --zstd --directory "$LIB_PATH" -xpf "$repo_dir/libunarr/libunarr-$libunarr_repo-x86_64.pkg.tar.zst" usr/lib
+        fd -tf -tl --exact-depth 1 ".*\.so(\..*)?" "$LIB_PATH/usr/lib" --exec-batch mv {} "$LIB_PATH"
+
+        rm -rf "${LIB_PATH:?}/usr"
+        touch "$LIB_PATH/libpdfium-nojs_${libpdfium_repo}.txt" \
+            "$LIB_PATH/icu_${libpdfium_icu}.txt" \
+            "$LIB_PATH/libunarr_${libunarr_repo}.txt"
     fi
-
-    installed_version="$(pacman -Q "$p" | cut -d" " -f2)"
-    repo_version="$(
-        fd -t f -Ii --glob -- "$p-*.pkg.tar.zst" "$repo_dir/$p" |
-            head -n 1 |
-            sed -E "s:(.*/)?$p-(.*)-.*:\2:"
-    )"
-
-    if [ "$installed_version" != "$repo_version" ]; then
-        echo -e "\e[31mUpdating $p\e[0m"
-        fd -t f -Ii --glob "$p-*.pkg.tar.zst" "$repo_dir/$p" \
-            --exec-batch sudo pacman -U --noconfirm {}
-    fi
-
-done
-
-## libpdfium-nojs
-if [ -d "$repo_dir"/libpdfium-nojs ] &&
-    pacman -Q libpdfium-nojs 1>/dev/null 2>&1; then
-
-    libpdfium_installed_version="$(pacman -Q libpdfium-nojs | cut -d" " -f2)"
-    libpdfium_repo_version="$(
-        fd -t f -Ii --glob -- 'libpdfium-nojs-*.pkg.tar.zst' \
-            "$repo_dir/libpdfium-nojs" |
-            head -n 1 |
-            sed -E 's:(.*/)?libpdfium-nojs-(.*)-x86_64.pkg.tar.zst:\2:'
-    )"
-
-    icu_update="$(
-        fd -t f -Ii --glob -- 'icu_*.txt' "$repo_dir/libpdfium-nojs" | wc -l
-    )"
-
-    if [ "$libpdfium_installed_version" != "$libpdfium_repo_version" ] ||
-        [ "$icu_update" = 0 ]; then
-
-        echo -e "\e[31mUpdating libpdfium-nojs\e[0m"
-
-        fd -t f -Ii --glob 'libpdfium-nojs-*.pkg.tar.zst' "$repo_dir/libpdfium-nojs" \
-            --exec-batch sudo pacman -U --asdeps --noconfirm {}
-
-        if [ "$icu_update" = 0 ]; then
-            icu_installed_version="$(pacman -Q icu | cut -d" " -f2)"
-            touch "$repo_dir/libpdfium-nojs/icu_${icu_installed_version}.txt"
-        fi
-    fi
+    unset LIB_PATH
 fi
