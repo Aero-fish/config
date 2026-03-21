@@ -98,14 +98,14 @@ if __name__ == "__main__":
     home = str(Path.home())
 
     sync_dir = [
-        f"{home}/.backup/config/ranger",
-        f"{home}/.backup/config/ranger_archives",
-        f"{home}/.backup/config/shared_syncthing",
         f"{home}/.backup/install_scripts",
         f"{home}/.backup/keepass",
-        f"{home}/.backup/user_data/misc",
+        f"{home}/.backup/user_data/ranger",
+        f"{home}/.backup/user_data/ranger_archives",
+        f"{home}/.backup/user_data/shared_syncthing",
         f"{home}/Documents",
         f"{home}/Sync",
+        f"{home}/misc",
     ]
 
     for d in sync_dir:
