@@ -84,7 +84,7 @@ fi
 # ----- GPU specific settings -----
 if lspci | grep -E "(VGA|Display controller)" | grep -q "NVIDIA"; then
     # Treat input as yuv444, default is yuv420
-    extra_cmd+=("-ffmpeg-video-opts" "-rgb_mode=yuv444;-tune=uhq")
+    extra_cmd+=("-ffmpeg-video-opts" "rgb_mode=yuv444;qp=64" "-tune" "quality")
 fi
 
 # ----- Play start sound -----
@@ -120,9 +120,8 @@ fi
 
 gpu-screen-recorder "${extra_cmd[@]}" -pixfmt yuv444 -f 60 \
     -a default_output -ac opus -ab 256 -v no \
-    -k "$codec" -q very_high -bm vbr -fm vfr -cr full -encoder gpu \
+    -k "$codec" -q very_high -bm qp -fm vfr -cr full -encoder gpu \
     -o "$output"
 
-# sleep 0.5
-
-# pkill -SIGRTMIN+12 -u "$(id -n -u)" -x waybar
+sleep 0.2
+pkill -SIGRTMIN+12 -u "$(id -n -u)" -x waybar
