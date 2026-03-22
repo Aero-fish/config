@@ -296,7 +296,7 @@
         "exec-if": "[ -f $HOME/.config/waybar/scripts/check-config-repo.sh ]",
         "exec": "$HOME/.config/waybar/scripts/check-config-repo.sh",
         "format": "{}",
-        "on-click-right": "[ \"$(hyprctl dispatch focuswindow class:config_repo)\" != \"ok\" ] && uwsm app -- zsh --interactive -c 'exec kitty --class config_repo -- lazygit --path $HOME/.backup/user_data/shared_github'",
+        "on-click-right": "[ \"$(hyprctl dispatch focuswindow class:config_repo)\" != \"ok\" ] && uwsm app -- zsh --interactive -c 'exec kitty --class config_repo -- lazygit --path $HOME/.backup/user_data/shared_github'; pkill -SIGRTMIN+14 -u \"$(id -n -u)\" -x waybar",
         "signal": 14,
         "return-type": "json",
         "tooltip": true,
