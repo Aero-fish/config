@@ -326,6 +326,7 @@ cmd paste ${{
         fi
     done
 
+    lf_user_paste_opt="replace"
     if [ "${#filename_already_exist[@]}" -ne 0 ]; then
         echo "----- File name already exist -----"
         # Trim down to max 50 paths
@@ -336,10 +337,19 @@ cmd paste ${{
         printf '%s\n' "${filename_already_exist[@]}"
         echo "----------"
 
-        echo -e "File name(s) exists in dest, going to \e[31m$lf_user_paste_opt\e[0m"
-        read -n 1 -r -p "Do you want to continue? [y/n] " res
+        echo -n -e "File name(s) exists in dest, do you want to \e[31mskip[s]\e[0m, \e[31mreplace[r]\e[0m or \e[31mbackup[b]\e[0m? "
+        read -n 1 -r res
         echo
-        if [ "$res" != "y" ]; then
+        if [ "$res" = "s" ]; then
+            lf_user_paste_opt="skip"
+
+        elif [ "$res" = "r" ]; then
+            lf_user_paste_opt="replace"
+
+        elif [ "$res" = "b" ]; then
+            lf_user_paste_opt="backup"
+
+        else
             echo -e "Cancelled\n"
             exit 0
         fi
@@ -485,24 +495,6 @@ EOF
     chmod 700 "$SH_FILE"
     tmux new-session -d -s "$(basename "$SH_FILE")" -- bash "$SH_FILE"
     lf -remote "send $id echo Pasting ${#selected_paths_arr[@]} file(s) - $ACTION"
-}}
-
-#----------
-cmd paste_skip_exist :{{
-    set user_paste_opt "skip"
-    paste
-}}
-
-#----------
-cmd paste_replace_exist :{{
-    set user_paste_opt "replace"
-    paste
-}}
-
-#----------
-cmd paste_backup_exist :{{
-    set user_paste_opt "backup"
-    paste
 }}
 
 #----------
@@ -1869,8 +1861,7 @@ map y           copy
 map d           cut
 map D           delete
 map <delete>    delete
-map p           paste_replace_exist
-map P           paste_skip_exist
+map p           paste
 
 map R           bulk-rename
 map r           rename
@@ -1988,7 +1979,6 @@ map <tab>D      delete-with-rm
 map <tab>g      push :glob-select<tab>
 map <tab>G      push :glob-unselect<tab>
 map <tab>l      follow_link
-map <tab>p      paste_backup_exist
 map <tab>r      :ripgrep_word
 map <tab>s      edit-selection
 map <tab>S      edit-cp-mv-list
