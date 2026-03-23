@@ -20,7 +20,7 @@ declare -A AVAILABLE_FRAMEWORKS=(
 
 # ---------- Variables ----------
 daemon_mode=0
-framework="sglang" # sglang, vllm or llama.cpp
+framework="vllm" # sglang, vllm or llama.cpp
 selected_model=""
 
 # ---------- Functions ----------
