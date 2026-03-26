@@ -163,14 +163,14 @@ if [ -z "$selected_model" ]; then
     framework="$(
         printf '%s\n' "${!AVAILABLE_FRAMEWORKS[@]}" |
             grep -v "^$" |
-            fzf --ignore-case --exact --reverse --prompt="LLM in $MODEL_DIR:" --no-multi
+            fzf --exact --reverse --prompt="LLM in $MODEL_DIR:" --no-multi
     )"
 
     selected_model="$(
         find "$MODEL_DIR" -mindepth 1 -maxdepth 1 ! -name ".*" -type d -printf '%P\n' |
             sort |
             grep -v "^$" |
-            fzf --ignore-case --exact --reverse --prompt="LLM in $MODEL_DIR:" --no-multi
+            fzf --exact --reverse --prompt="LLM in $MODEL_DIR:" --no-multi
     )"
 fi
 

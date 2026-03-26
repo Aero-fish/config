@@ -685,7 +685,7 @@ cmd fzf ${{
             --exclude "thunderbird/" \
             "${extra_args[@]}" \
             . "${PWD}" |
-            fzf -i --multi --exact --reverse --prompt="lf select:"
+            fzf --multi --exact --reverse --prompt="lf select:"
     )"
 
     arr=()
