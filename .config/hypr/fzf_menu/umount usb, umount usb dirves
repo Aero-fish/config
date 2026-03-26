@@ -1,0 +1,7 @@
+#!/bin/bash
+set -e
+
+udiskie-info --all --output "{id_label}" |
+    grep -v "^$" |
+    fzf --multi --exact --reverse --prompt="Eject USB:"
+# --delimiter / --with-nth -1 --print0 | xargs -0 --no-run-if-empty -I {} udiskie-umount --detach {} >/dev/null 2>&1
