@@ -15,4 +15,6 @@ SELECTED="$(
         sed "s:\s*--:,:"
 )"
 
-"$current_script_dir/$SELECTED"
+if [ -x "$current_script_dir/$SELECTED" ]; then
+    "$current_script_dir/$SELECTED"
+fi
