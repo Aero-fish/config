@@ -307,7 +307,7 @@
         "exec": "$HOME/.config/waybar/scripts/get-file-operation-status.sh",
         "format": "{}󰆏",
         "interval": 2,
-        "on-click-right": "[ \"$(hyprctl dispatch focuswindow class:file_operation_progress)\" != \"ok\" ] && \"$HOME/.config/hypr/fzf_menu/_view_file_opteration,--.view.file.operation\"",
+        "on-click-right": "[ \"$(hyprctl dispatch focuswindow class:file_operation_progress)\" != \"ok\" ] && \"$HOME/.config/hypr/fzf_menu/view file opteration, view file operation\"",
         "return-type": "json",
         "signal": 15,
         "tooltip": true
