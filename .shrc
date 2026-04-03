@@ -1020,6 +1020,7 @@ alias get-wifi-limits="iw list | grep -A 15 Frequencies:"
 
 # ---------- Utilities ----------
 alias aria2-downlaod='aria2c --dir="$HOME/Desktop" --continue=true'
+alias mount-dev=' sudo mount  -o "rw,rw,uid=$(id --user),gid=$(id --group),umask=077"'
 
 # ---------- Clean up ----------
 unset this_shell
