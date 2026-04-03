@@ -110,7 +110,7 @@ cmd delete ${{
     read -n 1 -r res
     echo -e "\n"
     if [ "$res" != "y" ]; then
-        echo -e "Cancelled\n"
+        lf -remote "send $id echo Delete cancelled"
         exit 0
     fi
 
@@ -195,7 +195,7 @@ cmd delete-with-rm ${{
     read -n 1 -r res
     echo -e "\n"
     if [ "$res" != "y" ]; then
-        echo -e "Cancelled\n"
+        lf -remote "send $id echo rm cancelled"
         exit 0
     fi
 
@@ -350,7 +350,7 @@ cmd paste ${{
             lf_user_paste_opt="backup"
 
         else
-            echo -e "Cancelled\n"
+            lf -remote "send $id echo Paste cancelled"
             exit 0
         fi
     fi
