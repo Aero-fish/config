@@ -1020,7 +1020,30 @@ alias get-wifi-limits="iw list | grep -A 15 Frequencies:"
 
 # ---------- Utilities ----------
 alias aria2-downlaod='aria2c --dir="$HOME/Desktop" --continue=true'
-alias mount-dev=' sudo mount  -o "rw,rw,uid=$(id --user),gid=$(id --group),umask=077"'
+
+mount-dev() {
+    local dev_path mount_path extra_args opts fs
+    dev_path="$1"
+    mount_path="$2"
+    extra_args=()
+    opts="rw,noatime,noexec,nodev,nosuid"
+
+    if mountpoint -q -- "$mount_path"; then
+        echo "'$mount_path' is already mounted"
+        return
+    fi
+
+    fs="$(lsblk --noheadings --output FSTYPE "$dev_path")"
+    if [ "$fs" = "exfat" ]; then
+        opt="$opt,uid=$(id --user),gid=$(id --group),umask=077"
+
+    elif [ "$fs" = "ntfs" ]; then
+        extra_args=("-t" "ntfs3")
+        opt="$opt,prealloc,iocharset=utf8,discard,windows_names,nocase,user,uid=$(id --user),gid=$(id --group),umask=077"
+    fi
+
+    sudo mount "${extra_args[@]}" -o "$opt" "$dev_path" "$mount_path"
+}
 
 # ---------- Clean up ----------
 unset this_shell
