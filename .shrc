@@ -813,7 +813,7 @@ rank-pacman-mirror() {
         "$(awk "/^## (Australia)$/{f=1; next}f==0{next}/^\$/{exit}{print substr(\$0, 1);}" /etc/pacman.d/mirrorlist.backup)" |
         sed "s/^#Server/Server/" |
         rankmirrors -n 10 - |
-        sodu tee /etc/pacman.d/mirrorlist >/dev/null
+        sudo tee /etc/pacman.d/mirrorlist >/dev/null
 }
 
 # ---------- MIME ----------
