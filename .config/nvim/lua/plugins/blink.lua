@@ -13,6 +13,7 @@ return {
     {
         "saghen/blink.cmp",
         -- Not comparable with bwrap --unshare-pid, when two nvims are opened
+        version = "1.*",
 
         event = "InsertEnter",
 
