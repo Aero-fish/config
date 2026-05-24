@@ -27,7 +27,7 @@ inhibit_programs=(
 
 for prog in "${inhibit_programs[@]}"; do
     if pgrep -u "$(id -n -u)" -f "$prog" >/dev/null; then
-        hyprctl --quiet dispatch forceidle 0
+        hyprctl --quiet dispatch 'hl.dsp.force_idle(0)'
         exit 0
     fi
 done

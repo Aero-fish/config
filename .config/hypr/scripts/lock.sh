@@ -16,7 +16,7 @@ no_lock_if_focus=(
 if [ "$1" != "force" ]; then
     for prog in "${no_lock_if_running[@]}"; do
         if pgrep -u "$(id -n -u)" -f "$prog" >/dev/null; then
-            hyprctl --quiet dispatch forceidle 0
+            hyprctl --quiet dispatch 'hl.dsp.force_idle(0)'
             exit 1
         fi
     done
@@ -37,7 +37,7 @@ if [ "$1" != "force" ]; then
     # Do not lock if a steam game is in focus
     for prog in "${no_lock_if_focus[@]}"; do
         if [ "$prog_in_focus" == "$prog" ] || [[ "$prog_in_focus" == steam_app_* ]] || [[ "$prog_in_focus" == *.exe ]]; then
-            hyprctl --quiet dispatch forceidle 0
+            hyprctl --quiet dispatch 'hl.dsp.force_idle(0)'
             exit 1
         fi
     done

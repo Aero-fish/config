@@ -29,6 +29,6 @@ progress
 
 EOF
 chmod 700 "$XDG_RUNTIME_DIR/check_file_operation.sh"
-[ "$(hyprctl dispatch focuswindow class:file_operation_progress)" != "ok" ] && setsid kitty --class file_operation_progress -- watch -n 1 --no-title bash "$XDG_RUNTIME_DIR/check_file_operation.sh" >/dev/null 2>&1 </dev/null &
+[ "$(hyprctl dispatch 'hl.dsp.focus({window = \"class:file_operation_progress\"})')" != "ok" ] && setsid kitty --class file_operation_progress -- watch -n 1 --no-title bash "$XDG_RUNTIME_DIR/check_file_operation.sh" >/dev/null 2>&1 </dev/null &
 
 sleep 0.1
