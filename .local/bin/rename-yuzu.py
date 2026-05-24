@@ -10,7 +10,7 @@ logging.basicConfig(format="[%(levelname)s]%(module)s.%(funcName)s: %(message)s"
 FILENAME_PATTERN = r"""[^_]*_(?P<year>[0-9]+)-(?P<month>[0-9]+)-(?P<day>[0-9]+)_(?P<hours>[0-9]+)-(?P<minutes>[0-9]+)-(?P<seconds>[0-9]+)-(?P<micro_seconds>[0-9]+).*"""
 
 
-def main() -> int:
+def main() -> None:
 
     # Glob png in the yuzu directory
     # directory = os.path.dirname(os.path.realpath(__file__)) + "/yuzu"
@@ -38,8 +38,6 @@ def main() -> int:
             continue
         print(file_name, " to ", f"{date} {time}")
         os.rename(f"{directory}/{file_name}", f"{directory}/{date} {time}.{ext}")
-
-    return 0
 
 
 if __name__ == "__main__":
