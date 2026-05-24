@@ -38,7 +38,6 @@ key_packages: set[str] = {
     "systemd",
     "thunderbird",
     "tmux",
-    "uwsm",
     "waybar",
     "wez",
     "wezterm",

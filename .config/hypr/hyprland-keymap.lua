@@ -332,7 +332,7 @@ hl.bind("SUPER + SHIFT + Escape",
 
 ----- Colour picker -----
 hl.bind("SUPER + CTRL + P",
-    hl.dsp.exec_raw('uwsm app -- sh -c "hyprpicker | tail -n1 | wl-copy"'))
+    hl.dsp.exec_raw('sh -c "hyprpicker | tail -n1 | wl-copy"'))
 
 ----- File manager -----
 hl.bind("SUPER + E",
