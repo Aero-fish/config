@@ -116,7 +116,14 @@ end
 vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
     group = general_id,
     pattern = ".shrc",
-    command = ":set filetype=sh",
+    command = ":set filetype=bash",
+})
+
+----- Set file type sh to bash -----
+vim.api.nvim_create_autocmd("FileType", {
+    group = general_id,
+    pattern = { "sh" },
+    command = ":set filetype=bash",
 })
 
 ----- Auto mkdir for new files -----
