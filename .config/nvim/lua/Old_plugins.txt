@@ -19,6 +19,7 @@ table_mode   -- Auto resize markdown table cell. Replaced by prettier formatter
 tabout       -- Tab to move over brackets
 texmagic     -- Using per project LSP setting instead
 markview     -- render-markdown is better. Better table alignment, syntax highlighting in code block. But no emoji, and worse foot note label.
+treesitter    -- Archived.
 
 Bug:
 -   pcall(require, "mod") returns true and load 'mod.lua' in the cwd, if it does not in typical $HOME/.local/nvim
