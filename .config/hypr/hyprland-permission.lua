@@ -26,8 +26,11 @@ hl.permission({ binary = "flydigi-flydigi-apex5-wireless-keyboard-.*", type = "k
 -- Lenovo
 hl.permission({ binary = "ideapad-extra-buttons", type = "keyboard", mode = "deny" })
 hl.permission({ binary = "hd-audio-generic-headphone", type = "keyboard", mode = "allow" })
+hl.permission({ binary = "at-translated-set-2-keyboard-1", type = "keyboard", mode = "allow" })
+hl.permission({ binary = "video-bus", type = "keyboard", mode = "allow" })
 hl.permission({ binary = "razer-razer-basilisk-v3-2", type = "keyboard", mode = "allow" })
 
+hl.permission({ binary = "at-translated-set-2-keyboard", type = "keyboard", mode = "deny" })
 hl.permission({ binary = "razer-razer-basilisk-v3-.*", type = "keyboard", mode = "deny" })
 
 -- Catch all

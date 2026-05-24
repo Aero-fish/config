@@ -28,7 +28,7 @@ hl.monitor({
 })
 
 hl.monitor({
-    output = "desc:ASUSTek COMPUTER INC PG32UCDM S3LMQS068423",
+    output = "desc:Chimei Innolux Corporation 0x13B0",
     mode   = "highres",
     vrr    = 0,
     scale  = 1
