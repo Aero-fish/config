@@ -99,7 +99,7 @@
             "class<org.gnome.gThumb>": "",
             "class<org.kde.konversation>": "󰻞",
             "class<org.kde.okular>": "",
-            "class<org.keepassxc.KeePassXC>": "",
+            "class<KeePassXC>": "",
             "class<org.yuzu_emu.yuzu>": " ",
             "class<pavucontrol>": "󰴸",
             "class<prop>": "",
