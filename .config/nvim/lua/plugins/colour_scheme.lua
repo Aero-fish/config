@@ -34,7 +34,7 @@ return {
                     NormalFloat = { bg = colours.none },     -- content
                     FloatBorder = { bg = colours.none },     -- border
 
-                    YankHighlight = { fg = "#586e75", bg = colours.yellow },
+                    YankHighlight = { fg = "#586e75", bg = "#FFD700" },
                     -- CursorLine = { bg = "#eee8d5" },
 
                     SpellBad = {
