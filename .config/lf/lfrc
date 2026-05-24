@@ -1951,8 +1951,8 @@ map gr          cd ~/misc/repo
 map gs          cd ~/Sync
 map gt          cd ~/.local/share/Trash
 map gu          goto_usb
-map gv          cd ~/workspace/vm_share
-map gw          cd ~/workspace
+map gv          cd ~/Projects/vm_share
+map gw          cd ~/Projects
 map ;           push :cd<space>
 
 ##### Sort #####
