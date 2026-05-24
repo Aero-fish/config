@@ -13,7 +13,7 @@ mode="$1"
 codec="av1_10bit"
 extra_cmd=()
 
-# Check whether monitor is in HDR mode
+# Check whether the user is requesting a HDR recording
 if [[ "$mode" =~ .*_hdr$ ]]; then
     mode="${mode:0:-4}"
     codec="av1_hdr"
