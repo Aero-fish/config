@@ -157,7 +157,8 @@ return {
                         },
                     },
                     vimgrep_arguments = {
-                        "rg", "--no-ignore", "--hidden", "--color=never",
+                        -- "rg", "--no-ignore", "--hidden", "--color=never",
+                        "rg", "--hidden", "--color=never",
                         "--no-messages", "--no-ignore-messages", "--no-heading",
                         "--with-filename", "--line-number", "--column", "--smart-case",
                         "--max-filesize", "2M", "--trim", "--glob=!*.kdb",
