@@ -32,7 +32,7 @@ hl.window_rule({
 
 hl.window_rule({
     name = "Black out sensitive programs",
-    match = { class = "(org.keepassxc.KeePassXC|firefox)" },
+    match = { class = "(KeePassXCC|firefox)" },
     no_screen_share = true,
 })
 
@@ -58,14 +58,20 @@ hl.window_rule({
 })
 
 hl.window_rule({
-    name = "Float window type 1",
+    name = "KeepassXC pop up",
+    match = { class = "KeePassXC", float = true },
+    center = true,
+})
+
+hl.window_rule({
+    name = "Floating window type 1",
     match = { class = "^(SVPManager|org.gnome.Calculator|org.fcitx.fcitx5-config-qt)$" },
     float = true,
     center = true,
 })
 
 hl.window_rule({
-    name = "Float window type 2",
+    name = "Floating window type 2",
     match = { class = "org.gnome.SystemMonitor" },
     float = true,
     center = true,
@@ -74,8 +80,11 @@ hl.window_rule({
 })
 
 hl.window_rule({
-    name = "Float window type 3",
-    match = { class = "^(system-config-printer|wdisplays|wlay|launcher|fzf|org.pulseaudio.pavucontrol|com.github.wwmm.easyeffects|blueman-manager)$" },
+    name = "Floating window type 3",
+    match = {
+        class =
+        "^(system-config-printer|launcher|org.pulseaudio.pavucontrol|blueman-manager)$"
+    },
     float = true,
     center = true,
     pin = true,
@@ -87,4 +96,3 @@ hl.window_rule({
     match = { class = ".*" },
     suppress_event = "maximize"
 })
-
