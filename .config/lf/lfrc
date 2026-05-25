@@ -501,12 +501,7 @@ EOF
 cmd on-select &{{
     # Send file to NautilusPreviewer if it is alive
     if pgrep -f "^(/usr/bin/gjs /usr/lib/)?org.gnome.NautilusPreviewer" >/dev/null 2>&1; then
-        dbus-send --print-reply --dest=org.gnome.NautilusPreviewer \
-        /org/gnome/NautilusPreviewer \
-        org.gnome.NautilusPreviewer.ShowFile \
-        string:"file:///$f" \
-        int32:0 \
-        boolean:false >/dev/null 2>&1
+        sushi "$f" >/dev/null 2>&1
     fi
 
 }}
@@ -565,22 +560,11 @@ cmd toggle_nautilus_previewer &{{
     # $1 url of file, $2 display id, $3 closeIfAlreadyShown
 
     if pgrep -f "^(/usr/bin/gjs /usr/lib/)?org.gnome.NautilusPreviewer" >/dev/null 2>&1; then
-
-        ## Close via dbus has delay
-        # dbus-send --print-reply --dest=org.gnome.NautilusPreviewer \
-        # /org/gnome/NautilusPreviewer \
-        # org.gnome.NautilusPreviewer.Close >/dev/null 2>&1
-
         pkill -f "^(/usr/bin/gjs /usr/lib/)?org.gnome.NautilusPreviewer" >/dev/null 2>&1
         lf -remote "send $id echo Killed NautilusPreviewer"
 
     else
-        dbus-send --print-reply --dest=org.gnome.NautilusPreviewer \
-        /org/gnome/NautilusPreviewer \
-        org.gnome.NautilusPreviewer.ShowFile \
-        string:"file:///$f" \
-        int32:0 \
-        boolean:false >/dev/null 2>&1
+        sushi "$f" >/dev/null 2>&1
 
         lf -remote "send $id echo Launched NautilusPreviewer"
     fi
