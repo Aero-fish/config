@@ -16,7 +16,7 @@ if pgrep -x sway >/dev/null 2>&1; then
     fi
 
 elif pgrep -x Hyprland >/dev/null; then
-    hyprctl dispatch workspace empty >/dev/null
+    hyprctl dispatch 'hl.dsp.focus({ workspace = "empty" })' >/dev/null
 
 fi
 

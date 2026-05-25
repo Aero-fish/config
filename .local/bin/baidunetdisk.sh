@@ -41,7 +41,6 @@ bwrap \
     --dev /dev \
     "${dev_bind[@]}" \
     "${tmpfs[@]}" \
-    --bind-try "$XDG_RUNTIME_DIR/code" "$XDG_RUNTIME_DIR" \
     "${ro_bind[@]}" \
     "${bind[@]}" \
     "${hide[@]}" \

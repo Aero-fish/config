@@ -5,15 +5,15 @@ set -e
     exit 0
 }
 
-mkdir -p "$HOME/Pictures/yuzu"
+mkdir -p "$HOME/Pictures/switch" "$HOME"/Games/switch/{config,local}/{citron,"citron team"} "$HOME"/Games/switch/{firmware,games}
 
 source /usr/local/share/bwrap_share/strict_rules
 
 ro_bind_path+=(
     "$HOME/.config/dconf"
     "$HOME/.local/share/fonts"
-    "$HOME/misc/programs/yuzu"
-    "$HOME/win_d/Games/switch/games"
+    "$HOME/misc/programs/citron"
+    "$HOME/Games/switch/games"
 )
 
 source /usr/local/share/bwrap_share/generate_args
@@ -29,35 +29,21 @@ if pgrep -x sway >/dev/null; then
     fi
 
 elif pgrep -x Hyprland >/dev/null; then
-    hyprctl dispatch workspace empty >/dev/null
+    hyprctl dispatch 'hl.dsp.focus({ workspace = "empty" })' >/dev/null
 
 fi
 
 user_config=()
-if [ -d "$HOME/win_d/Games/switch/yuzu_config" ]; then
-    mkdir -p "$HOME/win_d/Games/switch/yuzu_config/"{config,local}
-    user_config+=("--bind-try" "$HOME/win_d/Games/switch/yuzu_config/config" "$HOME/.config/yuzu")
-    user_config+=("--bind-try" "$HOME/win_d/Games/switch/yuzu_config/local" "$HOME/.local/share/yuzu")
-
-else
-    mkdir -p "$HOME"/.config/yuzu/config "$HOME"/.config/yuzu/local
-    user_config+=("--bind-try" "$HOME/.config/yuzu/config" "$HOME/.config/yuzu")
-    user_config+=("--bind-try" "$HOME/.config/yuzu/local" "$HOME/.local/share/yuzu")
-
-fi
-
-user_config+=("--bind-try" "$HOME/Pictures/yuzu" "$HOME/.local/share/yuzu/screenshots")
-
-if [ -d "$HOME/win_d/Games/switch/firmware" ]; then
-    user_config+=("--bind-try" "$HOME/win_d/Games/switch/firmware" "$HOME/.local/share/yuzu/nand")
-fi
-
-if [ -d "$HOME/win_d/Games/switch/keys" ]; then
-    user_config+=("--bind-try" "$HOME/win_d/Games/switch/keys" "$HOME/.local/share/yuzu/keys")
-fi
+user_config+=("--bind-try" "$HOME/Games/switch/config/citron" "$HOME/.config/citron")
+user_config+=("--bind-try" "$HOME/Games/switch/config/citron team" "$HOME/.config/citron team")
+user_config+=("--bind-try" "$HOME/Games/switch/local/citron" "$HOME/.local/share/citron")
+user_config+=("--bind-try" "$HOME/Games/switch/local/citron team" "$HOME/.local/share/citron team")
+user_config+=("--bind-try" "$HOME/Pictures/switch" "$HOME/.local/share/citron/screenshots")
+user_config+=("--bind-try" "$HOME/Games/switch/firmware" "$HOME/.local/share/citron/nand")
+user_config+=("--bind-try" "$HOME/Games/switch/keys" "$HOME/.local/share/citron/keys")
 
 ## Inhibit is handled by the custom lock and suspend scripts for sway and hyprland.
-## So it will not lock if yuzu is in focus only.
+## So it will not lock when citron is in focus only.
 ## May need  "--setenv QT_QPA_PLATFORM "xcb"' to run on xwayland
 bwrap \
     --unshare-user \
@@ -76,7 +62,7 @@ bwrap \
     --seccomp 9 \
     9</usr/local/share/seccomp-filter/default_seccomp_filter.bpf \
     \
-    --setenv LD_LIBRARY_PATH "$HOME/misc/programs/yuzu/lib:$LD_LIBRARY_PATH" \
+    --setenv LD_LIBRARY_PATH "$HOME/misc/programs/citron/lib:$LD_LIBRARY_PATH" \
     \
     --dev /dev \
     "${dev_bind[@]}" \
@@ -90,4 +76,4 @@ bwrap \
     "${symbolic_link[@]}" \
     --ro-bind-try "$XDG_RUNTIME_DIR"/tray-proxy "$dbus_address" \
     --perms 444 --file 8 /etc/machine-id 8< <(dbus-uuidgen) \
-    "$HOME"/misc/programs/yuzu/yuzu "$@"
+    "$HOME"/misc/programs/citron/citron "$@"

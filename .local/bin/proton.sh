@@ -52,7 +52,7 @@ if [ "$1" != "wineboot.exe" ] && [ "$1" != "wineboot" ]; then
         fi
 
     elif pgrep -x Hyprland >/dev/null; then
-        hyprctl dispatch workspace empty >/dev/null
+        hyprctl dispatch 'hl.dsp.focus({ workspace = "empty" })' >/dev/null
     fi
 fi
 

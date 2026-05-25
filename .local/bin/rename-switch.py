@@ -12,9 +12,9 @@ FILENAME_PATTERN = r"""[^_]*_(?P<year>[0-9]+)-(?P<month>[0-9]+)-(?P<day>[0-9]+)_
 
 def main() -> None:
 
-    # Glob png in the yuzu directory
+    # Glob png in the switch directory
     # directory = os.path.dirname(os.path.realpath(__file__)) + "/yuzu"
-    directory = str(pathlib.Path.home()) + "/Pictures/yuzu"
+    directory = str(pathlib.Path.home()) + "/Pictures/switch"
     ext = "png"
 
     for file_path in glob.glob(os.path.join(directory, f"*.{ext}")):
