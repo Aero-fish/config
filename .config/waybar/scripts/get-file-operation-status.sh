@@ -10,11 +10,11 @@ tooltip=""
 for f in "${arr[@]}"; do
     filename="$(basename -- "$f")"
     action="${filename%%_*}"
-    dest="$(head -n 1 "$f" | sed -E "s:^#::")"
+    dest="$(head -n 2 "$f" | tail -n 1"" | sed -E "s:^#::" | tr -d '\n')"
     [ -z "$dest" ] && dest="Unknown"
 
     if [ -z "$tooltip" ]; then
-        tooltip="$filename:  $dest"
+        tooltip="$filename: $dest"
     else
         tooltip="$tooltip\n\n$filename: $dest"
     fi

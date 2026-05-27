@@ -224,7 +224,7 @@
         "exec": "\"$HOME\"/.config/waybar/scripts/get-temperature.sh",
         "format": "{:>2}",
         "interval": 1,
-        "on-click-right": "kitty -- watch -n 0.5 \"$HOME/.config/waybar/scripts/get-temperature.sh\"",
+        "on-click-right": "exec setsid kitty -- watch -n 0.5 \"$HOME/.config/waybar/scripts/get-temperature.sh\" &",
         "return-type": "json",
         "tooltip": true
     },
@@ -237,7 +237,7 @@
         "format-disconnected": "",
         "format": "{bandwidthUpOctets:>}󰜷 {bandwidthDownOctets:>}󰜮",
         "interval": 1,
-        "on-click-right": "[ \"$(hyprctl dispatch 'hl.dsp.focus({window = \"class:netdog\"})')\" != \"ok\" ] && kitty --class nethogs -- nethogs -v 4",
+        "on-click-right": "[ \"$(hyprctl dispatch 'hl.dsp.focus({window = \"class:netdog\"})')\" != \"ok\" ] && exec setsid kitty --class nethogs -- nethogs -v 4 &",
         "tooltip-format-disconnected": "Disconnected",
         "tooltip-format-ethernet": "{ifname}\nIP: {ipaddr}/{cidr}",
         "tooltip-format-wifi": "SSID: {essid}\nStrength: {signalStrength}%\nIP: {ipaddr}/{cidr}"
@@ -247,7 +247,7 @@
         "exec": "$HOME/.config/waybar/scripts/arch-checkupdates.py",
         "format": "{} ",
         "interval": 21600,
-        "on-click-right": "if /usr/bin/checkupdates >/dev/null; then [ \"$(hyprctl dispatch 'hl.dsp.focus({window = \"class:arch_update\"})')\" != \"ok\" ] && kitty --class arch_update -- sh -c 'echo Update Arch...; sudo pacman -Syu; echo Done - Press enter to exit; read; pkill -SIGRTMIN+8 -u \"$(id -n -u)\" -x waybar;'; fi",
+        "on-click-right": "if /usr/bin/checkupdates >/dev/null; then [ \"$(hyprctl dispatch 'hl.dsp.focus({window = \"class:arch_update\"})')\" != \"ok\" ] && exec setsid kitty --class arch_update -- sh -c 'echo Update Arch...; sudo pacman -Syu; echo Done - Press enter to exit; read; pkill -SIGRTMIN+8 -u \"$(id -n -u)\" -x waybar;' &; fi",
         "on-click": "pkill -SIGRTMIN+8 -u \"$(id -n -u)\" -x waybar",
         "return-type": "json",
         "signal": 8
@@ -257,7 +257,7 @@
         "exec": "$HOME/.config/waybar/scripts/get-mail-unread.sh",
         "format": "{} ",
         "interval": "once",
-        "on-click-right": "[ \"$(hyprctl dispatch 'hl.dsp.focus({window = \"class:aerc\"})')\" != \"ok\" ] && zsh --interactive -c 'kitty --class aerc -- aerc'",
+        "on-click-right": "[ \"$(hyprctl dispatch 'hl.dsp.focus({window = \"class:aerc\"})')\" != \"ok\" ] && exec setsid kitty --class aerc -- aerc &",
         "on-click-middle": "systemctl --user --no-block start mbsync.service",
         "on-click": "pkill -SIGRTMIN+9 -u \"$(id -n -u)\" -x waybar",
         "return-type": "json",
@@ -277,7 +277,7 @@
         "exec": "$HOME/.config/waybar/scripts/storage.sh \"$HOME\"",
         "format": " ",
         "interval": 30,
-        "on-click-right": "zsh --interactive -c 'exec kitty -- /usr/bin/lf'",
+        "on-click-right": "exec setsid kitty -- /usr/bin/lf &",
         "on-click": "pkill -SIGRTMIN+11 -u \"$(id -n -u)\" -x waybar",
         "return-type": "json",
         "signal": 11,
@@ -313,7 +313,7 @@
         "exec-if": "[ -f $HOME/.config/waybar/scripts/check-config-repo.sh ]",
         "exec": "$HOME/.config/waybar/scripts/check-config-repo.sh",
         "format": "{}",
-        "on-click-right": "[ \"$(hyprctl dispatch 'hl.dsp.focus({window = \"class:confit_repo\"})')\" != \"ok\" ] && zsh --interactive -c 'exec kitty --class config_repo -- lazygit --path $HOME/.backup/user_data/shared_github'; pkill -SIGRTMIN+14 -u \"$(id -n -u)\" -x waybar",
+        "on-click-right": "[ \"$(hyprctl dispatch 'hl.dsp.focus({window = \"class:confit_repo\"})')\" != \"ok\" ] && exec setsid kitty --class config_repo -- sh -c 'lazygit --path $HOME/.backup/user_data/shared_github; pkill -SIGRTMIN+14 -u \"$(id -n -u)\" -x waybar;' &",
         "signal": 14,
         "return-type": "json",
         "tooltip": true
