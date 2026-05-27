@@ -254,7 +254,6 @@ cmd paste ${{
     ACTION="$(head -n1 "$HOME/.local/share/lf/files")"
     RUN_DIR="${XDG_RUNTIME_DIR:-/run/user/0}"
     mkdir -p "$RUN_DIR/lf_progress"
-    DEST="$PWD"
 
     ## Read selection into an array, and split them into rsync, mv and duplicate actions
     selected_paths_arr=()
@@ -274,7 +273,7 @@ cmd paste ${{
         # For move, if source and destination are on the same device, use mv, else rsync.
         path_is_dir_arr=()
         for path in "${selected_paths_arr[@]}"; do
-            if [ "$(stat -c "%d" "$path")" = "$(stat -c "%d" "$DEST")" ]; then
+            if [ "$(stat -c "%d" "$path")" = "$(stat -c "%d" "$PWD")" ]; then
                 mv_arr+=("$path")
 
             else
@@ -297,14 +296,14 @@ cmd paste ${{
         unset path_is_dir_arr
 
         # Only check rsync usage. mv does not occupy space as the are on the same device.
-        check_available_space rsync_arr DEST
+        check_available_space rsync_arr PWD
 
     elif [ "$ACTION" = "copy" ]; then
-        check_available_space selected_paths_arr DEST
+        check_available_space selected_paths_arr PWD
 
         # Determine whether to copy or duplicate
         for path in "${selected_paths_arr[@]}"; do
-            if [ "$(dirname -- "$path")" = "$DEST" ]; then
+            if [ "$(dirname -- "$path")" = "$PWD" ]; then
                 dup_arr+=("$path")
             else
                 rsync_arr+=("$path")
@@ -321,7 +320,7 @@ cmd paste ${{
     paths_to_be_checked=("${mv_arr[@]}" "${rsync_arr[@]}")
     filename_already_exist=()
     for path in "${paths_to_be_checked[@]}"; do
-        if [ -e "$DEST/$(basename -- "$path")" ]; then
+        if [ -e "$PWD/$(basename -- "$path")" ]; then
             filename_already_exist+=("$path")
         fi
     done
@@ -337,7 +336,7 @@ cmd paste ${{
         printf '%s\n' "${filename_already_exist[@]}"
         echo "----------"
 
-        echo -n -e "File name(s) exists in dest, do you want to \e[31mskip[s]\e[0m, \e[31mreplace[r]\e[0m or \e[31mbackup[b]\e[0m? "
+        echo -n -e "File name(s) exists in destination, do you want to \e[31mskip[s]\e[0m, \e[31mreplace[r]\e[0m or \e[31mbackup[b]\e[0m? "
         read -n 1 -r res
         echo
         if [ "$res" = "s" ]; then
@@ -375,9 +374,9 @@ cmd paste ${{
     fi
 
     ## Start to create the script
-    cat <<EOF >"$SH_FILE"
+    cat << EOF >"$SH_FILE"
 #!/usr/bin/bash
-## Paste to ${DEST@Q}
+#${PWD@Q}
 
 EOF
 
@@ -394,13 +393,13 @@ EOF
     ## Otherwise, if source is a file or the destination dir does not exist, mv directly.
     if [ "${#mv_arr[@]}" -ne 0 ]; then
         mv_simple_arr=()
-        echo "echo $mv_cmd ${mv_arr[@]@Q} ${DEST@Q}" >>"$SH_FILE"
+        echo "echo $mv_cmd ${mv_arr[@]@Q} ${PWD@Q}" >>"$SH_FILE"
 
         for path in "${mv_arr[@]}"; do
 
             dir_basename="$(basename -- "$path")"
 
-            if [ ! -d "$path" ] || [ ! -d "$DEST/$dir_basename" ]; then
+            if [ ! -d "$path" ] || [ ! -d "$PWD/$dir_basename" ]; then
                 # Store in an array and move all together using one 'mv'
                 mv_simple_arr+=("$path")
 
@@ -408,11 +407,11 @@ EOF
 
                 ## mkdir -p all leaf directories
                 # Only works on POSIX compliant file system like ext4
-                # echo "(cd ${f@Q}; find -type d -links 2 -exec mkdir -p ${dest@Q}/${dir_basename@Q}/{} \;)" >>"$SH_FILE"
+                # echo "(cd ${f@Q}; find -type d -links 2 -exec mkdir -p ${PWD@Q}/${dir_basename@Q}/{} \;)" >>"$SH_FILE"
 
                 ## Move file one by one
                 cat <<EOF >>"$SH_FILE"
-mkdir -p ${DEST@Q}/${dir_basename@Q}
+mkdir -p ${PWD@Q}/${dir_basename@Q}
 
 arr=()
 while read -d \$'\\n' directory; do
@@ -422,7 +421,7 @@ while read -d \$'\\n' directory; do
     last="\$directory"
 done < <(find ${path@Q} -mindepth 1 -type d -printf '%P/\\n' | sort)
 arr+=("\$last")
-printf "%s\\0" "\${arr[@]}" | xargs --no-run-if-empty -0  -I {} mkdir -p ${DEST@Q}/${dir_basename@Q}/{}
+printf "%s\\0" "\${arr[@]}" | xargs --no-run-if-empty -0  -I {} mkdir -p ${PWD@Q}/${dir_basename@Q}/{}
 
 error_code="\$?"
 if [ "\$error_code" -ne 0 ]; then
@@ -432,7 +431,7 @@ if [ "\$error_code" -ne 0 ]; then
     exit 1
 fi
 
-(cd ${path@Q}; fd --unrestricted -tf -tl --exec $mv_cmd {} ${DEST@Q}/${dir_basename@Q}/{})
+(cd ${path@Q}; fd --unrestricted -tf -tl --exec $mv_cmd {} ${PWD@Q}/${dir_basename@Q}/{})
 error_code="\$?"
 if [ "\$error_code" -ne 0 ]; then
     notify-send "lf: $ACTION failed.Add rsync to the script (move one by one)"
@@ -446,7 +445,7 @@ EOF
 
         if [ "${#mv_simple_arr[@]}" -ne 0 ]; then
             cat <<EOF >>"$SH_FILE"
-$mv_cmd ${mv_simple_arr[@]@Q} ${DEST@Q}
+$mv_cmd ${mv_simple_arr[@]@Q} ${PWD@Q}
 error_code="\$?"
 if [ "\$error_code" -ne 0 ]; then
     notify-send "lf: $ACTION failed. (move simple)"
@@ -461,7 +460,7 @@ EOF
 
     ## Add rsync to the script
     if [ "${#rsync_arr[@]}" -ne 0 ]; then
-        echo "$rsync_cmd ${rsync_arr[@]@Q} ${DEST@Q}" >>"$SH_FILE"
+        echo "$rsync_cmd ${rsync_arr[@]@Q} ${PWD@Q}" >>"$SH_FILE"
     fi
 
     ## Clean up empty source dir. This command is empty for copy.
@@ -588,7 +587,7 @@ cmd z ${{
 
 #----------
 cmd ripgrep_word ${{
-    cmd="rg --follow --no-ignore --column --line-number --no-heading --color=always --smart-case --field-match-separator='\x7F:'"
+    cmd="rg --follow --no-ignore --hidden --column --line-number --no-heading --color=always --smart-case --max-filesize 2M --trim --field-match-separator='\x7F:' --glob='!*.kdb' --glob='!*.kdbx' --glob='!*.key' --glob='!*cache/' --glob='!.cargo/' --glob='!.cert' --glob='!.fpm/' --glob='!.git/' --glob='!.gnupg/' --glob='!.gphoto/' --glob='!.hyprland/' --glob='!.ipython/' --glob='!.jupyter/' --glob='!.keepass/' --glob='!.keepassxc/' --glob='!.lastpass/' --glob='!.npm/' --glob='!.nv' --glob='!.password-store/' --glob='!.perl5/' --glob='!.pki/' --glob='!.snapshots/' --glob='!.ssh/' --glob='!.svn/' --glob='!.texlive/' --glob='!.vscode-oss/' --glob='!.wine/' --glob='!__pycache__/' --glob='!bitwarden/' --glob='!containers/' --glob='!go/' --glob='!keepass/' --glob='!keepass/' --glob='!keepassx/' --glob='!keepassxc/' --glob='!keepassxcrc/' --glob='!keyrings/' --glob='!librewolf*/' --glob='!lost+found' --glob='!mozilla*/' --glob='!node_modules/' --glob='!rclone/' --glob='!thunderbird/'"
     # Preview takes too much space, not able to show full path
     f="$(
         fzf --ansi --disabled --layout=reverse --header="Search in files" --delimiter='\x7F:' \
@@ -599,8 +598,6 @@ cmd ripgrep_word ${{
         # --bind='enter:become(lf -remote "send $id select \"$(printf "%s" {1} | sed '\''s/\\/\\\\/g;s/"/\\"/g'\'')\"")')"
         # --preview='~/.config/lf/lf_kitty_clean; ~/.config/lf/lf_kitty_preview_bwrap {1} "$FZF_PREVIEW_COLUMNS" "$FZF_PREVIEW_LINES" "$FZF_PREVIEW_LEFT" "$FZF_PREVIEW_TOP"'
     f_escaped="${f@Q}"
-    f_escaped="${f_escaped// /\\ }"
-    f_escaped="${f_escaped//;/\\;}"
     lf -remote "send $id select $f_escaped"
 }}
 
@@ -934,8 +931,8 @@ cmd extract ${{
     run_dir="${XDG_RUNTIME_DIR:-/run/user/0}"
     mkdir -p "$run_dir/lf_progress"
     SH_FILE="$(mktemp "$run_dir/lf_progress/extract_XXXXX.sh")"
-    dest="$PWD"
     cat << EOF >"$SH_FILE"
+#!/usr/bin/bash
 #${PWD@Q}
 cd ${PWD@Q} || { rm "\$0"; exit 1; }
 
@@ -1049,6 +1046,7 @@ cmd extract-to-individual-folder ${{
     mkdir -p "$run_dir/lf_progress"
     SH_FILE="$(mktemp "$run_dir/lf_progress/extract_inv_XXXXX.sh")"
         cat << EOF >"$SH_FILE"
+#!/usr/bin/bash
 #${PWD@Q}
 base_dir=${PWD@Q}
 cd "\$base_dir" ||{ rm "\$0"; exit 1; }
@@ -1201,6 +1199,7 @@ EOF
 }}
 
 #----------
+# Do not use Tmux, in case it exits with an error
 cmd archive-single-tar-zstd ${{
     readarray -t arr <<<"$fx"
     [ "${#arr[@]}" -eq 0 ] && {
@@ -1271,6 +1270,7 @@ cmd archive-single-tar-zstd ${{
     SH_FILE="$(mktemp "$run_dir/lf_progress/tar_XXXXX.sh")"
 
         cat << EOF >"$SH_FILE"
+#!/usr/bin/bash
 #$dest
 ${tar_cmd[@]} | pv -s "\$(${du_cmd[@]} | tail -1 | awk '{print \$1}')" | zstdmt >${dest@Q}
 
@@ -1287,6 +1287,7 @@ EOF
 }}
 
 #----------
+# Do not use Tmux, in case it exits with an error
 cmd archive-individual-tar-zstd ${{
     readarray -t arr <<<"$fx"
     [ "${#arr[@]}" -eq 0 ] && {
@@ -1298,6 +1299,7 @@ cmd archive-individual-tar-zstd ${{
     mkdir -p "$run_dir/lf_progress"
     SH_FILE="$(mktemp "$run_dir/lf_progress/tar_inv_XXXXX.sh")"
         cat << EOF >"$SH_FILE"
+#!/usr/bin/bash
 #${PWD@Q}
 cd ${PWD@Q} || { rm "\$0"; exit 1; }
 
@@ -1363,6 +1365,7 @@ EOF
 }}
 
 #----------
+# Do not use Tmux, in case it exits with an error
 cmd archive-single-zip ${{
     readarray -t arr <<<"$fx"
     [ "${#arr[@]}" -eq 0 ] && {
@@ -1425,6 +1428,7 @@ cmd archive-single-zip ${{
     arr_trim=("${arr[@]#"$prefix"}")
 
         cat << EOF >"$SH_FILE"
+#!/usr/bin/bash
 #$dest
 cd ${common_dir@Q}
 zip -r ${dest@Q} ${arr_trim[@]@Q}
@@ -1442,6 +1446,7 @@ EOF
 }}
 
 #----------
+# Do not use Tmux, in case it exits with an error
 cmd archive-individual-zip ${{
     readarray -t arr <<<"$fx"
     [ "${#arr[@]}" -eq 0 ] && {
@@ -1453,6 +1458,7 @@ cmd archive-individual-zip ${{
     mkdir -p "$run_dir/lf_progress"
     SH_FILE="$(mktemp "$run_dir/lf_progress/zip_inv_XXXXX.sh")"
         cat << EOF >"$SH_FILE"
+#!/usr/bin/bash
 #${PWD@Q}
 
 files=(
@@ -1516,6 +1522,7 @@ EOF
 }}
 
 #----------
+# Do not use Tmux, in case it exits with an error
 cmd archive-single-7z ${{
     readarray -t arr <<<"$fx"
     [ "${#arr[@]}" -eq 0 ] && {
@@ -1551,6 +1558,7 @@ cmd archive-single-7z ${{
     SH_FILE="$(mktemp "$run_dir/lf_progress/7z_XXXXX.sh")"
 
         cat << EOF >"$SH_FILE"
+#!/usr/bin/bash
 #$dest
 7z a ${dest@Q} ${arr[@]@Q}
 
@@ -1567,6 +1575,7 @@ EOF
 }}
 
 #----------
+# Do not use Tmux, in case it exits with an error
 cmd archive-individual-7z ${{
     readarray -t arr <<<"$fx"
     [ "${#arr[@]}" -eq 0 ] && {
@@ -1578,6 +1587,7 @@ cmd archive-individual-7z ${{
     mkdir -p "$run_dir/lf_progress"
     SH_FILE="$(mktemp "$run_dir/lf_progress/7z_inv_XXXXX.sh")"
         cat << EOF >"$SH_FILE"
+#!/usr/bin/bash
 #${PWD@Q}
 
 files=(
@@ -1711,7 +1721,7 @@ cmd clamscan &{{
     mkdir -p "$run_dir/lf_progress"
     SH_FILE="$(mktemp "$run_dir/lf_progress/clamscan_XXXXX.sh")"
             cat << EOF >"$SH_FILE"
-#$PWD@
+#${PWD@Q}
 files=(
 $(printf '    %s\n' "${arr[@]@Q}")
 )
