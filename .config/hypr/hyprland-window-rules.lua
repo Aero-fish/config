@@ -32,7 +32,7 @@ hl.window_rule({
 
 hl.window_rule({
     name = "Black out sensitive programs",
-    match = { class = "(KeePassXCC|firefox)" },
+    match = { class = "KeePassXC" },
     no_screen_share = true,
 })
 
