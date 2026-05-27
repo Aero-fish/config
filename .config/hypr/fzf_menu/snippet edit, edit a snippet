@@ -7,7 +7,3 @@ fd --exact-depth 1 --type file --type symlink \
         --tiebreak=index |
     xargs -0 --no-run-if-empty nvim-reuse
 
-# [ -z "$selected" ] && exit
-
-# nvim-reuse "$selected"
-# swaymsg "[app_id=\"foot\" title=\".*/${selected##*/} - Neovim\"] focus"

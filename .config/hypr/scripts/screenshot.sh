@@ -13,14 +13,6 @@ elif [ "$1" = "window" ]; then
     if pgrep -x "Hyprland" >/dev/null 2>&1; then
         extra_cmd=("-g" "$(hyprctl activewindow -j | jq -r '"\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1])"')")
 
-    elif pgrep -x "sway" >/dev/null 2>&1; then
-        IFS=, read -r x y w h b <<<"$(swaymsg -t get_tree | jq -r 'recurse(.nodes[]) | select(.nodes[].focused == true) | .nodes[0] | "\(.rect.x),\(.rect.y),\(.rect.width),\(.rect.height),\(.current_border_width)"')"
-        x="$(($x + $b))"
-        y="$(($y + $b))"
-        w="$(($w - $b - $b))"
-        h="$(($h - $b - $b))"
-        extra_cmd=("-g" "$x,$y ${w}x${h}")
-
     else
         notify-send --icon="$HOME/.local/share/icons/Screenshot.svg" -- "Screenshot active window is not supported for current DE"
         exit 0
@@ -50,9 +42,6 @@ fi
 
 if pgrep -x "Hyprland" >/dev/null 2>&1; then
     focus_prog_is_fullscreen="$(hyprctl activewindow -j | jq -r '.fullscreen')"
-
-elif pgrep -x "sway" >/dev/null 2>&1; then
-    focus_prog_is_fullscreen="$(swaymsg -t get_tree | jq -r '.. | select(.type?) | select(.focused==true) | .fullscreen_mode')"
 fi
 
 if [ "$focus_prog_is_fullscreen" = "0" ]; then

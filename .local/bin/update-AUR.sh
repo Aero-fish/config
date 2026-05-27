@@ -220,24 +220,6 @@ vkd3d-proton-update() {
     done
 }
 
-sway-autotiling-download() {
-    download_url="$(
-        curl -s -L "$1" |
-            jq -r ".tarball_url"
-    )"
-    _check_download_url
-
-    curl -L "$download_url" --output "$work_path/$version.tar.gz"
-
-    tar -xf "$work_path/$version.tar.gz" -C "$work_path"
-    fd -tf --glob "main.py" "$work_path" --exec mv {} "$work_path/autotiling.py"
-
-    fd --exact-depth 1 --exclude "autotiling.py" "$work_path" --exec-batch rm -r {}
-
-    sed -i '1 s:^.*$:#!/usr/bin/python3:' "$work_path"/autotiling.py
-    chmod 700 "$work_path"/autotiling.py
-}
-
 ksmbd-tools-download() {
     download_url="$(
         curl -s -L "$1" |
@@ -461,7 +443,6 @@ declare -A github_packages=(
     ["maple-mono"]="https://api.github.com/repos/subframe7536/maple-font/releases/latest"
     ["pandoc-eisvogel-template"]="https://api.github.com/repos/Wandmalfarbe/pandoc-latex-template/releases/latest"
     ["revealjs"]="https://api.github.com/repos/hakimel/reveal.js/releases/latest"
-    ["sway-autotiling"]="https://api.github.com/repos/nwg-piotr/autotiling/releases/latest"
     ["vkd3d-proton"]="https://api.github.com/repos/HansKristian-Work/vkd3d-proton/releases/latest"
     ["yt-dlp"]="https://api.github.com/repos/yt-dlp/yt-dlp/releases/latest"
 )

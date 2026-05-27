@@ -18,17 +18,7 @@ ro_bind_path+=(
 
 source /usr/local/share/bwrap_share/generate_args
 
-if pgrep -x sway >/dev/null; then
-    active_output="$(swaymsg -t get_outputs | jq ".[] | select(.focused == true) | .name")"
-    original_scale="$(swaymsg -t get_outputs | jq ".[] | select(.focused == true) | .scale")"
-
-    "$HOME"/.config/sway/scripts/goto-empty-workspace.py
-    if [ "$original_scale" != "1" ]; then
-        swaymsg output "$active_output" scale 1
-        sleep 0.5
-    fi
-
-elif pgrep -x Hyprland >/dev/null; then
+if pgrep -x Hyprland >/dev/null; then
     hyprctl dispatch 'hl.dsp.focus({ workspace = "empty" })' >/dev/null
 
 fi
@@ -42,7 +32,7 @@ user_config+=("--bind-try" "$HOME/Pictures/switch" "$HOME/.local/share/citron/sc
 user_config+=("--bind-try" "$HOME/Games/switch/firmware" "$HOME/.local/share/citron/nand")
 user_config+=("--bind-try" "$HOME/Games/switch/keys" "$HOME/.local/share/citron/keys")
 
-## Inhibit is handled by the custom lock and suspend scripts for sway and hyprland.
+## Inhibit is handled by the custom lock and suspend scripts for hyprland.
 ## So it will not lock when citron is in focus only.
 ## May need  "--setenv QT_QPA_PLATFORM "xcb"' to run on xwayland
 bwrap \

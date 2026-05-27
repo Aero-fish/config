@@ -10,17 +10,6 @@ for pid in $(pgrep -f "bash $0"); do
     fi
 done
 
-if pgrep -x sway >/dev/null 2>&1; then
-    ## Do not use systemd-inhibit, which also stops monitor turning off
-    ## Check by other means
-    :
-elif pgrep -x gnome-shell >/dev/null 2>&1; then
-    if [ "$(cat /proc/$PPID/comm)" != "gnome-session-i" ]; then
-        echo "'exec' with gnome-session-inhibit"
-        exec gnome-session-inhibit --inhibit suspend bash "$0"
-    fi
-fi
-
 trap 'rv=$?; [ ! -z $ytdl_pid ] && kill -INT $ytdl_pid; exit $rv' EXIT
 
 TMP_DIR="$(mktemp -d "$XDG_RUNTIME_DIR/tmp.XXXXXXXXXX")"

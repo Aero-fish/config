@@ -48,13 +48,6 @@ tooltip label {
 /* Shades */
 /* 43dfb8 3cc9a6 36b293 2f9c81 28866e 22705c 1b594a 144337 0d2d25 071612 */
 /* 43dfb8 56e2bf 69e5c6 7be9cd 8eecd4 a1efdc b4f2e3 c7f5ea d9f9f1 ecfcf8 */
-#workspaces button.focused {
-    /*sway*/
-    color: #a1efdc;
-    border-radius: 1em;
-    border: 0.3ex solid #a1efdc;
-}
-
 #workspaces button.active {
     /*hyprland*/
     color: #a1efdc;

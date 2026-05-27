@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
-[ "${UID}" -eq 0 ] && { echo "Do not run as root."; exit 0; }
+[ "${UID}" -eq 0 ] && {
+    echo "Do not run as root."
+    exit 0
+}
 
 mkdir -p "$HOME/Pictures/yuzu"
 
@@ -14,22 +17,10 @@ ro_bind_path+=(
     "$HOME/win_d/Games/Wii U/games"
 )
 
-
 source /usr/local/share/bwrap_share/generate_args
 
-if pgrep -x sway >/dev/null; then
-    active_output="$(swaymsg -t get_outputs | jq ".[] | select(.focused == true) | .name")"
-    original_scale="$(swaymsg -t get_outputs | jq ".[] | select(.focused == true) | .scale")"
-
-    "$HOME"/.config/sway/scripts/goto-empty-workspace.py
-    if [ "$original_scale" != "1" ]; then
-        swaymsg output "$active_output" scale 1
-        sleep 0.5
-    fi
-
-elif pgrep -x Hyprland >/dev/null; then
+if pgrep -x Hyprland >/dev/null; then
     hyprctl dispatch 'hl.dsp.focus({ workspace = "empty" })' >/dev/null
-
 fi
 
 user_config=()
@@ -45,7 +36,7 @@ else
 
 fi
 
-## Inhibit is handled by the custom lock and suspend scripts for sway and hyprland.
+## Inhibit is handled by the custom lock and suspend scripts for hyprland.
 ## So it will not lock if cemu is in focus only.
 bwrap \
     --unshare-user \
@@ -62,7 +53,6 @@ bwrap \
     --new-session \
     --die-with-parent \
     --seccomp 1 \
-    1< /usr/local/share/seccomp-filter/default_seccomp_filter.bpf \
     \
     --dev /dev \
     "${dev_bind[@]}" \
@@ -75,6 +65,5 @@ bwrap \
     "${symbolic_link[@]}" \
     "${user_config[@]}" \
     --ro-bind-try "$XDG_RUNTIME_DIR/tray-proxy" "$dbus_address" \
-    --perms 444 --file 0 /etc/machine-id 0< <(dbus-uuidgen) \
-    "$HOME"/misc/programs/cemu/Cemu "$@"
-
+    --perms 444 --file 0 /etc/machine-id \
+    "$HOME"/misc/programs/cemu/Cemu "$@" 1</usr/local/share/seccomp-filter/default_seccomp_filter.bpf 0< <(dbus-uuidgen)

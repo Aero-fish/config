@@ -24,11 +24,6 @@ if [ "$1" != "force" ]; then
     if pidof Hyprland >/dev/null; then
         prog_in_focus="$(hyprctl activewindow -j | jq -r '.class')"
 
-    elif pidof sway >/dev/null; then
-        prog_in_focus="$(swaymsg -t get_tree | jq -r '.. | select(.type?) | select(.focused==true) | .app_id')"
-        if [ "$prog_in_focus" = "null" ]; then
-            prog_in_focus="$(swaymsg -t get_tree | jq -r '.. | select(.type?) | select(.focused==true) | .window_properties.class')"
-        fi
     else
         notify-send "Unknown DE, cannot lock"
         exit 1
@@ -55,13 +50,6 @@ fi
 if pidof Hyprland >/dev/null; then
     setsid hyprlock --quiet >/dev/null &
 
-elif pidof sway >/dev/null; then
-    swaylock --daemonize --ignore-empty-password \
-        --indicator-caps-lock -c 000000 --scaling fit \
-        --image "$(find "$HOME"/misc/BingWallpaper -maxdepth 1 -type f -name "*.jpg" | sort | tail -n 1)" || {
-        notify-send "Lock fail"
-        exit 1
-    }
 else
     notify-send "Lock fail"
     exit 1
