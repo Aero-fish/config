@@ -1,0 +1,9 @@
+#!/usr/bin/sh
+set -e
+
+session_name="$(
+    tmux list-sessions |
+        fzf -i --no-multi --exact --prompt="Tmux sessions:" --delimiter=":" --accept-nth '{1}' --info=default --layout=reverse --tiebreak=index
+)"
+setsid kitty -- tmux attach-session -t "$session_name" >/dev/null 2>&1 </dev/null &
+sleep 0.1
