@@ -1,5 +1,7 @@
 hl.on("hyprland.start", function()
-    hl.exec_cmd("systemctl --user start waybar_customised.service")
+    -- Do not start waybar as systemd unit. hyprlshutdown will not work properly.
+    -- All others, try to start as systemd service to enable auto restart.
+    hl.exec_cmd("waybar")
     hl.exec_cmd("systemctl --user start app-blueman@autostart.service")
     hl.exec_cmd("systemctl --user start app-firewall\\\\x2dapplet@autostart.service")
     hl.exec_cmd("systemctl --user start app-nm\\\\x2dapplet@autostart.service")

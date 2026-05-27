@@ -21,12 +21,12 @@
     },
     {
         "label": "Reboot",
-        "exec": "systemctl reboot",
+        "exec": "/usr/bin/bash /usr/local/share/power_operation.sh reboot",
         "icon": "/usr/share/nwg-bar/images/system-reboot.svg"
     },
     {
         "label": "Shutdown",
-        "exec": "systemctl -i poweroff",
+        "exec": "/usr/local/share/power_operation.sh poweroff",
         "icon": "/usr/share/nwg-bar/images/system-shutdown.svg"
     }
 ]
