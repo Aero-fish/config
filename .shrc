@@ -610,16 +610,12 @@ alias jctl-error-tail10="journalctl --follow --lines=10 --priority=4"
 # DEC850 router tty access
 alias dec850-tty="screen /dev/ttyUSB0 115200"
 
-# Use for ssh if foot is not recognized
-alias foot-with-terminfo="foot --term xterm-256color"
-
 alias check-cpu-vulnerabilities="grep -r . /sys/devices/system/cpu/vulnerabilities/"
 alias ls-installed-packages="pacman -Qe | cut -d' ' -f1'"
 alias watch-cpu-freq="watch -n 1 'cat /proc/cpuinfo | grep \"^[c]pu MHz\"'"
 
 alias clean-zsh-history='\rm -f "$HOME/.cache/zsh"/*'
 alias test-terminal-bell="echo -e '\07'"
-alias soft-reboot="systemctl soft-reboot"
 
 # Container for building
 alias aur-container="podman run -it --rm -v \$HOME/misc/repo:/home/user/aur --userns keep-id -u user localhost/archlinux-aur-build bash"
@@ -627,6 +623,10 @@ alias aur-container="podman run -it --rm -v \$HOME/misc/repo:/home/user/aur --us
 alias ls-network-connections="ss --tcp --udp --processes"
 alias ls-network-port-listening="ss --listening --tcp --udp --processes"
 alias ls-network-bandwidth-usage="nethogs -v 4"
+
+alias soft-reboot="hyprshutdown --top-label 'Restarting...' --post-cmd 'systemctl soft-reboot'"
+alias reboot="hyprshutdown --top-label 'Restarting...' --post-cmd 'systemctl reboot'"
+alias poweroff="hyprshutdown --top-label 'Shutting down...' --post-cmd 'systemctl -i poweroff'"
 
 ls-dbus() {
     echo "---------- System ----------"
