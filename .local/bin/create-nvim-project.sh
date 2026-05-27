@@ -138,7 +138,7 @@ return {
             -- ["basedpyright"] = {
             --     settings = {
             --         python = {
-            --             pythonPath = "~/workspace/coding/.venv/bin/python3",
+            --             pythonPath = "~/Projects/coding/venv/bin/python3",
             --         },
             --         basedpyright = {
             --             analysis = {

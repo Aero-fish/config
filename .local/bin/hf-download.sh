@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-STORAGE_DIR="$HOME/workspace/AI/models"
+STORAGE_DIR="$HOME/Projects/AI/models"
 
 MODEL="$1"
 MODEL_NAME="${MODEL##*'/'}"

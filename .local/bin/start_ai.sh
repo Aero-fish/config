@@ -2,8 +2,8 @@
 set -e
 
 # ---------- Config ----------
-MODEL_DIR="$HOME/workspace/AI/models"
-TEMPLATE_DIR="$HOME/workspace/AI/templates"
+MODEL_DIR="$HOME/Projects/AI/models"
+TEMPLATE_DIR="$HOME/Projects/AI/templates"
 TEMPLATE_CONTAINER_PATH="/templates"
 AI_CONTAINER_LABEL="AI"
 VLLM_MEM_UTILISATION=0.90
