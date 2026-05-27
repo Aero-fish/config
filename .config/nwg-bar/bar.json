@@ -26,7 +26,7 @@
     },
     {
         "label": "Shutdown",
-        "exec": "/usr/local/share/power_operation.sh poweroff",
+        "exec": "/usr/local/share/power_operation.sh shutdown",
         "icon": "/usr/share/nwg-bar/images/system-shutdown.svg"
     }
 ]
