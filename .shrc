@@ -20,7 +20,9 @@ this_shell="$(ps -hp $$ | awk '{print $5}' | sed -E -e 's:^(.*/)?-*::')"
 export EDITOR=nvim
 export VISUAL=nvim
 export PAGER=less
-export GPG_TTY="$(tty)"
+export GPG_TTY
+
+GPG_TTY="$(tty)"
 
 # Perl and CPAN
 export PERL5LIB="$HOME/.perl5/lib/perl5${PERL5LIB:+:${PERL5LIB}}"

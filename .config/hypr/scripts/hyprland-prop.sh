@@ -2,8 +2,6 @@
 set -e
 export LESSHISTFILE="/dev/null"
 
-PROG=$( basename "$0" )
-
 TMP="$(mktemp "$XDG_RUNTIME_DIR/prop-XXXXX")"
 
 trap 'rm $TMP' EXIT
