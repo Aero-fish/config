@@ -5,7 +5,7 @@ set -e
     exit 0
 }
 
-mkdir -p "$HOME/Pictures/switch" "$HOME"/Games/switch/{config,local}/{citron,"citron team"} "$HOME"/Games/switch/{firmware,games}
+mkdir -p "$HOME/Pictures/switch" "$HOME"/Games/switch/{config,local}/{citron,"citron team"} "$HOME"/Games/switch/{firmware,keys}
 
 source /usr/local/share/bwrap_share/strict_rules
 
@@ -13,7 +13,6 @@ ro_bind_path+=(
     "$HOME/.config/dconf"
     "$HOME/.local/share/fonts"
     "$HOME/misc/programs/citron"
-    "$HOME/Games/switch/games"
 )
 
 source /usr/local/share/bwrap_share/generate_args
@@ -31,6 +30,8 @@ user_config+=("--bind-try" "$HOME/Games/switch/local/citron team" "$HOME/.local/
 user_config+=("--bind-try" "$HOME/Pictures/switch" "$HOME/.local/share/citron/screenshots")
 user_config+=("--bind-try" "$HOME/Games/switch/firmware" "$HOME/.local/share/citron/nand")
 user_config+=("--bind-try" "$HOME/Games/switch/keys" "$HOME/.local/share/citron/keys")
+
+user_config+=("--ro-bind-try" "$HOME/win_d/Games/switch/games/" "$HOME/Games/switch/games")
 
 ## Inhibit is handled by the custom lock and suspend scripts for hyprland.
 ## So it will not lock when citron is in focus only.
