@@ -247,7 +247,7 @@
         "exec": "$HOME/.config/waybar/scripts/arch-checkupdates.py",
         "format": "{} ",
         "interval": 21600,
-        "on-click-right": "if /usr/bin/checkupdates >/dev/null; then [ \"$(hyprctl dispatch 'hl.dsp.focus({window = \"class:arch_update\"})')\" != \"ok\" ] && exec setsid kitty --class arch_update -- sh -c 'echo Update Arch...; sudo pacman -Syu; echo Done - Press enter to exit; read; pkill -SIGRTMIN+8 -u \"$(id -n -u)\" -x waybar;' &; fi",
+        "on-click-right": "if /usr/bin/checkupdates >/dev/null; then [ \"$(hyprctl dispatch 'hl.dsp.focus({window = \"class:arch_update\"})')\" != \"ok\" ] && exec setsid kitty --class arch_update -- sh -c 'echo Update Arch...; sudo pacman -Syu; echo Done - Press enter to exit; read; pkill -SIGRTMIN+8 -u \"$(id -n -u)\" -x waybar'; fi",
         "on-click": "pkill -SIGRTMIN+8 -u \"$(id -n -u)\" -x waybar",
         "return-type": "json",
         "signal": 8
