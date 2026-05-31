@@ -907,6 +907,13 @@ image-to-pdf() {
         -background white -density 72 -units PixelsPerInch -page A4 "$pdf_name"
 }
 
+extract-pdf-images() {
+    local file_name
+    file_name="$(basename -- "$1")"
+    file_name="${file_name%.*}"
+    pdfimages -all "$1" "./$file_name"
+}
+
 image-to-gray-scale() {
     if [ "$#" == 0 ]; then
         echo "Usage: image-to-gray-scale input.jpg [output.jpg]"
