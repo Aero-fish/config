@@ -48,6 +48,31 @@ return {
                         if default_on_attach_func then
                             default_on_attach_func(client, bufnr)
                         end
+
+                        ----- User builtin auto complete
+                        -- if client.server_capabilities.completionProvider ~= nil then
+                        --     ----- Extend trigger chars if needed
+                        --     -- client.server_capabilities.completionProvider.triggerCharacters =
+                        --     --     vim.tbl_extend(
+                        --     --         "keep",
+                        --     --         client.server_capabilities.completionProvider
+                        --     --         .triggerCharacters,
+                        --     --         {
+                        --     --             "a",
+                        --     --             "b"
+                        --     --         }
+                        --     --     )
+                        --     vim.lsp.completion.enable(true, client.id, bufnr, {
+                        --         autotrigger = true,
+                        --         convert = function(item)
+                        --             return { abbr = item.label:gsub("%b()", "") }
+                        --         end,
+                        --     })
+                        --     vim.keymap.set("i", "<C-space>", vim.lsp.completion.get,
+                        --         {
+                        --             desc = "trigger autocompletion"
+                        --         })
+                        -- end
                     end
                 }
 

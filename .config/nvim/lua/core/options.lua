@@ -4,7 +4,7 @@ local options = {
     backup = false, -- creates a backup file
     cmdheight = 1,  -- space in the neovim command line for displaying messages
     colorcolumn = { "89" },
-    completeopt = { "menuone", "noinsert" },
+    completeopt = { "menuone", "noinsert", "popup" },
     conceallevel = 0,  -- 0 = No conceal
     cursorline = true, -- highlight the current line
     expandtab = true,  -- convert tabs to spaces
