@@ -58,6 +58,8 @@ set tabstop 4
 set rulerfmt "%a  |%p  |\033[7;31m %m \033[0m  |\033[7;33m %c \033[0m  |\033[7;35m %s \033[0m  |\033[7;34m %f \033[0m |%d |%i/%t"
 
 # --------- User options ---------
+set user_file_operation_finish_sound '$HOME/.config/my-config/notification_tones/file_operation_completed.mp3'
+
 set user_paste_opt ''
 set user_broot_opt ''
 set user_fzf_opt ''
@@ -173,7 +175,8 @@ notify-send "lf: rm completed"
 rm -- "\$0"
 EOF
     chmod 700 "$SH_FILE"
-    tmux new-session -d -s "$(basename "$SH_FILE")" -- bash "$SH_FILE"
+    TMUX_NAME="$(basename "$SH_FILE" | tr "." "_")"
+    tmux new-session -d -s "$TMUX_NAME" -- bash "$SH_FILE"
     lf -remote "send $id echo Remove ${#arr[@]} file(s)"
 
 }}
@@ -220,7 +223,8 @@ notify-send "lf: rm completed"
 rm -- "\$0"
 EOF
     chmod 700 "$SH_FILE"
-    tmux new-session -d -s "$(basename "$SH_FILE")" -- bash "$SH_FILE"
+    TMUX_NAME="$(basename "$SH_FILE" | tr "." "_")"
+    tmux new-session -d -s "$TMUX_NAME" -- bash "$SH_FILE"
     lf -remote "send $id echo Remove ${#arr[@]} file(s)"
 
 }}
@@ -489,10 +493,12 @@ EOF
     cat <<EOF >>"$SH_FILE"
 notify-send "lf: $ACTION completed"
 lf -remote "send reload"
+[ -f "$lf_user_file_operation_finish_sound" ] && pw-play "$lf_user_file_operation_finish_sound"
 rm -- "\$0"
 EOF
     chmod 700 "$SH_FILE"
-    tmux new-session -d -s "$(basename "$SH_FILE")" -- bash "$SH_FILE"
+    TMUX_NAME="$(basename "$SH_FILE" | tr "." "_")"
+    tmux new-session -d -s "$TMUX_NAME" -- bash "$SH_FILE"
     lf -remote "send $id echo Pasting ${#selected_paths_arr[@]} file(s) - $ACTION"
 }}
 
@@ -1026,11 +1032,14 @@ done
 
 notify-send "lf: Extract completed"
 lf -remote "send reload"
+[ -f "$lf_user_file_operation_finish_sound" ] && pw-play "$lf_user_file_operation_finish_sound"
 read -n 1 -s -p "Press any key to exit..."
 rm -- "\$0"
 EOF
     chmod 700 "$SH_FILE"
-    (setsid kitty -- bash "$SH_FILE" &) >/dev/null 2>&1 </dev/null
+    TMUX_NAME="$(basename "$SH_FILE" | tr "." "_")"
+    tmux new-session -d -s "$TMUX_NAME" -- bash "$SH_FILE"
+    setsid kitty -- tmux attach-session -t "$TMUX_NAME" >/dev/null 2>&1 </dev/null &
     lf -remote "send $id echo Extracting $f"
 }}
 
@@ -1188,18 +1197,20 @@ done
 
 notify-send "lf: Extract to individual folder completed "${PWD@Q}
 lf -remote "send reload"
+[ -f "$lf_user_file_operation_finish_sound" ] && pw-play "$lf_user_file_operation_finish_sound"
 read -n 1 -s -p "Press any key to exit..."
 rm -- "\$0"
 EOF
     chmod 700 "$SH_FILE"
-    (setsid kitty -- bash "$SH_FILE" &) >/dev/null 2>&1 </dev/null
+    TMUX_NAME="$(basename "$SH_FILE" | tr "." "_")"
+    tmux new-session -d -s "$TMUX_NAME" -- bash "$SH_FILE"
+    setsid kitty -- tmux attach-session -t "$TMUX_NAME" >/dev/null 2>&1 </dev/null &
     lf -remote "send $id unselect"
     lf -remote "send $id echo Extracting ${#arr[@]} file(s) to individual folder"
 
 }}
 
 #----------
-# Do not use Tmux, in case it exits with an error
 cmd archive-single-tar-zstd ${{
     readarray -t arr <<<"$fx"
     [ "${#arr[@]}" -eq 0 ] && {
@@ -1274,20 +1285,22 @@ cmd archive-single-tar-zstd ${{
 #$dest
 ${tar_cmd[@]} | pv -s "\$(${du_cmd[@]} | tail -1 | awk '{print \$1}')" | zstdmt >${dest@Q}
 
-notify-send "lf: Archive completed "${dest@Q}
+notify-send "lf: Archive to single tar.zst completed "${dest@Q}
 lf -remote "send reload"
+[ -f "$lf_user_file_operation_finish_sound" ] && pw-play "$lf_user_file_operation_finish_sound"
 read -n 1 -s -p "Press any key to exit..."
 rm -- "\$0"
 EOF
     chmod 700 "$SH_FILE"
-    (setsid kitty -- bash "$SH_FILE" &) >/dev/null 2>&1 </dev/null
+    TMUX_NAME="$(basename "$SH_FILE" | tr "." "_")"
+    tmux new-session -d -s "$TMUX_NAME" -- bash "$SH_FILE"
+    setsid kitty -- tmux attach-session -t "$TMUX_NAME" >/dev/null 2>&1 </dev/null &
     lf -remote "send $id unselect"
     lf -remote "send $id echo Archiving to $dest"
 
 }}
 
 #----------
-# Do not use Tmux, in case it exits with an error
 cmd archive-individual-tar-zstd ${{
     readarray -t arr <<<"$fx"
     [ "${#arr[@]}" -eq 0 ] && {
@@ -1352,20 +1365,22 @@ for file in "\${files[@]}"; do
     fi
 done
 
-notify-send "lf: Archive to individual tar completed "${PWD@Q}
+notify-send "lf: Archive to individual tar.zst completed "${PWD@Q}
 lf -remote "send reload"
+[ -f "$lf_user_file_operation_finish_sound" ] && pw-play "$lf_user_file_operation_finish_sound"
 read -n 1 -s -p "Press any key to exit..."
 rm -- "\$0"
 EOF
     chmod 700 "$SH_FILE"
-    (setsid kitty -- bash "$SH_FILE" &) >/dev/null 2>&1 </dev/null
+    TMUX_NAME="$(basename "$SH_FILE" | tr "." "_")"
+    tmux new-session -d -s "$TMUX_NAME" -- bash "$SH_FILE"
+    setsid kitty -- tmux attach-session -t "$TMUX_NAME" >/dev/null 2>&1 </dev/null &
     lf -remote "send $id unselect"
     lf -remote "send $id echo Archiving ${#arr[@]} file(s) to individual tar"
 
 }}
 
 #----------
-# Do not use Tmux, in case it exits with an error
 cmd archive-single-zip ${{
     readarray -t arr <<<"$fx"
     [ "${#arr[@]}" -eq 0 ] && {
@@ -1433,20 +1448,22 @@ cmd archive-single-zip ${{
 cd ${common_dir@Q}
 zip -r ${dest@Q} ${arr_trim[@]@Q}
 
-notify-send "lf: Archive completed "${dest@Q}
+notify-send "lf: Archive to single zip completed "${dest@Q}
 lf -remote "send reload"
+[ -f "$lf_user_file_operation_finish_sound" ] && pw-play "$lf_user_file_operation_finish_sound"
 read -n 1 -s -p "Press any key to exit..."
 rm -- "\$0"
 EOF
     chmod 700 "$SH_FILE"
-    (setsid kitty -- bash "$SH_FILE" &) >/dev/null 2>&1 </dev/null
+    TMUX_NAME="$(basename "$SH_FILE" | tr "." "_")"
+    tmux new-session -d -s "$TMUX_NAME" -- bash "$SH_FILE"
+    setsid kitty -- tmux attach-session -t "$TMUX_NAME" >/dev/null 2>&1 </dev/null &
     lf -remote "send $id unselect"
     lf -remote "send $id echo Archiving to $dest"
 
 }}
 
 #----------
-# Do not use Tmux, in case it exits with an error
 cmd archive-individual-zip ${{
     readarray -t arr <<<"$fx"
     [ "${#arr[@]}" -eq 0 ] && {
@@ -1511,18 +1528,20 @@ done
 
 notify-send "lf: Archive to individual zip completed "${PWD@Q}
 lf -remote "send reload"
+[ -f "$lf_user_file_operation_finish_sound" ] && pw-play "$lf_user_file_operation_finish_sound"
 read -n 1 -s -p "Press any key to exit..."
 rm -- "\$0"
 EOF
     chmod 700 "$SH_FILE"
-    (setsid kitty -- bash "$SH_FILE" &) >/dev/null 2>&1 </dev/null
+    TMUX_NAME="$(basename "$SH_FILE" | tr "." "_")"
+    tmux new-session -d -s "$TMUX_NAME" -- bash "$SH_FILE"
+    setsid kitty -- tmux attach-session -t "$TMUX_NAME" >/dev/null 2>&1 </dev/null &
     lf -remote "send $id unselect"
     lf -remote "send $id echo Archiving ${#arr[@]} file(s) to individual zip"
 
 }}
 
 #----------
-# Do not use Tmux, in case it exits with an error
 cmd archive-single-7z ${{
     readarray -t arr <<<"$fx"
     [ "${#arr[@]}" -eq 0 ] && {
@@ -1562,20 +1581,22 @@ cmd archive-single-7z ${{
 #$dest
 7z a ${dest@Q} ${arr[@]@Q}
 
-notify-send "lf: Archive completed "${dest@Q}
+notify-send "lf: Archive to single 7zip completed "${dest@Q}
 lf -remote "send reload"
+[ -f "$lf_user_file_operation_finish_sound" ] && pw-play "$lf_user_file_operation_finish_sound"
 read -n 1 -s -p "Press any key to exit..."
 rm -- "\$0"
 EOF
     chmod 700 "$SH_FILE"
-    (setsid kitty -- bash "$SH_FILE" &) >/dev/null 2>&1 </dev/null
+    TMUX_NAME="$(basename "$SH_FILE" | tr "." "_")"
+    tmux new-session -d -s "$TMUX_NAME" -- bash "$SH_FILE"
+    setsid kitty -- tmux attach-session -t "$TMUX_NAME" >/dev/null 2>&1 </dev/null &
     lf -remote "send $id unselect"
     lf -remote "send $id echo Archiving to $dest"
 
 }}
 
 #----------
-# Do not use Tmux, in case it exits with an error
 cmd archive-individual-7z ${{
     readarray -t arr <<<"$fx"
     [ "${#arr[@]}" -eq 0 ] && {
@@ -1638,13 +1659,16 @@ for file in "\${files[@]}"; do
     fi
 done
 
-notify-send "lf: Archive to individual zip completed "${PWD@Q}
+notify-send "lf: Archive to individual 7z completed "${PWD@Q}
 lf -remote "send reload"
+[ -f "$lf_user_file_operation_finish_sound" ] && pw-play "$lf_user_file_operation_finish_sound"
 read -n 1 -s -p "Press any key to exit..."
 rm -- "\$0"
 EOF
     chmod 700 "$SH_FILE"
-    (setsid kitty -- bash "$SH_FILE" &) >/dev/null 2>&1 </dev/null
+    TMUX_NAME="$(basename "$SH_FILE" | tr "." "_")"
+    tmux new-session -d -s "$TMUX_NAME" -- bash "$SH_FILE"
+    setsid kitty -- tmux attach-session -t "$TMUX_NAME" >/dev/null 2>&1 </dev/null &
     lf -remote "send $id unselect"
     lf -remote "send $id echo Archiving ${#arr[@]} file(s) to individual 7z"
 
