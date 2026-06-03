@@ -84,7 +84,7 @@ fi
 # ----- GPU specific settings -----
 if lspci | grep -E "(VGA|Display controller)" | grep -q "NVIDIA"; then
     # Treat input as yuv444, default is yuv420
-    extra_cmd+=("-ffmpeg-video-opts" "rgb_mode=yuv444;rc=constqp;qp=64" "-tune" "quality")
+    extra_cmd+=("-ffmpeg-video-opts" "rgb_mode=yuv444;qp=64" "-tune" "quality")
     # -pix_fmt
 fi
 
