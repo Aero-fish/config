@@ -68,6 +68,7 @@ text/xml=nvim.desktop;
 video/MP2T=mpv.desktop;
 video/mp4=mpv.desktop;
 video/quicktime=mpv.desktop;
+video/webm=mpv.desktop;
 video/x-matroska=mpv.desktop;
 video/x-ms-wmv=mpv.desktop;
 video/x-msvideo=mpv.desktop;
