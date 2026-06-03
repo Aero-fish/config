@@ -16,6 +16,7 @@ inhibit_programs=(
     "^(/usr/bin/|/bin/|)bash $HOME/.local/bin/yuzu.sh"
     "^(/usr/bin/|/bin/|)bash -c sleep infinity; echo no-suspension ended\$"
     "^(/usr/bin/|/bin/|)cp ?"
+    "^(/usr/bin/|/bin/|)ffmpeg ?"
     "^(/usr/bin/|/bin/|)mv ?"
     "^(/usr/bin/|/bin/|)qbittorrent ?"
     "^(/usr/bin/|/bin/|)qemu-system-x86_64 ?"
