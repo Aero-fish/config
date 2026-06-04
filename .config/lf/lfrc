@@ -493,7 +493,13 @@ EOF
     cat <<EOF >>"$SH_FILE"
 notify-send "lf: $ACTION completed"
 lf -remote "send reload"
-[ -f "$lf_user_file_operation_finish_sound" ] && pw-play "$lf_user_file_operation_finish_sound"
+if pgrep -x "Hyprland" >/dev/null 2>&1; then
+    focus_prog_is_fullscreen="\$(hyprctl activewindow -j | jq -r '.fullscreen')"
+    if [ "\$focus_prog_is_fullscreen" = "0" ] && [ -f "$lf_user_file_operation_finish_sound" ]; then
+        pw-play "$lf_user_file_operation_finish_sound"
+    fi
+fi
+
 rm -- "\$0"
 EOF
     chmod 700 "$SH_FILE"
@@ -1032,7 +1038,12 @@ done
 
 notify-send "lf: Extract completed"
 lf -remote "send reload"
-[ -f "$lf_user_file_operation_finish_sound" ] && pw-play "$lf_user_file_operation_finish_sound"
+if pgrep -x "Hyprland" >/dev/null 2>&1; then
+    focus_prog_is_fullscreen="\$(hyprctl activewindow -j | jq -r '.fullscreen')"
+    if [ "\$focus_prog_is_fullscreen" = "0" ] && [ -f "$lf_user_file_operation_finish_sound" ]; then
+        pw-play "$lf_user_file_operation_finish_sound"
+    fi
+fi
 read -n 1 -s -p "Press any key to exit..."
 rm -- "\$0"
 EOF
@@ -1197,7 +1208,12 @@ done
 
 notify-send "lf: Extract to individual folder completed "${PWD@Q}
 lf -remote "send reload"
-[ -f "$lf_user_file_operation_finish_sound" ] && pw-play "$lf_user_file_operation_finish_sound"
+if pgrep -x "Hyprland" >/dev/null 2>&1; then
+    focus_prog_is_fullscreen="\$(hyprctl activewindow -j | jq -r '.fullscreen')"
+    if [ "\$focus_prog_is_fullscreen" = "0" ] && [ -f "$lf_user_file_operation_finish_sound" ]; then
+        pw-play "$lf_user_file_operation_finish_sound"
+    fi
+fi
 read -n 1 -s -p "Press any key to exit..."
 rm -- "\$0"
 EOF
@@ -1287,7 +1303,12 @@ ${tar_cmd[@]} | pv -s "\$(${du_cmd[@]} | tail -1 | awk '{print \$1}')" | zstdmt 
 
 notify-send "lf: Archive to single tar.zst completed "${dest@Q}
 lf -remote "send reload"
-[ -f "$lf_user_file_operation_finish_sound" ] && pw-play "$lf_user_file_operation_finish_sound"
+if pgrep -x "Hyprland" >/dev/null 2>&1; then
+    focus_prog_is_fullscreen="\$(hyprctl activewindow -j | jq -r '.fullscreen')"
+    if [ "\$focus_prog_is_fullscreen" = "0" ] && [ -f "$lf_user_file_operation_finish_sound" ]; then
+        pw-play "$lf_user_file_operation_finish_sound"
+    fi
+fi
 read -n 1 -s -p "Press any key to exit..."
 rm -- "\$0"
 EOF
@@ -1367,7 +1388,12 @@ done
 
 notify-send "lf: Archive to individual tar.zst completed "${PWD@Q}
 lf -remote "send reload"
-[ -f "$lf_user_file_operation_finish_sound" ] && pw-play "$lf_user_file_operation_finish_sound"
+if pgrep -x "Hyprland" >/dev/null 2>&1; then
+    focus_prog_is_fullscreen="\$(hyprctl activewindow -j | jq -r '.fullscreen')"
+    if [ "\$focus_prog_is_fullscreen" = "0" ] && [ -f "$lf_user_file_operation_finish_sound" ]; then
+        pw-play "$lf_user_file_operation_finish_sound"
+    fi
+fi
 read -n 1 -s -p "Press any key to exit..."
 rm -- "\$0"
 EOF
@@ -1450,7 +1476,12 @@ zip -r ${dest@Q} ${arr_trim[@]@Q}
 
 notify-send "lf: Archive to single zip completed "${dest@Q}
 lf -remote "send reload"
-[ -f "$lf_user_file_operation_finish_sound" ] && pw-play "$lf_user_file_operation_finish_sound"
+if pgrep -x "Hyprland" >/dev/null 2>&1; then
+    focus_prog_is_fullscreen="\$(hyprctl activewindow -j | jq -r '.fullscreen')"
+    if [ "\$focus_prog_is_fullscreen" = "0" ] && [ -f "$lf_user_file_operation_finish_sound" ]; then
+        pw-play "$lf_user_file_operation_finish_sound"
+    fi
+fi
 read -n 1 -s -p "Press any key to exit..."
 rm -- "\$0"
 EOF
@@ -1528,7 +1559,12 @@ done
 
 notify-send "lf: Archive to individual zip completed "${PWD@Q}
 lf -remote "send reload"
-[ -f "$lf_user_file_operation_finish_sound" ] && pw-play "$lf_user_file_operation_finish_sound"
+if pgrep -x "Hyprland" >/dev/null 2>&1; then
+    focus_prog_is_fullscreen="\$(hyprctl activewindow -j | jq -r '.fullscreen')"
+    if [ "\$focus_prog_is_fullscreen" = "0" ] && [ -f "$lf_user_file_operation_finish_sound" ]; then
+        pw-play "$lf_user_file_operation_finish_sound"
+    fi
+fi
 read -n 1 -s -p "Press any key to exit..."
 rm -- "\$0"
 EOF
@@ -1583,7 +1619,12 @@ cmd archive-single-7z ${{
 
 notify-send "lf: Archive to single 7zip completed "${dest@Q}
 lf -remote "send reload"
-[ -f "$lf_user_file_operation_finish_sound" ] && pw-play "$lf_user_file_operation_finish_sound"
+if pgrep -x "Hyprland" >/dev/null 2>&1; then
+    focus_prog_is_fullscreen="\$(hyprctl activewindow -j | jq -r '.fullscreen')"
+    if [ "\$focus_prog_is_fullscreen" = "0" ] && [ -f "$lf_user_file_operation_finish_sound" ]; then
+        pw-play "$lf_user_file_operation_finish_sound"
+    fi
+fi
 read -n 1 -s -p "Press any key to exit..."
 rm -- "\$0"
 EOF
@@ -1661,7 +1702,12 @@ done
 
 notify-send "lf: Archive to individual 7z completed "${PWD@Q}
 lf -remote "send reload"
-[ -f "$lf_user_file_operation_finish_sound" ] && pw-play "$lf_user_file_operation_finish_sound"
+if pgrep -x "Hyprland" >/dev/null 2>&1; then
+    focus_prog_is_fullscreen="\$(hyprctl activewindow -j | jq -r '.fullscreen')"
+    if [ "\$focus_prog_is_fullscreen" = "0" ] && [ -f "$lf_user_file_operation_finish_sound" ]; then
+        pw-play "$lf_user_file_operation_finish_sound"
+    fi
+fi
 read -n 1 -s -p "Press any key to exit..."
 rm -- "\$0"
 EOF
