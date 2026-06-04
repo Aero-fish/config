@@ -280,6 +280,9 @@ ffmpeg-compress-video() {
     ## Also copy metadata
     #ffmpeg -i "$1" -map 0 -c:v libx265 -x265-params crf=23 -c:a copy -c:s copy "${basename}.new.mkv"
 
+    ## AV1 using nvenc
+    # ffmpeg -hwaccel cuda -hwaccel_output_format cuda -i "$i" -c:v av1_nvenc -preset p4 -tune uhq -rgb_mode yuv444 -rc constqp -qp 64 -c:a copy -c:s copy "$(_get_basename "$1").new.mkv"
+
     echo "Output to '$(_get_basename "$1").new.mkv'."
 }
 
