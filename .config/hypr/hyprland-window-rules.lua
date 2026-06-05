@@ -59,7 +59,8 @@ hl.window_rule({
 
 hl.window_rule({
     name = "KeepassXC pop up",
-    match = { class = "KeePassXC", float = true },
+    match = { class = "org.keepassxc.KeePassXC", title = "Unlock Database - KeePassXC" },
+    float = true,
     center = true,
 })
 
