@@ -10,6 +10,7 @@ inhibit_programs=(
     "^($HOME/misc/programs/baidunetdisk/|)baidunetdisk"
     "^(/usr/bin/|/bin/|)(bash|sh) (/usr/local/share/|)wine-net .*115(chrome)?\\.exe"
     "^(/usr/bin/|/bin/|)(bash|sh) (/usr/local/share/|)wine-net .*PikPak\\.exe"
+    "^(/usr/bin/|/bin/|)7z ?"
     "^(/usr/bin/|/bin/|)bash $HOME/.local/bin/cemu.sh"
     "^(/usr/bin/|/bin/|)bash $HOME/.local/bin/download-youtube-watchlist.sh"
     "^(/usr/bin/|/bin/|)bash $HOME/.local/bin/jdownloader.sh"
@@ -23,6 +24,8 @@ inhibit_programs=(
     "^(/usr/bin/|/bin/|)rclone ?"
     "^(/usr/bin/|/bin/|)rm ?"
     "^(/usr/bin/|/bin/|)rsync ?"
+    "^(/usr/bin/|/bin/|)tar ?"
+    "^(/usr/bin/|/bin/|)zip ?"
     "yt-dlp ?"
 )
 
