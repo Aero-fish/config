@@ -430,7 +430,7 @@ printf "%s\\0" "\${arr[@]}" | xargs --no-run-if-empty -0  -I {} mkdir -p ${PWD@Q
 error_code="\$?"
 if [ "\$error_code" -ne 0 ]; then
     notify-send "lf: $ACTION failed. (mkdir)"
-    pw-play "$HOME/.config/my-config/notification_tones/Overheat.wav"
+    setsid pw-play "$HOME/.config/my-config/notification_tones/Overheat.wav" &
     lf -remote "send reload"
     exit 1
 fi
@@ -439,7 +439,7 @@ fi
 error_code="\$?"
 if [ "\$error_code" -ne 0 ]; then
     notify-send "lf: $ACTION failed.Add rsync to the script (move one by one)"
-    pw-play "$HOME/.config/my-config/notification_tones/Overheat.wav"
+    setside pw-play "$HOME/.config/my-config/notification_tones/Overheat.wav" &
     lf -remote "send reload"
 fi
 
@@ -453,7 +453,7 @@ $mv_cmd ${mv_simple_arr[@]@Q} ${PWD@Q}
 error_code="\$?"
 if [ "\$error_code" -ne 0 ]; then
     notify-send "lf: $ACTION failed. (move simple)"
-    pw-play "$HOME/.config/my-config/notification_tones/Overheat.wav"
+    setsid pw-play "$HOME/.config/my-config/notification_tones/Overheat.wav" &
     lf -remote "send reload"
     exit 1
 fi
@@ -493,11 +493,8 @@ EOF
     cat <<EOF >>"$SH_FILE"
 notify-send "lf: $ACTION completed"
 lf -remote "send reload"
-if pgrep -x "Hyprland" >/dev/null 2>&1; then
-    focus_prog_is_fullscreen="\$(hyprctl activewindow -j | jq -r '.fullscreen')"
-    if [ "\$focus_prog_is_fullscreen" = "0" ] && [ -f "$lf_user_file_operation_finish_sound" ]; then
-        pw-play "$lf_user_file_operation_finish_sound"
-    fi
+if ! pgrep --quiet -f "^(/usr/bin/|/bin/|)gpu-screen-recorder" && [ -f "$lf_user_file_operation_finish_sound" ]; then
+    setsid pw-play "$lf_user_file_operation_finish_sound" &
 fi
 
 rm -- "\$0"
@@ -511,7 +508,7 @@ EOF
 #----------
 cmd on-select &{{
     # Send file to NautilusPreviewer if it is alive
-    if pgrep -f "^(/usr/bin/gjs /usr/lib/)?org.gnome.NautilusPreviewer" >/dev/null 2>&1; then
+    if pgrep --quiet -f "^(/usr/bin/gjs /usr/lib/)?org.gnome.NautilusPreviewer"; then
         sushi "$f" >/dev/null 2>&1
     fi
 
@@ -519,7 +516,7 @@ cmd on-select &{{
 
 #----------
 cmd on-quit &{{
-    if pgrep -f "^(/usr/bin/gjs /usr/lib/)?org.gnome.NautilusPreviewer" >/dev/null 2>&1; then
+    if pgrep --quiet -f "^(/usr/bin/gjs /usr/lib/)?org.gnome.NautilusPreviewer"; then
         pkill -f "^(/usr/bin/gjs /usr/lib/)?org.gnome.NautilusPreviewer" >/dev/null 2>&1
     fi
 }}
@@ -570,7 +567,7 @@ cmd toggle_nautilus_previewer &{{
     # ShowFile method:
     # $1 url of file, $2 display id, $3 closeIfAlreadyShown
 
-    if pgrep -f "^(/usr/bin/gjs /usr/lib/)?org.gnome.NautilusPreviewer" >/dev/null 2>&1; then
+    if pgrep --quiet -f "^(/usr/bin/gjs /usr/lib/)?org.gnome.NautilusPreviewer"; then
         pkill -f "^(/usr/bin/gjs /usr/lib/)?org.gnome.NautilusPreviewer" >/dev/null 2>&1
         lf -remote "send $id echo Killed NautilusPreviewer"
 
@@ -599,7 +596,7 @@ cmd z ${{
 
 #----------
 cmd ripgrep_word ${{
-    cmd="rg --follow --no-ignore --hidden --column --line-number --no-heading --color=always --smart-case --max-filesize 2M --trim --field-match-separator='\x7F:' --glob='!*.kdb' --glob='!*.kdbx' --glob='!*.key' --glob='!*cache/' --glob='!.cargo/' --glob='!.cert' --glob='!.fpm/' --glob='!.git/' --glob='!.gnupg/' --glob='!.gphoto/' --glob='!.hyprland/' --glob='!.ipython/' --glob='!.jupyter/' --glob='!.keepass/' --glob='!.keepassxc/' --glob='!.lastpass/' --glob='!.npm/' --glob='!.nv' --glob='!.password-store/' --glob='!.perl5/' --glob='!.pki/' --glob='!.snapshots/' --glob='!.ssh/' --glob='!.svn/' --glob='!.texlive/' --glob='!.vscode-oss/' --glob='!.wine/' --glob='!__pycache__/' --glob='!bitwarden/' --glob='!containers/' --glob='!go/' --glob='!keepass/' --glob='!keepass/' --glob='!keepassx/' --glob='!keepassxc/' --glob='!keepassxcrc/' --glob='!keyrings/' --glob='!librewolf*/' --glob='!lost+found' --glob='!mozilla*/' --glob='!node_modules/' --glob='!rclone/' --glob='!thunderbird/'"
+    cmd="rg --follow --hidden --column --line-number --no-heading --color=always --smart-case --max-filesize 2M --trim --field-match-separator='\x7F:' --glob='!*.kdb' --glob='!*.kdbx' --glob='!*.key' --glob='!*cache/' --glob='!.cargo/' --glob='!.cert' --glob='!.fpm/' --glob='!.git/' --glob='!.gnupg/' --glob='!.gphoto/' --glob='!.hyprland/' --glob='!.ipython/' --glob='!.jupyter/' --glob='!.keepass/' --glob='!.keepassxc/' --glob='!.lastpass/' --glob='!.npm/' --glob='!.nv' --glob='!.password-store/' --glob='!.perl5/' --glob='!.pki/' --glob='!.snapshots/' --glob='!.ssh/' --glob='!.svn/' --glob='!.texlive/' --glob='!.vscode-oss/' --glob='!.wine/' --glob='!__pycache__/' --glob='!bitwarden/' --glob='!containers/' --glob='!go/' --glob='!keepass/' --glob='!keepass/' --glob='!keepassx/' --glob='!keepassxc/' --glob='!keepassxcrc/' --glob='!keyrings/' --glob='!librewolf*/' --glob='!lost+found' --glob='!mozilla*/' --glob='!node_modules/' --glob='!rclone/' --glob='!thunderbird/'"
     # Preview takes too much space, not able to show full path
     f="$(
         fzf --ansi --disabled --layout=reverse --header="Search in files" --delimiter='\x7F:' \
@@ -613,6 +610,21 @@ cmd ripgrep_word ${{
     lf -remote "send $id select $f_escaped"
 }}
 
+#----------
+cmd ripgrep_word_no_ignore ${{
+    cmd="rg --follow --no-ignore --hidden --column --line-number --no-heading --color=always --smart-case --max-filesize 2M --trim --field-match-separator='\x7F:' --glob='!*.kdb' --glob='!*.kdbx' --glob='!*.key' --glob='!*cache/' --glob='!.cargo/' --glob='!.cert' --glob='!.fpm/' --glob='!.git/' --glob='!.gnupg/' --glob='!.gphoto/' --glob='!.hyprland/' --glob='!.ipython/' --glob='!.jupyter/' --glob='!.keepass/' --glob='!.keepassxc/' --glob='!.lastpass/' --glob='!.npm/' --glob='!.nv' --glob='!.password-store/' --glob='!.perl5/' --glob='!.pki/' --glob='!.snapshots/' --glob='!.ssh/' --glob='!.svn/' --glob='!.texlive/' --glob='!.vscode-oss/' --glob='!.wine/' --glob='!__pycache__/' --glob='!bitwarden/' --glob='!containers/' --glob='!go/' --glob='!keepass/' --glob='!keepass/' --glob='!keepassx/' --glob='!keepassxc/' --glob='!keepassxcrc/' --glob='!keyrings/' --glob='!librewolf*/' --glob='!lost+found' --glob='!mozilla*/' --glob='!node_modules/' --glob='!rclone/' --glob='!thunderbird/'"
+    # Preview takes too much space, not able to show full path
+    f="$(
+        fzf --ansi --disabled --layout=reverse --header="Search in files" --delimiter='\x7F:' \
+            --bind="start:reload([ -n {q} ] && $cmd -- {q} || true)" \
+            --bind="change:reload([ -n {q} ] && $cmd -- {q} || true)" \
+            --bind="enter:become(printf '%s' {1})"
+        )"
+        # --bind='enter:become(lf -remote "send $id select \"$(printf "%s" {1} | sed '\''s/\\/\\\\/g;s/"/\\"/g'\'')\"")')"
+        # --preview='~/.config/lf/lf_kitty_clean; ~/.config/lf/lf_kitty_preview_bwrap {1} "$FZF_PREVIEW_COLUMNS" "$FZF_PREVIEW_LINES" "$FZF_PREVIEW_LEFT" "$FZF_PREVIEW_TOP"'
+    f_escaped="${f@Q}"
+    lf -remote "send $id select $f_escaped"
+}}
 #----------
 cmd broot ${{
     if [ "$lf_user_broot_opt" = "norm" ]; then
@@ -1038,11 +1050,8 @@ done
 
 notify-send "lf: Extract completed"
 lf -remote "send reload"
-if pgrep -x "Hyprland" >/dev/null 2>&1; then
-    focus_prog_is_fullscreen="\$(hyprctl activewindow -j | jq -r '.fullscreen')"
-    if [ "\$focus_prog_is_fullscreen" = "0" ] && [ -f "$lf_user_file_operation_finish_sound" ]; then
-        pw-play "$lf_user_file_operation_finish_sound"
-    fi
+if ! pgrep --quiet -f "^(/usr/bin/|/bin/|)gpu-screen-recorder" && [ -f "$lf_user_file_operation_finish_sound" ]; then
+    setsid pw-play "$lf_user_file_operation_finish_sound" &
 fi
 read -n 1 -s -p "Press any key to exit..."
 rm -- "\$0"
@@ -1208,11 +1217,8 @@ done
 
 notify-send "lf: Extract to individual folder completed "${PWD@Q}
 lf -remote "send reload"
-if pgrep -x "Hyprland" >/dev/null 2>&1; then
-    focus_prog_is_fullscreen="\$(hyprctl activewindow -j | jq -r '.fullscreen')"
-    if [ "\$focus_prog_is_fullscreen" = "0" ] && [ -f "$lf_user_file_operation_finish_sound" ]; then
-        pw-play "$lf_user_file_operation_finish_sound"
-    fi
+if ! pgrep --quiet -f "^(/usr/bin/|/bin/|)gpu-screen-recorder" && [ -f "$lf_user_file_operation_finish_sound" ]; then
+    setsid pw-play "$lf_user_file_operation_finish_sound" &
 fi
 read -n 1 -s -p "Press any key to exit..."
 rm -- "\$0"
@@ -1303,11 +1309,8 @@ ${tar_cmd[@]} | pv -s "\$(${du_cmd[@]} | tail -1 | awk '{print \$1}')" | zstdmt 
 
 notify-send "lf: Archive to single tar.zst completed "${dest@Q}
 lf -remote "send reload"
-if pgrep -x "Hyprland" >/dev/null 2>&1; then
-    focus_prog_is_fullscreen="\$(hyprctl activewindow -j | jq -r '.fullscreen')"
-    if [ "\$focus_prog_is_fullscreen" = "0" ] && [ -f "$lf_user_file_operation_finish_sound" ]; then
-        pw-play "$lf_user_file_operation_finish_sound"
-    fi
+if ! pgrep --quiet -f "^(/usr/bin/|/bin/|)gpu-screen-recorder" && [ -f "$lf_user_file_operation_finish_sound" ]; then
+    setsid pw-play "$lf_user_file_operation_finish_sound" &
 fi
 read -n 1 -s -p "Press any key to exit..."
 rm -- "\$0"
@@ -1388,11 +1391,8 @@ done
 
 notify-send "lf: Archive to individual tar.zst completed "${PWD@Q}
 lf -remote "send reload"
-if pgrep -x "Hyprland" >/dev/null 2>&1; then
-    focus_prog_is_fullscreen="\$(hyprctl activewindow -j | jq -r '.fullscreen')"
-    if [ "\$focus_prog_is_fullscreen" = "0" ] && [ -f "$lf_user_file_operation_finish_sound" ]; then
-        pw-play "$lf_user_file_operation_finish_sound"
-    fi
+if ! pgrep --quiet -f "^(/usr/bin/|/bin/|)gpu-screen-recorder" && [ -f "$lf_user_file_operation_finish_sound" ]; then
+    setsid pw-play "$lf_user_file_operation_finish_sound" &
 fi
 read -n 1 -s -p "Press any key to exit..."
 rm -- "\$0"
@@ -1476,11 +1476,8 @@ zip -r ${dest@Q} ${arr_trim[@]@Q}
 
 notify-send "lf: Archive to single zip completed "${dest@Q}
 lf -remote "send reload"
-if pgrep -x "Hyprland" >/dev/null 2>&1; then
-    focus_prog_is_fullscreen="\$(hyprctl activewindow -j | jq -r '.fullscreen')"
-    if [ "\$focus_prog_is_fullscreen" = "0" ] && [ -f "$lf_user_file_operation_finish_sound" ]; then
-        pw-play "$lf_user_file_operation_finish_sound"
-    fi
+if ! pgrep --quiet -f "^(/usr/bin/|/bin/|)gpu-screen-recorder" && [ -f "$lf_user_file_operation_finish_sound" ]; then
+    setsid pw-play "$lf_user_file_operation_finish_sound" &
 fi
 read -n 1 -s -p "Press any key to exit..."
 rm -- "\$0"
@@ -1559,11 +1556,8 @@ done
 
 notify-send "lf: Archive to individual zip completed "${PWD@Q}
 lf -remote "send reload"
-if pgrep -x "Hyprland" >/dev/null 2>&1; then
-    focus_prog_is_fullscreen="\$(hyprctl activewindow -j | jq -r '.fullscreen')"
-    if [ "\$focus_prog_is_fullscreen" = "0" ] && [ -f "$lf_user_file_operation_finish_sound" ]; then
-        pw-play "$lf_user_file_operation_finish_sound"
-    fi
+if ! pgrep --quiet -f "^(/usr/bin/|/bin/|)gpu-screen-recorder" && [ -f "$lf_user_file_operation_finish_sound" ]; then
+    setsid pw-play "$lf_user_file_operation_finish_sound" &
 fi
 read -n 1 -s -p "Press any key to exit..."
 rm -- "\$0"
@@ -1619,11 +1613,8 @@ cmd archive-single-7z ${{
 
 notify-send "lf: Archive to single 7zip completed "${dest@Q}
 lf -remote "send reload"
-if pgrep -x "Hyprland" >/dev/null 2>&1; then
-    focus_prog_is_fullscreen="\$(hyprctl activewindow -j | jq -r '.fullscreen')"
-    if [ "\$focus_prog_is_fullscreen" = "0" ] && [ -f "$lf_user_file_operation_finish_sound" ]; then
-        pw-play "$lf_user_file_operation_finish_sound"
-    fi
+if ! pgrep --quiet -f "^(/usr/bin/|/bin/|)gpu-screen-recorder" && [ -f "$lf_user_file_operation_finish_sound" ]; then
+    setsid pw-play "$lf_user_file_operation_finish_sound" &
 fi
 read -n 1 -s -p "Press any key to exit..."
 rm -- "\$0"
@@ -1702,11 +1693,8 @@ done
 
 notify-send "lf: Archive to individual 7z completed "${PWD@Q}
 lf -remote "send reload"
-if pgrep -x "Hyprland" >/dev/null 2>&1; then
-    focus_prog_is_fullscreen="\$(hyprctl activewindow -j | jq -r '.fullscreen')"
-    if [ "\$focus_prog_is_fullscreen" = "0" ] && [ -f "$lf_user_file_operation_finish_sound" ]; then
-        pw-play "$lf_user_file_operation_finish_sound"
-    fi
+if ! pgrep --quiet -f "^(/usr/bin/|/bin/|)gpu-screen-recorder" && [ -f "$lf_user_file_operation_finish_sound" ]; then
+    setsid pw-play "$lf_user_file_operation_finish_sound" &
 fi
 read -n 1 -s -p "Press any key to exit..."
 rm -- "\$0"
@@ -2044,6 +2032,7 @@ map <tab>g      push :glob-select<tab>
 map <tab>G      push :glob-unselect<tab>
 map <tab>l      follow_link
 map <tab>r      :ripgrep_word
+map <tab>R      :ripgrep_word_no_ignore
 map <tab>s      edit-selection
 map <tab>S      edit-cp-mv-list
 map <tab>z      z
