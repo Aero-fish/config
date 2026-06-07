@@ -102,19 +102,25 @@ cmd delete ${{
         exit 0
     }
 
-    if [ "${#arr[@]}" -gt 12 ]; then
-        echo -n "Delete all ${#arr[@]} files? [y/n]"
-    else
-        echo "Delete the following ${#arr[@]} file(s)?"
-        printf '%s\n' "${arr[@]}"
-        echo -n "[y/n]"
-    fi
-    read -n 1 -r res
-    echo -e "\n"
-    if [ "$res" != "y" ]; then
-        lf -remote "send $id echo Delete cancelled"
-        exit 0
-    fi
+    while true; do
+        if [ "${#arr[@]}" -gt 12 ]; then
+            echo -n "rm all ${#arr[@]} files? [y/n]"
+        else
+            echo "rm the following ${#arr[@]} file(s)?"
+            printf '%s\n' "${arr[@]}"
+            echo -n "[y/n]"
+        fi
+        read -n 1 -r res
+        echo -e "\n"
+        if [ "$res" = "y" ] || [ "$res" = "Y" ]; then
+            break
+        elif [ "$res" = "n" ] || [ "$res" = "N" ]; then
+            lf -remote "send $id echo rm cancelled"
+            exit 0
+        else
+            echo "'$res' is not a valid input."
+        fi
+    done
 
     run_dir="${XDG_RUNTIME_DIR:-/run/user/0}"
     mkdir -p "$run_dir/lf_progress"
@@ -188,19 +194,25 @@ cmd delete-with-rm ${{
         exit 0
     }
 
-    if [ "${#arr[@]}" -gt 12 ]; then
-        echo -n "rm all ${#arr[@]} files? [y/n]"
-    else
-        echo "rm the following ${#arr[@]} file(s)?"
-        printf '%s\n' "${arr[@]}"
-        echo -n "[y/n]"
-    fi
-    read -n 1 -r res
-    echo -e "\n"
-    if [ "$res" != "y" ]; then
-        lf -remote "send $id echo rm cancelled"
-        exit 0
-    fi
+    while true; do
+        if [ "${#arr[@]}" -gt 12 ]; then
+            echo -n "rm all ${#arr[@]} files? [y/n]"
+        else
+            echo "rm the following ${#arr[@]} file(s)?"
+            printf '%s\n' "${arr[@]}"
+            echo -n "[y/n]"
+        fi
+        read -n 1 -r res
+        echo -e "\n"
+        if [ "$res" = "y" ] || [ "$res" = "Y" ]; then
+            break
+        elif [ "$res" = "n" ] || [ "$res" = "N" ]; then
+            lf -remote "send $id echo rm cancelled"
+            exit 0
+        else
+            echo "'$res' is not a valid input."
+        fi
+    done
 
     run_dir="${XDG_RUNTIME_DIR:-/run/user/0}"
     mkdir -p "$run_dir/lf_progress"
@@ -340,22 +352,26 @@ cmd paste ${{
         printf '%s\n' "${filename_already_exist[@]}"
         echo "----------"
 
-        echo -n -e "File name(s) exists in destination, do you want to \e[31mskip[s]\e[0m, \e[31mreplace[r]\e[0m or \e[31mbackup[b]\e[0m? "
-        read -n 1 -r res
-        echo
-        if [ "$res" = "s" ]; then
-            lf_user_paste_opt="skip"
+        while true; do
+            echo -n -e "File name(s) exists in destination, do you want to \e[31mskip[s]\e[0m, \e[31mreplace[r]\e[0m or \e[31mbackup[b]\e[0m? "
+            read -n 1 -r res
+            echo
+            if [ "$res" = "s" ]; then
+                lf_user_paste_opt="skip"
+                break
 
-        elif [ "$res" = "r" ]; then
-            lf_user_paste_opt="replace"
+            elif [ "$res" = "r" ]; then
+                lf_user_paste_opt="replace"
+                break
 
-        elif [ "$res" = "b" ]; then
-            lf_user_paste_opt="backup"
+            elif [ "$res" = "b" ]; then
+                lf_user_paste_opt="backup"
+                break
 
-        else
-            lf -remote "send $id echo Paste cancelled"
-            exit 0
-        fi
+            else
+                echo "'$res' is not a valid input."
+            fi
+        done
     fi
 
     # Create the temp file after all interactions with the user is completed.
