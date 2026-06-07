@@ -286,6 +286,21 @@ ffmpeg-compress-video() {
     echo "Output to '$(_get_basename "$1").new.mkv'."
 }
 
+ffmpeg-trim-audio-silence() {
+    local fullname basename ext output_file
+
+    fullname="$(basename -- "$1")"
+    basename="${fullname%.*}"
+    if [[ "$fullname" == *"."* ]]; then
+        ext=".${fullname##*.}" # ext=".txt"
+    else
+        ext=""
+    fi
+    output_file="$(dirname -- "$1")/${basename}_trim${ext}"
+
+    ffmpeg -i "$1" -af silenceremove=1:0:-50dB "$output_file"
+}
+
 # ---------- archiver ----------
 archive-to-single-tar-zstd() {
     # Guess the common dir
