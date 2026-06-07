@@ -22,7 +22,8 @@ for f in "${arr[@]}"; do
     filename="${filename//./_}"
     if tmux list-sessions 2>/dev/null | rg -q -F "$filename"; then
         if [[ "$action" =~ (rm|zip|7z|clamscan|extract|tar) ]]; then
-            tooltip="$tooltip\n$(tmux capture-pane -peC -t "$filename":0 | grep -v -e '^$' | tail -n1)"
+            line="$(tmux capture-pane -peC -t "$filename":0 | grep -v -e '^$' | tail -n1)"
+            tooltip="$tooltip\n${line:0:50}"
 
         else
             tooltip="$tooltip\n$(tmux capture-pane -peC -t "$filename":0 | grep -v -e '^$' | tail -n1 | awk '{print $1, $2, $3, $4}')"
