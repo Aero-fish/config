@@ -118,7 +118,7 @@ cmd delete ${{
             lf -remote "send $id echo rm cancelled"
             exit 0
         else
-            echo "'$res' is not a valid input."
+            echo "Not a valid input."
         fi
     done
 
@@ -210,7 +210,7 @@ cmd delete-with-rm ${{
             lf -remote "send $id echo rm cancelled"
             exit 0
         else
-            echo "'$res' is not a valid input."
+            echo "Not a valid input."
         fi
     done
 
