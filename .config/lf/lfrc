@@ -59,6 +59,7 @@ set rulerfmt "%a  |%p  |\033[7;31m %m \033[0m  |\033[7;33m %c \033[0m  |\033[7;3
 
 # --------- User options ---------
 set user_file_operation_finish_sound '$HOME/.config/my-config/notification_tones/file_operation_completed.mp3'
+set user_file_operation_fail_sound '$HOME/.config/my-config/notification_tones/file_operation_failed.mp3'
 
 set user_paste_opt ''
 set user_broot_opt ''
@@ -446,7 +447,9 @@ printf "%s\\0" "\${arr[@]}" | xargs --no-run-if-empty -0  -I {} mkdir -p ${PWD@Q
 error_code="\$?"
 if [ "\$error_code" -ne 0 ]; then
     notify-send "lf: $ACTION failed. (mkdir)"
-    setsid pw-play "$HOME/.config/my-config/notification_tones/Overheat.wav" &
+    if ! pgrep --quiet -f "^(/usr/bin/|/bin/|)gpu-screen-recorder" && [ -f "$lf_user_file_operation_fail_sound" ]; then
+        setsid pw-play "$lf_user_file_operation_fail_sound" &
+    fi
     lf -remote "send reload"
     exit 1
 fi
@@ -455,7 +458,9 @@ fi
 error_code="\$?"
 if [ "\$error_code" -ne 0 ]; then
     notify-send "lf: $ACTION failed.Add rsync to the script (move one by one)"
-    setside pw-play "$HOME/.config/my-config/notification_tones/Overheat.wav" &
+    if ! pgrep --quiet -f "^(/usr/bin/|/bin/|)gpu-screen-recorder" && [ -f "$lf_user_file_operation_fail_sound" ]; then
+        setsid pw-play "$lf_user_file_operation_fail_sound" &
+    fi
     lf -remote "send reload"
 fi
 
@@ -469,7 +474,10 @@ $mv_cmd ${mv_simple_arr[@]@Q} ${PWD@Q}
 error_code="\$?"
 if [ "\$error_code" -ne 0 ]; then
     notify-send "lf: $ACTION failed. (move simple)"
-    setsid pw-play "$HOME/.config/my-config/notification_tones/Overheat.wav" &
+
+    if ! pgrep --quiet -f "^(/usr/bin/|/bin/|)gpu-screen-recorder" && [ -f "$lf_user_file_operation_fail_sound" ]; then
+        setsid pw-play "$lf_user_file_operation_fail_sound" &
+    fi
     lf -remote "send reload"
     exit 1
 fi
