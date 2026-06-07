@@ -370,7 +370,7 @@ cmd paste ${{
                 break
 
             else
-                echo "'$res' is not a valid input."
+                echo "Not a valid input."
             fi
         done
     fi
