@@ -527,8 +527,8 @@ if [ -d "$work_path/html" ]; then
     done
 fi
 
-## libpdfium-nojs and libunarr
-if [ -d "$repo_dir/yacreader" ] && [ -d "$repo_dir/libpdfium-nojs" ] && [ -d "$repo_dir/libunarr" ]; then
+## libpdfium-nojs
+if [ -d "$repo_dir/yacreader" ] && [ -d "$repo_dir/libpdfium-nojs" ]; then
     LIB_PATH="$repo_dir/yacreader/lib"
     mkdir -p "$LIB_PATH"
 
@@ -536,23 +536,18 @@ if [ -d "$repo_dir/yacreader" ] && [ -d "$repo_dir/libpdfium-nojs" ] && [ -d "$r
 
     libpdfium_icu="$(fd -tf --glob "icu_*.txt" "$repo_dir/libpdfium-nojs" | head -n1 | sed -E 's:(.*/)?icu_(.*).txt:\2:')"
 
-    libunarr_repo="$(fd -tf --glob "libunarr-*.pkg.tar.zst" "$repo_dir/libunarr" | head -n1 | sed -E 's:(.*/)?libunarr-(.*)-x86_64.pkg.tar.zst:\2:')"
-
-    if [ -n "$libpdfium_repo" ] && [ -n "$libpdfium_icu" ] && [ -n "$libunarr_repo" ] &&
+    if [ -n "$libpdfium_repo" ] && [ -n "$libpdfium_icu" ] &&
         {
             [ ! -f "$LIB_PATH/libpdfium-nojs_${libpdfium_repo}.txt" ] ||
-                [ ! -f "$LIB_PATH/icu_${libpdfium_icu}.txt" ] ||
-                [ ! -f "$LIB_PATH/libunarr_${libunarr_repo}.txt" ]
+                [ ! -f "$LIB_PATH/icu_${libpdfium_icu}.txt" ]
         }; then
         rm -rf "${LIB_PATH:?}"/*
         tar --zstd --directory "$LIB_PATH" -xpf "$repo_dir/libpdfium-nojs/libpdfium-nojs-$libpdfium_repo-x86_64.pkg.tar.zst" usr/lib
-        tar --zstd --directory "$LIB_PATH" -xpf "$repo_dir/libunarr/libunarr-$libunarr_repo-x86_64.pkg.tar.zst" usr/lib
         fd -tf -tl --exact-depth 1 ".*\.so(\..*)?" "$LIB_PATH/usr/lib" --exec-batch mv {} "$LIB_PATH"
 
         rm -rf "${LIB_PATH:?}/usr"
         touch "$LIB_PATH/libpdfium-nojs_${libpdfium_repo}.txt" \
-            "$LIB_PATH/icu_${libpdfium_icu}.txt" \
-            "$LIB_PATH/libunarr_${libunarr_repo}.txt"
+            "$LIB_PATH/icu_${libpdfium_icu}.txt"
     fi
     unset LIB_PATH
 fi
