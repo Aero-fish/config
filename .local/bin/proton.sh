@@ -70,7 +70,6 @@ bwrap \
     --setenv PROTON_DLSS_UPGRADE 0 \
     --setenv PROTON_DLSS_INDICATOR 0 \
     --setenv WINEDEBUG "-all" \
-    --setenv ENABLE_HDR_WSI 1 \
     --setenv PROTON_USE_WAYLAND 1 \
     --setenv PROTON_ENABLE_HDR 1 \
     \

@@ -1,6 +1,5 @@
 #!/bin/bash
 set -e
-export ENABLE_HDR_WSI=1
 export DXVK_HDR=1
 export DISPLAY=
 export WINEPREFIX="$HOME/.wine/games"
