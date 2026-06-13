@@ -1,7 +1,12 @@
-#!/bin/bash
+#!/usr/bin/bash
 set -e
 
-udiskie-info --all --output "{mount_path}" |
-    grep -v "^$" |
-    fzf --multi --exact --reverse --prompt="Eject USB:" --delimiter / --with-nth -1 |
-    xargs --no-run-if-empty -I {} udiskie-umount --detach {} >/dev/null 2>&1
+readarray -td '' arr < <(
+    udiskie-info --all --output "{mount_path}" |
+        grep -v "^$" |
+        fzf --multi --exact --reverse --prompt="Eject USB:" --delimiter / --with-nth -1 --print0
+)
+
+for usb_path in "${arr[@]}"; do
+    setsid udiskie-umount --detach "$usb_path" >/dev/null 2>&1 &
+done

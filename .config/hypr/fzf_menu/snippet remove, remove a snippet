@@ -1,8 +1,8 @@
-#!/usr/bin/sh
+#!/usr/bin/bash
 set -e
+
 fd --unrestricted --exact-depth 1 --type file --type symlink \
     ".*" "$HOME/.config/hypr/fzf_menu/snippets" | sort |
     fzf --print0 -i --no-multi --exact --delimiter / --with-nth -1 --preview 'cat {}' \
-        --prompt="Delete snippet:" --info=default --layout=reverse \
-        --tiebreak=index |
+        --prompt="Delete snippet:" --info=default --layout=reverse --tiebreak=index |
     xargs -0 --no-run-if-empty rm

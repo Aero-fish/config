@@ -1,4 +1,6 @@
-#!/usr/bin/sh
+#!/usr/bin/bash
+set -e
+
 [ ! -d "$XDG_RUNTIME_DIR/lf_progress" ] && exit 0
 
 cat <<\EOF >"$XDG_RUNTIME_DIR/check_file_operation.sh"
@@ -30,6 +32,10 @@ progress
 
 EOF
 chmod 700 "$XDG_RUNTIME_DIR/check_file_operation.sh"
-[ "$(hyprctl dispatch 'hl.dsp.focus({window = \"class:file_operation_progress\"})')" != "ok" ] && setsid kitty --class file_operation_progress -- watch -n 1 --no-title bash "$XDG_RUNTIME_DIR/check_file_operation.sh" >/dev/null 2>&1 </dev/null &
+
+if [ "$(hyprctl dispatch 'hl.dsp.focus({window = \"class:file_operation_progress\"})')" != "ok" ]; then
+    setsid kitty --class file_operation_progress -- watch -n 1 --no-title \
+        bash "$XDG_RUNTIME_DIR/check_file_operation.sh" >/dev/null 2>&1 </dev/null &
+fi
 
 sleep 0.1

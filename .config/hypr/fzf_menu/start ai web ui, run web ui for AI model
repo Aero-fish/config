@@ -1,4 +1,4 @@
-#!/usr/bin/sh
+#!/usr/bin/bash
 set -e
 
 "$HOME/.local/bin/start_ai_web_ui.sh"

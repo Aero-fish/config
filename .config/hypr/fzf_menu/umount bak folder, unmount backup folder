@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/bin/bash
+set -e
 
 bak_path="$HOME/Sync/Bak"
 if ! mountpoint -q -- "$bak_path"; then

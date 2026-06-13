@@ -1,5 +1,6 @@
-#!/usr/bin/sh
+#!/usr/bin/bash
 set -e
+
 echo "Enter the name of the snippet: "
 read -r snippet_name
 
