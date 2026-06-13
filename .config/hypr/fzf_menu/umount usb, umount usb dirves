@@ -10,3 +10,4 @@ readarray -td '' arr < <(
 for usb_path in "${arr[@]}"; do
     setsid udiskie-umount --detach "$usb_path" >/dev/null 2>&1 &
 done
+sleep 0.1
