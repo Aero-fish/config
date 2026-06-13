@@ -17,7 +17,7 @@ while read -r f; do
     filename="${filename//./_}"
 
     if tmux list-sessions 2>/dev/null | rg -q -F "$filename"; then
-        if [[ "$action" =~ (rm|zip|7z|clamscan|extract|tar) ]]; then
+        if [[ "$action" =~ (trash|rm|zip|7z|clamscan|extract|tar) ]]; then
             line="$(tmux capture-pane -peC -t "$filename":0 | grep -v -e '^$' | tail -n1)"
             echo "$line"
 

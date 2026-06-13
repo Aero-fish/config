@@ -125,7 +125,7 @@ cmd delete ${{
 
     run_dir="${XDG_RUNTIME_DIR:-/run/user/0}"
     mkdir -p "$run_dir/lf_progress"
-    SH_FILE="$(mktemp "$run_dir/lf_progress/rm_XXXXX.sh")"
+    SH_FILE="$(mktemp "$run_dir/lf_progress/trash_XXXXX.sh")"
 
     rm_arr=()
     trash_arr=()
@@ -178,7 +178,7 @@ cmd delete ${{
     cat <<EOF >>"$SH_FILE"
 lf -remote "send unselect"
 lf -remote "send reload"
-notify-send "lf: rm completed"
+notify-send "lf: Trash completed"
 rm -- "\$0"
 EOF
     chmod 700 "$SH_FILE"
