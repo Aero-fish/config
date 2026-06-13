@@ -104,10 +104,10 @@ cmd delete ${{
     }
 
     while true; do
-        if [ "${#arr[@]}" -gt 12 ]; then
-            echo -n "rm all ${#arr[@]} files? [y/n]"
+        if [ "${#arr[@]}" -gt 20 ]; then
+            echo -n "Trash all ${#arr[@]} files? [y/n]"
         else
-            echo "rm the following ${#arr[@]} file(s)?"
+            echo "Trash the following ${#arr[@]} file(s)?"
             printf '%s\n' "${arr[@]}"
             echo -n "[y/n]"
         fi
