@@ -4,6 +4,8 @@
 hl.env("QT_QPA_PLATFORM", "wayland;xcb")
 hl.env("QT_WAYLAND_DISABLE_WINDOWDECORATION", "1")
 
+hl.env("SDL_VIDEO_DRIVER", "wayland,x11")
+
 -- hl.env("XMODIFIERS=@im", "fcitx") -- Crash steam
 -- hl.env("GTK_IM_MODULE", "fcitx")
 hl.env("QT_IM_MODULE", "fcitx") -- Use fcitx im module instead of text-input-v2 (not up streamed) for QT4/5
