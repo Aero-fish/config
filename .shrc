@@ -47,16 +47,6 @@ export LESS="--clear-screen --ignore-case --no-lessopen --LONG-PROMPT --RAW-CONT
 ## No search history for `less`
 export LESSHISTFILE="/dev/null"
 
-# Scheme 1
-#export LESS_TERMCAP_mb=$'\E[1;31m'     # begin blink
-#export LESS_TERMCAP_md=$'\E[1;36m'     # begin bold
-#export LESS_TERMCAP_me=$'\E[0m'        # reset bold/blink
-#export LESS_TERMCAP_so=$'\E[01;44;33m' # begin reverse video
-#export LESS_TERMCAP_se=$'\E[0m'        # reset reverse video
-#export LESS_TERMCAP_us=$'\E[1;32m'     # begin underline
-#export LESS_TERMCAP_ue=$'\E[0m'        # reset underline
-
-# Scheme 2
 export LESS_TERMCAP_mb=$'\E[1;31m'
 export LESS_TERMCAP_md=$'\E[1;31m'
 export LESS_TERMCAP_me=$'\E[0m'
@@ -64,11 +54,6 @@ export LESS_TERMCAP_se=$'\E[0m'
 #export LESS_TERMCAP_so=$'\E[1;44;33m'  # Ugly status line highlight
 export LESS_TERMCAP_ue=$'\E[0m'
 export LESS_TERMCAP_us=$'\E[1;32m'
-
-# ---------- hyprland ----------
-if [ -x /usr/bin/Hyprland ]; then
-    alias hyprland-via-uwsm="uwsm start hyprland-uwsm.desktop"
-fi
 
 # ====================
 #  Aliases and functions
@@ -460,7 +445,8 @@ alias gpg-retrieve="gpg2 --keyserver-options auto-key-retrieve --receive-keys"
 
 # ---------- youtube-dl ----------
 _ytdl() {
-    local COOKIE_PATH="$(find "$HOME/Documents/youtube-log/mozilla-ytdl" -type d -regex '.*default-release' | head -n 1)"
+    local COOKIE_PATH
+    COOKIE_PATH="$(find "$HOME/Documents/youtube-log/mozilla-ytdl" -type d -regex '.*default-release' | head -n 1)"
     echo -e "\e[31mDownloading to Desktop\e[0m"
     /usr/local/bin/generic_bwrap \
         --bind-try "$COOKIE_PATH" "$HOME/.cache/yt" \
@@ -576,22 +562,6 @@ unset fd_ignore_pattern
 if [ -r /usr/bin/zoxide ]; then
     export _ZO_DATA_DIR=${HOME}/.cache/zsh
     eval "$(zoxide init "$this_shell")"
-fi
-
-# ---------- nnn ----------
-if [ -x /usr/bin/nnn ]; then
-    alias N="sudo -E nnn -H"
-    alias ncp="cat \${NNN_SEL:-\${XDG_CONFIG_HOME:-\$HOME/.config}/nnn/.selection} | tr '\0' '\n'"
-
-    if [ -f "$HOME/.config/nnn/env" ]; then
-        source "$HOME/.config/nnn/env"
-    fi
-
-    # cd on quit via ^g, provide function 'n'
-    if [ -f /usr/share/nnn/quitcd/quitcd.bash_sh_zsh ]; then
-        # shellcheck disable=SC1091
-        source /usr/share/nnn/quitcd/quitcd.bash_sh_zsh
-    fi
 fi
 
 # Sort order, capitalise to reverse
@@ -851,8 +821,10 @@ set-mime-default() {
 }
 
 open() {
-    local file_type="$(file -Lb --mime-type "$1")"
-    local opener="$(gio mime "$file_type" | head -n1)"
+    local file_type
+    file_type="$(file -Lb --mime-type "$1")"
+    local opener
+    opener="$(gio mime "$file_type" | head -n1)"
     if [[ "$opener" == "No default applications"* ]]; then
         echo "No default program to open the file"
 
@@ -882,7 +854,7 @@ _rclone_ignore_list() {
     local ignore_config_name=".rclone_ignore"
     local exclude_list=""
 
-    while read ignore_file_path; do
+    while read -r ignore_file_path; do
         exclude_list="$exclude_list$(cat "$rsync_dir/$ignore_file_path")\n"
     done < <(find -L "$1" -type f -iname "$ignore_config_name" -printf "%P\n")
 
@@ -982,9 +954,9 @@ alias kill-tools-wine="WINEPREFIX=\"\$HOME/.wine/tools\" wineserver -k 15"
 alias kill-all-exe="pkill -9 -f '.exe'"
 
 ## Keep consistency with texlab LSP for neovim. It only parse log in root dir.
-alias latex-to-pdf="latexmk -pdf -aux-directory=aux -emulate-aux-dir -interaction=nonstopmode -synctex=1"
-## Lualatex cannot detect update for tikz externalise.
-# alias latex-to-pdf="latexmk -pdflua -interaction=nonstopmode -synctex=1"
+## Lualatex does not detect update for 'tikz externalise'.
+## Change '-pdflua' to '-pdf' to use pdflatex.
+alias latex-to-pdf="latexmk -pdflua -interaction=nonstopmode -synctex=1 -aux-directory=aux -emulate-aux-dir"
 
 # ---------- pandoc ----------
 md-to-pdf() {
