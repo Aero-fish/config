@@ -40,7 +40,7 @@ bind_path=(
 )
 source /usr/local/share/bwrap_share/generate_args
 
-if [ "$1" != "wineboot.exe" ] && [ "$1" != "wineboot" ]; then
+if ! [[ "$1" =~ wineboot(\.exe)? ]] && ! [[ "$1" =~ winecfg(\.exe)? ]]; then
     if pgrep -x Hyprland >/dev/null; then
         hyprctl dispatch 'hl.dsp.focus({ workspace = "empty" })' >/dev/null
     fi
@@ -84,4 +84,4 @@ bwrap \
     "${symbolic_link[@]}" \
     --ro-bind-try "$XDG_RUNTIME_DIR/tray-proxy" "$dbus_address" \
     --perms 444 --file 8 /etc/machine-id \
-    "$proton_path"/usr/bin/proton-ge "$@" 8< <(dbus-uuidgen)
+    "$proton_path"/usr/bin/proton-ge run "$@" 8< <(dbus-uuidgen)

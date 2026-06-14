@@ -107,7 +107,7 @@ create-baseline() {
     rm -rf "$WINEPREFIX"
     override_dll=()
 
-    wineboot -i
+    wineboot --init
     # Wait 15 seconds for wine to finish Initialisation
     sleep 10
 
@@ -239,7 +239,7 @@ for prefix_name in "${args[@]}"; do
     proton)
         rm -rf "$WINEPREFIX"
         mkdir -p "$HOME/.wine/games_documents" "$HOME/.wine/games_appdata"
-        "$HOME"/.local/bin/proton.sh wineboot.exe
+        "$HOME"/.local/bin/proton.sh wineboot --init
         sleep 5
         "$HOME"/.local/bin/proton.sh winecfg -v win11
         sleep 3
