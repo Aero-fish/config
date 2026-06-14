@@ -36,64 +36,42 @@ function M.build_by_filetype()
             print("Texlab not installed.")
         end
 
-        ---------- Markdown ----------
-    elseif filetype == "markdown" then
-        if has_overseer then
-            local file_path = vim.fn.expand("%:p")
-            local dir, file_name, ext = file_path:match(
-                "^(.-)([^\\/]-)%.([^\\/%.]-)%.?$"
-            )
-            local pdf_path = dir .. file_name .. ".pdf"
-            local beamer_path = dir .. file_name .. "_beamer.pdf"
-            local html_path = dir .. file_name .. ".html"
-
-            if vim.fn.filereadable(beamer_path) == 1 then
-                print("Building markdown to beamer pdf")
-                overseer.run_template({ name = "Markdown to beamer" }, nil)
-            elseif vim.fn.filereadable(html_path) == 1 then
-                print("Building markdown to revealjs")
-                overseer.run_template({ name = "Markdown to revealjs" }, nil)
-            else
-                print("Building markdown to pdf")
-                overseer.run_template({ name = "Markdown to PDF" }, nil)
-            end
-        else
-            print("overseer is not installed")
-        end
-
-        ---------- d2 ----------
-    elseif filetype == "d2" then
-        local file_path = vim.fn.expand("%:p")
-        local dir, file_name, ext = file_path:match("^(.-)([^\\/]-)%.([^\\/%.]-)%.?$")
-        local output_path = dir .. file_name .. ".svg"
-
-        if vim.fn.filereadable(file_path) == 1 then
-            os.execute("( setsid d2 '" ..
-                file_path .. "' '" .. output_path .. "' >/dev/null 2>&1 </dev/null &)")
-            print("Building " .. file_name .. "." .. ext .. " to svg")
-        end
+    ---------- rust ----------
     elseif filetype == "rust" then
         if vim.fn.exists(":RustRun") then
             vim.cmd.RustRun()
         else
-            print("Rust analyzer not installed.")
+            print("Rust analyser not installed.")
         end
-    end
-end
 
-function M.repeat_last_build()
-    local overseer_ok, overseer = pcall(require, "overseer")
+    ---------- Try overseer task ----------
+    elseif has_overseer then
+        local task_name
+        if filetype == "markdown" then
+            local file_path = vim.fn.expand("%:p")
+            local dir, file_name, ext = file_path:match(
+                "^(.-)([^\\/]-)%.([^\\/%.]-)%.?$"
+            )
+            local beamer_path = dir .. file_name .. "_beamer.pdf"
+            local html_path = dir .. file_name .. ".html"
 
-    ---------- Re-run last task if exist ----------
-    if overseer_ok then
-        local tasks = overseer.list_tasks({ recent_first = true })
-        if not vim.tbl_isempty(tasks) then
-            overseer.run_action(tasks[1], "restart")
-            return
+            if vim.fn.filereadable(beamer_path) == 1 then
+                task_name = "Pandoc markdown to beamer"
+            elseif vim.fn.filereadable(html_path) == 1 then
+                task_name = "Pandoc markdown to revealjs"
+            else
+                task_name = "Pandoc markdown to pdf"
+            end
         end
-    end
 
-    M.build_by_filetype()
+        overseer.run_task({ name = task_name }, function(task)
+            if task then
+                print("Task:" .. task.name)
+            end
+        end)
+    else
+        print("No overseer installed. No custom build.")
+    end
 end
 
 ----- Auto viewer -----
@@ -105,6 +83,7 @@ function M.view()
         else
             print("TexLab not installed.")
         end
+
     elseif filetype == "markdown" then
         local file_path = vim.fn.expand("%:p")
         local dir, file_name, ext = file_path:match("^(.-)([^\\/]-)%.([^\\/%.]-)%.?$")
@@ -118,7 +97,8 @@ function M.view()
             )
         elseif vim.fn.filereadable(html_path) == 1 then
             os.execute(
-                "( setsid librewolf '" .. html_path .. "' >/dev/null 2>&1 </dev/null &)"
+                "( setsid librewolf '" ..
+                html_path .. "' >/dev/null 2>&1 </dev/null &)"
             )
         elseif vim.fn.filereadable(pdf_path) == 1 then
             os.execute(
@@ -127,6 +107,7 @@ function M.view()
         else
             print("Cannot find the pandoc generated file.")
         end
+
     elseif filetype == "d2" then
         local file_path = vim.fn.expand("%:p")
         local dir, file_name, ext = file_path:match("^(.-)([^\\/]-)%.([^\\/%.]-)%.?$")
@@ -142,6 +123,7 @@ function M.view()
                 "( setsid xdg-open '" .. png_path .. "' >/dev/null 2>&1 </dev/null &)"
             )
         end
+
     elseif filetype == "typst" then
         if vim.fn.exists(":TypstPreview") then
             vim.cmd.TypstPreview()
