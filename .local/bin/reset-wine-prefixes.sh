@@ -109,13 +109,14 @@ create-baseline() {
 
     wineboot -i
     # Wait 15 seconds for wine to finish Initialisation
-    sleep 15
+    sleep 10
 
     cp "$wine_misc_folder/wine.reg" "$WINEPREFIX"
     wine regedit "$WINEPREFIX/wine.reg"
+    wine winecfg -v win11
 
     # # Wait 15 seconds for wine to finish Initialisation
-    sleep 15
+    sleep 10
 
     rm "$WINEPREFIX/wine.reg"
 
@@ -240,6 +241,8 @@ for prefix_name in "${args[@]}"; do
         mkdir -p "$HOME/.wine/games_documents" "$HOME/.wine/games_appdata"
         "$HOME"/.local/bin/proton.sh wineboot.exe
         sleep 5
+        "$HOME"/.local/bin/proton.sh winecfg -v win11
+        sleep 3
         rm -rf "$WINEPREFIX/pfx/drive_c/users/steamuser/"{Desktop,Documents,AppData}
         ln -s "$HOME/Desktop" "$WINEPREFIX/pfx/drive_c/users/steamuser/Desktop"
         ln -s "../../../../../games_documents" "$WINEPREFIX/pfx/drive_c/users/steamuser/Documents"
