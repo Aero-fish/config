@@ -17,7 +17,7 @@ return {
             },
             build = {
                 args = {
-                    "-pdf",
+                    "-pdflua",
                     "-interaction=nonstopmode",
                     "-synctex=1",
                     "-aux-directory=aux",
