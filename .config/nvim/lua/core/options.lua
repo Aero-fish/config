@@ -51,6 +51,8 @@ local options = {
     -- winborder = "rounded",  -- Do not use, added unwanted border for snack dashboard text art, and which key bottom row
     wrap = true,         -- display lines as one long line
     writebackup = false, -- if a file is being edited by another program (or was written to file while editing with another program), it is not allowed to be edited
+    fileencodings = "utf-8,gbk,cp936,gb18030,big5,euc-jp,euc-kr,utf-16,utf-16le,latin1,ucs-bom,ucs", -- Try to decode in this order
+    encoding = "utf-8"                                                                          -- Always use utf-8 for internal encoding
 }
 
 for k, v in pairs(options) do
