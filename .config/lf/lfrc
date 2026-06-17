@@ -115,7 +115,8 @@ cmd delete ${{
         echo -e "\n"
         if [ "$res" = "y" ] || [ "$res" = "Y" ]; then
             break
-        elif [ "$res" = "n" ] || [ "$res" = "N" ]; then
+        elif [ "$res" = "n" ] || [ "$res" = "N" ] || [ "$res" = $'\e' ]; then
+            ## $'\e' is esc
             lf -remote "send $id echo rm cancelled"
             exit 0
         else
@@ -207,7 +208,8 @@ cmd delete-with-rm ${{
         echo -e "\n"
         if [ "$res" = "y" ] || [ "$res" = "Y" ]; then
             break
-        elif [ "$res" = "n" ] || [ "$res" = "N" ]; then
+        elif [ "$res" = "n" ] || [ "$res" = "N" ] || [ "$res" = $'\e' ]; then
+            ## $'\e' is esc
             lf -remote "send $id echo rm cancelled"
             exit 0
         else
@@ -368,6 +370,9 @@ cmd paste ${{
             elif [ "$res" = "b" ]; then
                 lf_user_paste_opt="backup"
                 break
+
+            elif [ "$res" = $'\e' ]; then
+                exit 1
 
             else
                 echo "Not a valid input."
