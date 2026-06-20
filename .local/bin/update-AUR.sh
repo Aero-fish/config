@@ -406,25 +406,6 @@ maple-mono-update() {
 }
 
 yt-dlp-download() {
-    # Compare the github and pip version. Stripping the leading 0.
-    IFS='.' read -r year month day <<<"$version"
-    year="$((10#$year))"
-    month="$((10#$month))"
-    day="$((10#$day))"
-    version_trim="$year.$month.$day"
-
-    pip_version="$(pip index versions --json yt-dlp | jq -r -j '.versions[0]')"
-    IFS='.' read -r year month day <<<"$pip_version"
-    year="$((10#$year))"
-    month="$((10#$month))"
-    day="$((10#$day))"
-    pip_version_trim="$year.$month.$day"
-
-    if [ "$version_trim" != "$pip_version_trim" ]; then
-        echo -e "\e[31mCannot update yt-dlp\e[0m"
-        echo -e "\e[31mGithub version: $version (trimed: $version_trim), pip version: $pip_version (trimed: $pip_version_trim)\e[0m"
-        return 1
-    fi
     python -m venv --clear "$work_path"
     (
         source "$work_path"/bin/activate
@@ -432,10 +413,19 @@ yt-dlp-download() {
     )
 }
 
-declare -A github_packages=(
+huggingface_hub-download() {
+    python -m venv --clear "$work_path"
+    (
+        source "$work_path"/bin/activate
+        pip install "huggingface_hub"
+    )
+}
+
+declare -A non_aur_packages=(
     ["dxvk"]="https://api.github.com/repos/doitsujin/dxvk/releases/latest"
     ["dxvk-nvapi"]="https://api.github.com/repos/jp7677/dxvk-nvapi/releases/latest"
     ["ffmpeg-yt-dlp"]="https://api.github.com/repos/yt-dlp/FFmpeg-Builds/releases/latest"
+    ["huggingface_hub"]="pip index versions --json huggingface_hub"
     ["katex"]="https://api.github.com/repos/KaTeX/KaTeX/releases/latest"
     ["ksmbd-tools"]="https://api.github.com/repos/cifsd-team/ksmbd-tools/releases/latest"
     ["localsend"]="https://api.github.com/repos/localsend/localsend/releases/latest"
@@ -444,23 +434,35 @@ declare -A github_packages=(
     ["pandoc-eisvogel-template"]="https://api.github.com/repos/Wandmalfarbe/pandoc-latex-template/releases/latest"
     ["revealjs"]="https://api.github.com/repos/hakimel/reveal.js/releases/latest"
     ["vkd3d-proton"]="https://api.github.com/repos/HansKristian-Work/vkd3d-proton/releases/latest"
-    ["yt-dlp"]="https://api.github.com/repos/yt-dlp/yt-dlp/releases/latest"
+    ["yt-dlp"]="pip index versions --json yt-dlp"
 )
 
-for p in "${!github_packages[@]}"; do
+## Delete pip cache
+rm -rf "$HOME/.cache/pip"
+
+for p in "${!non_aur_packages[@]}"; do
     work_path="$repo_dir/$p"
     if [ -d "$work_path" ]; then
         cd "$work_path"
         if [ "$pc_name" = "$main_pc" ]; then
-            url="${github_packages["$p"]}"
+            url="${non_aur_packages["$p"]}"
+            if [[ "$url" == "https://api.github.com/"* ]]; then
+                version="$(curl -s -l "$url" | jq -r ".tag_name")"
+                [ "$version" == "latest" ] && version="$(curl -s -l "$url" | jq -r ".name")"
 
-            version="$(curl -s -l "$url" | jq -r ".tag_name")"
-            [ "$version" == "latest" ] && version="$(curl -s -l "$url" | jq -r ".name")"
+            elif [[ "$url" == "pip "* ]]; then
+                version="$(eval "$url" | jq -r -j '.latest')"
 
-            [ -z "$version" ] && {
-                echo "fail to fetch '$p' version"
-                exit 1
-            }
+            else
+                echo "Do not know how to get version from: $url"
+
+            fi
+
+            if [ -z "$version" ]; then
+                unset version
+                echo "Fail to fetch '$p' version"
+                continue
+            fi
 
             if [ ! -f "$work_path/$version.txt" ]; then
                 echo -e "\e[31mUpdating '$p'.\e[0m"
