@@ -577,6 +577,12 @@ if [ -x /usr/bin/lf ]; then
     fi
 fi
 
+# ---------- lf ----------
+if [ -x "$HOME/misc/repo/huggingface_hub/bin/hf" ]; then
+    # shellcheck disable=SC2139
+    alias hf="$HOME/misc/repo/huggingface_hub/bin/hf"
+fi
+
 # ---------- System ----------
 ## get top process eating memory ##
 alias psmem='ps auxf | sort -nr -k 4'

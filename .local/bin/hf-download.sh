@@ -2,6 +2,11 @@
 set -e
 
 STORAGE_DIR="$HOME/Projects/AI/models"
+HF_PATH="$HOME/misc/repo/huggingface_hub/bin/hf"
+if [ ! -x "$HF_PATH" ]; then
+    echo "'hf' executable not found"
+    exit 1
+fi
 
 MODEL="$1"
 MODEL_NAME="${MODEL##*'/'}"
@@ -31,7 +36,7 @@ if [ -d "$MODEL_PATH" ]; then
 fi
 
 mkdir -p "$MODEL_PATH"
-HF_HUB_DISABLE_TELEMETRY=1 hf download --local-dir "$MODEL_PATH" "$MODEL" "${include_paths[@]}"
+HF_HUB_DISABLE_TELEMETRY=1 "$HF_PATH" download --local-dir "$MODEL_PATH" "$MODEL" "${include_paths[@]}"
 
 exit_code="$?"
 if [ "$exit_code" = 0 ]; then
