@@ -41,7 +41,7 @@
         "window-rewrite": {
             "class<.*[.]exe>": "",
             "class<Google-chrome>": "",
-            "class<KeePassXC>": "",
+            "class<org.keepassxc.KeePassXC>": "",
             "class<Spotify>": "",
             "class<YACReader>": "",
             "class<aerc>": "",
