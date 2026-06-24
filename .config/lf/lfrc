@@ -2021,7 +2021,7 @@ map own         open-in-wine-net
 map owN         open-in-proton-net
 
 ##### Goto #####
-map gb          cd ~/Sync/Bak
+map gb          cd ~/.snapshots/Bak
 map gD          cd ~/Downloads
 map gd          cd ~/Desktop
 map gh          cd ~
