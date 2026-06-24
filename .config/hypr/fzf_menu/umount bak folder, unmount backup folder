@@ -8,8 +8,8 @@ if ! mountpoint -q -- "$bak_path"; then
     exit 0
 fi
 
-# fusermount -u "$bak_path"
-umount "$bak_path"
+fusermount -u "$bak_path"
+# umount "$bak_path"
 
 exit_code="$?"
 if [ "$exit_code" -eq 0 ]; then
