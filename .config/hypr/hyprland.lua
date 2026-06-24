@@ -77,7 +77,7 @@ hl.config({
 hl.config({
     input = {
         accel_profile = "flat",
-        mouse_refocus = false,
+        -- mouse_refocus = false,
         touchpad      = {
             natural_scroll = true,
         },
