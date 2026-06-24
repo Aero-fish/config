@@ -27,7 +27,7 @@ while read -r f; do
         fi
     fi
     echo
-done < <(fd  -tx --glob -- "*.sh" "$XDG_RUNTIME_DIR/lf_progress")
+done < <(fd  --type x --glob -- "*.sh" "$XDG_RUNTIME_DIR/lf_progress")
 progress
 
 EOF

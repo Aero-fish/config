@@ -4,8 +4,8 @@ set -e
 [ ! -d "$XDG_RUNTIME_DIR/lf_progress" ] && exit 0
 
 readarray -td '' selected < <(
-     fd -type x --glob -- "*.sh" "$XDG_RUNTIME_DIR/lf_progress" |
-          fzf -i --multi --exact --reverse --prompt="Kill operation:"--delimiter / \
+     fd --type x --glob -- "*.sh" "$XDG_RUNTIME_DIR/lf_progress" |
+          fzf -i --multi --exact --reverse --prompt="Kill operation:" --delimiter / \
                --with-nth -1 --preview "less {}" --print0
 )
 
