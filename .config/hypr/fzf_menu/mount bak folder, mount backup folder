@@ -1,8 +1,8 @@
 #!/usr/bin/bash
 set -e
 
-if [ ! -d "/run/media/${USER}/T5_EVO" ]; then
-    echo "Source '/run/media/${USER}/T5_EVO' does not exist"
+if [ ! -d "/run/media/${USER}/T5_EVO/Bak" ]; then
+    echo "Source '/run/media/${USER}/T5_EVO/Bak' does not exist"
     read -n 1 -s -r -p "Press any key to continue"
     exit 0
 fi
@@ -24,8 +24,8 @@ if mountpoint -q -- "$bak_path"; then
 fi
 
 while true; do
-    gocryptfs --nosyslog --quiet --nodev --noexec --nosuid \
-        "/run/media/${USER}/T5_EVO" \
+    gocryptfs --nosyslog --quiet --nodev --noexec --nosuid -badname '*' \
+        "/run/media/${USER}/T5_EVO/Bak" \
         "$bak_path"
 
     exit_code="$?"

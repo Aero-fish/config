@@ -140,8 +140,8 @@ mirror() {
 }
 
 mirror-bak() {
-    echo "mirror '/run/media/$(id -u -n)/T5_EVO/' to '/run/media/$(id -u -n)/Bak'"
-    mirror "/run/media/$(id -u -n)/T5_EVO/" "/run/media/$(id -u -n)/Bak"
+    echo "mirror '/run/media/$(id -u -n)/T5_EVO/Bak' to '/run/media/$(id -u -n)/Bak/Bak'"
+    mirror "/run/media/$(id -u -n)/T5_EVO/Bak" "/run/media/$(id -u -n)/Bak/Bak"
 }
 # ---------- ls ----------
 glob_ignore_pattern="*cache|.cargo|.git|.gnupg|.gphoto|.ipython|.jupyter|.lastpass|.npm|.nv|.password-store|.perl5|.pki|.svn|.texlive|.vscode-oss|.wine|__pycache__|go|lost+found|mozilla*|librewolf*|node_modules|thunderbird"
