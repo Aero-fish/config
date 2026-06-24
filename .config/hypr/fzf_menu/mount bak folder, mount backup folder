@@ -7,7 +7,7 @@ if [ ! -d "/run/media/${USER}/T5_EVO/Bak" ]; then
     exit 0
 fi
 
-bak_path="$HOME/Sync/Bak"
+bak_path="$HOME/.snapshots/Bak"
 mkdir -p "$bak_path"
 
 if [ ! -d "$bak_path" ]; then
