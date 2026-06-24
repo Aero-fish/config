@@ -1742,7 +1742,8 @@ cmd open-with-mpv-with-svp &{{
 # Need this to detect GPU in older SVP
 #clinfo >/dev/null 2>&1; sleep 1
 
-(setsid bash <(sed -E -e '/"\$\{symbolic_link\[@\]\}"/a\    --ro-bind-try /etc/machine-id /etc/machine-id \\\n    --ro-bind-try /run/udev /run/udev \\\n    --ro-bind-try "\$HOME\/misc/programs/SVP4" "\$HOME\/misc/programs/SVP4" \\\n    --bind-try "\$HOME\/.config\/SVP4" "\$HOME\/.local\/share\/SVP4" \\\n    --bind-try "\$HOME\/.cache\/trt-models" "\$HOME\/.cache\/trt-models" \\' \
+(setsid bash <(
+    sed -E -e '/"\$\{symbolic_link\[@\]\}"/a\    --ro-bind-try /etc/machine-id /etc/machine-id \\\n    --ro-bind-try /run/udev /run/udev \\\n    --ro-bind-try "\$HOME\/misc/programs/SVP4" "\$HOME\/misc/programs/SVP4" \\\n    --bind-try "\$HOME\/.config\/SVP4" "\$HOME\/.local\/share\/SVP4" \\\n    --bind-try "\$HOME\/.cache\/trt-models" "\$HOME\/.cache\/trt-models" \\' \
     -e 's:^(\s*)/usr/bin/mpv .*:\1/usr/bin/sh -c "$HOME/misc/programs/SVP4/SVPManager \& /usr/bin/mpv \${extra_args[*]} \${1@Q}; /usr/bin/pkill -x SVPManager":' \
     /usr/local/bin/mpv) "$f" &) >/dev/null 2>&1 </dev/null
 }}
