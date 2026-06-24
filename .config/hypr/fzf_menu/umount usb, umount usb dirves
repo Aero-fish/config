@@ -7,7 +7,21 @@ readarray -td '' arr < <(
         fzf --multi --exact --reverse --prompt="Eject USB:" --delimiter / --with-nth -1 --print0
 )
 
+gocryptfs_mount="$({ mount | grep "type fuse.gocryptfs" || true; })"
+
 for usb_path in "${arr[@]}"; do
+    gocryptfs_mount_list="$({ echo "$gocryptfs_mount" | grep "$usb_path" | awk -F' ' '{ printf "%s\n",$3; }' | sed '$ d' || true; })"
+
+    while IFS= read -r line; do
+        [ -z "$line" ] && continue
+        if ! fusermount -u "$line"; then
+            echo "Failed to umount $line."
+            read -p "Press enter to continue"
+            exit 1
+        fi
+    done <<<"$gocryptfs_mount_list"
+
     setsid udiskie-umount --detach "$usb_path" >/dev/null 2>&1 &
+
 done
 sleep 0.1
