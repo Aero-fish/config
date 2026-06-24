@@ -356,7 +356,7 @@ cmd paste ${{
         echo "----------"
 
         while true; do
-            echo -n -e "File name(s) exists in destination, do you want to \e[31mskip[s]\e[0m, \e[31mreplace[r]\e[0m or \e[31mbackup[b]\e[0m? "
+            echo -n -e "File name(s) exists in destination ("${#filename_already_exist[@]}"), do you want to \e[31mskip[s]\e[0m, \e[31mreplace[r]\e[0m or \e[31mbackup[b]\e[0m? "
             read -n 1 -r res
             echo
             if [ "$res" = "s" ]; then
@@ -1742,7 +1742,7 @@ cmd open-with-mpv-with-svp &{{
 # Need this to detect GPU in older SVP
 #clinfo >/dev/null 2>&1; sleep 1
 
-(setsid bash <(sed -E -e '/"\$\{symbolic_link\[@\]\}"/a\    --ro-bind-try /etc/machine-id /etc/machine-id \\\n    --ro-bind-try /run/udev /run/udev \\\n    --bind-try "\$HOME\/.config\/SVP4" "\$HOME\/.local\/share\/SVP4" \\\n    --bind-try "\$HOME\/.cache\/trt-models" "\$HOME\/.cache\/trt-models" \\' \
+(setsid bash <(sed -E -e '/"\$\{symbolic_link\[@\]\}"/a\    --ro-bind-try /etc/machine-id /etc/machine-id \\\n    --ro-bind-try /run/udev /run/udev \\\n    --ro-bind-try "\$HOME\/misc/programs/SVP4" "\$HOME\/misc/programs/SVP4" \\\n    --bind-try "\$HOME\/.config\/SVP4" "\$HOME\/.local\/share\/SVP4" \\\n    --bind-try "\$HOME\/.cache\/trt-models" "\$HOME\/.cache\/trt-models" \\' \
     -e 's:^(\s*)/usr/bin/mpv .*:\1/usr/bin/sh -c "$HOME/misc/programs/SVP4/SVPManager \& /usr/bin/mpv \${extra_args[*]} \${1@Q}; /usr/bin/pkill -x SVPManager":' \
     /usr/local/bin/mpv) "$f" &) >/dev/null 2>&1 </dev/null
 }}
