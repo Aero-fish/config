@@ -137,6 +137,10 @@ mirror() {
     fi
 
     rsync -ah --delete --no-inc-recursive --info=progress2 --exclude "lost+found/" "$scr_path" "$dest_path"
+    notify-send "Mirror finished" "$scr_path\nto\n$dest_path"
+    if ! pgrep --quiet -f "^(/usr/bin/|/bin/|)gpu-screen-recorder" && [ -f "$HOME/.config/my-config/notification_tones/file_operation_completed.mp3" ]; then
+        setsid pw-play "$HOME/.config/my-config/notification_tones/file_operation_completed.mp3" &
+    fi
 }
 
 mirror-bak() {
