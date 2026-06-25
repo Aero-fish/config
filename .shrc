@@ -122,7 +122,7 @@ mirror() {
     dest_path="$2"
 
     ## Check destination path, never write to 'Bak' folder
-    if echo "$dest_path" | grep -qEi -e ".*/(back|backup|.backup)/*"; then
+    if echo "$dest_path" | grep -qEi -e ".*/(back|backup|.backup|T5_EVO)(/.*)?"; then
         echo -n "The destination is '$dest_path', type YES to continue:"
         read -r continue_mirror
         [ ! "$continue_mirror" = "YES" ] && return
@@ -140,8 +140,8 @@ mirror() {
 }
 
 mirror-bak() {
-    echo "mirror '/run/media/$(id -u -n)/T5_EVO/Bak' to '/run/media/$(id -u -n)/Bak/Bak'"
-    mirror "/run/media/$(id -u -n)/T5_EVO/Bak" "/run/media/$(id -u -n)/Bak/Bak"
+    echo "mirror '/run/media/$(id -u -n)/T5_EVO' to '/run/media/$(id -u -n)/Bak'"
+    mirror "/run/media/$(id -u -n)/T5_EVO/" "/run/media/$(id -u -n)/Bak/"
 }
 # ---------- ls ----------
 glob_ignore_pattern="*cache|.cargo|.git|.gnupg|.gphoto|.ipython|.jupyter|.lastpass|.npm|.nv|.password-store|.perl5|.pki|.svn|.texlive|.vscode-oss|.wine|__pycache__|go|lost+found|mozilla*|librewolf*|node_modules|thunderbird"
