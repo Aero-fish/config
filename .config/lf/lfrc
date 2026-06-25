@@ -258,7 +258,7 @@ cmd paste ${{
             need_free_space="$((files_size - free_space))"
             need_free_space="$(numfmt --to=iec-i --from=iec-i --suffix=B --format="%9.2f" "${need_free_space}Ki")"
             lf -remote "send $id echo Insufficient free space, need $need_free_space more"
-            notify-send "Insufficient free space, need $need_free_space more"
+            notify-send "Insufficient free space, need $need_free_space more."
             exit 0
         fi
     }
@@ -462,7 +462,7 @@ fi
 (cd ${path@Q}; fd --unrestricted -tf -tl --exec $mv_cmd {} ${PWD@Q}/${dir_basename@Q}/{})
 error_code="\$?"
 if [ "\$error_code" -ne 0 ]; then
-    notify-send "lf: $ACTION failed.Add rsync to the script (move one by one)"
+    notify-send "lf: $ACTION failed. Add rsync to the script (move one by one)"
     if ! pgrep --quiet -f "^(/usr/bin/|/bin/|)gpu-screen-recorder" && [ -f "$lf_user_file_operation_fail_sound" ]; then
         setsid pw-play "$lf_user_file_operation_fail_sound" &
     fi
@@ -1244,7 +1244,7 @@ for file in "\${files[@]}"; do
     fi
 done
 
-notify-send "lf: Extract to individual folder completed "${PWD@Q}
+notify-send "lf: Extract to individual folder completed" "$PWD"
 lf -remote "send reload"
 if ! pgrep --quiet -f "^(/usr/bin/|/bin/|)gpu-screen-recorder" && [ -f "$lf_user_file_operation_finish_sound" ]; then
     setsid pw-play "$lf_user_file_operation_finish_sound" &
@@ -1336,7 +1336,7 @@ cmd archive-single-tar-zstd ${{
 #$dest
 ${tar_cmd[@]} | pv -s "\$(${du_cmd[@]} | tail -1 | awk '{print \$1}')" | zstdmt >${dest@Q}
 
-notify-send "lf: Archive to single tar.zst completed "${dest@Q}
+notify-send "lf: Archive to single tar.zst completed" "$dest"
 lf -remote "send reload"
 if ! pgrep --quiet -f "^(/usr/bin/|/bin/|)gpu-screen-recorder" && [ -f "$lf_user_file_operation_finish_sound" ]; then
     setsid pw-play "$lf_user_file_operation_finish_sound" &
@@ -1418,7 +1418,7 @@ for file in "\${files[@]}"; do
     fi
 done
 
-notify-send "lf: Archive to individual tar.zst completed "${PWD@Q}
+notify-send "lf: Archive to individual tar.zst completed" "$PWD"
 lf -remote "send reload"
 if ! pgrep --quiet -f "^(/usr/bin/|/bin/|)gpu-screen-recorder" && [ -f "$lf_user_file_operation_finish_sound" ]; then
     setsid pw-play "$lf_user_file_operation_finish_sound" &
@@ -1503,7 +1503,7 @@ cmd archive-single-zip ${{
 cd ${common_dir@Q}
 zip -r ${dest@Q} ${arr_trim[@]@Q}
 
-notify-send "lf: Archive to single zip completed "${dest@Q}
+notify-send "lf: Archive to single zip completed" "$dest"
 lf -remote "send reload"
 if ! pgrep --quiet -f "^(/usr/bin/|/bin/|)gpu-screen-recorder" && [ -f "$lf_user_file_operation_finish_sound" ]; then
     setsid pw-play "$lf_user_file_operation_finish_sound" &
@@ -1583,7 +1583,7 @@ for file in "\${files[@]}"; do
     fi
 done
 
-notify-send "lf: Archive to individual zip completed "${PWD@Q}
+notify-send "lf: Archive to individual zip completed" "$PWD"
 lf -remote "send reload"
 if ! pgrep --quiet -f "^(/usr/bin/|/bin/|)gpu-screen-recorder" && [ -f "$lf_user_file_operation_finish_sound" ]; then
     setsid pw-play "$lf_user_file_operation_finish_sound" &
@@ -1640,7 +1640,7 @@ cmd archive-single-7z ${{
 #$dest
 7z a ${dest@Q} ${arr[@]@Q}
 
-notify-send "lf: Archive to single 7zip completed "${dest@Q}
+notify-send "lf: Archive to single 7zip completed" "$dest"
 lf -remote "send reload"
 if ! pgrep --quiet -f "^(/usr/bin/|/bin/|)gpu-screen-recorder" && [ -f "$lf_user_file_operation_finish_sound" ]; then
     setsid pw-play "$lf_user_file_operation_finish_sound" &
@@ -1720,7 +1720,7 @@ for file in "\${files[@]}"; do
     fi
 done
 
-notify-send "lf: Archive to individual 7z completed "${PWD@Q}
+notify-send "lf: Archive to individual 7z completed" "$PWD"
 lf -remote "send reload"
 if ! pgrep --quiet -f "^(/usr/bin/|/bin/|)gpu-screen-recorder" && [ -f "$lf_user_file_operation_finish_sound" ]; then
     setsid pw-play "$lf_user_file_operation_finish_sound" &
@@ -1809,14 +1809,14 @@ cmd clamscan &{{
     mkdir -p "$run_dir/lf_progress"
     SH_FILE="$(mktemp "$run_dir/lf_progress/clamscan_XXXXX.sh")"
             cat << EOF >"$SH_FILE"
-#${PWD@Q}
+#$PWD
 files=(
 $(printf '    %s\n' "${arr[@]@Q}")
 )
 echo "scanning..."
 clamscan --recursive --infected "\${files[@]}"
 
-notify-send "clamscan: scan complete "${PWD@Q}
+notify-send "clamscan: scan complete" "$PWD"
 read -n 1 -s -p "Press any key to exit..."
 rm -- "\$0"
 EOF
