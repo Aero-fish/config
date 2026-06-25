@@ -1,5 +1,4 @@
 #!/usr/bin/bash
-set -e
 
 bak_path="$HOME/.snapshots/Bak"
 if ! mountpoint -q -- "$bak_path"; then
