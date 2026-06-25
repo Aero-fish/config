@@ -191,9 +191,9 @@ create-baseline() {
 
     ## ---------- Install Visual C++ runtime ----------
     # echo -e "\e[31mInstall Visual C++ runtime.\e[0m"
-    # if [ -d "$wine_misc_folder/VC DX" ]; then
+    # if [ -d "$wine_misc_folder/VC_DX" ]; then
     #     mkdir -p "$WINEPREFIX/drive_c/VC"
-    #     for f in "$wine_misc_folder/VC DX/"*.{exe,msi}; do
+    #     for f in "$wine_misc_folder/VC_DX/"*.{exe,msi}; do
     #         if [ -f "$f" ]; then
     #             cp "$f" "$WINEPREFIX/drive_c/VC"
     #             echo -e "\e[31mInstalling ${f##*/}\e[0m"
