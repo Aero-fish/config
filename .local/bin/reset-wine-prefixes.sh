@@ -108,29 +108,29 @@ create-baseline() {
     override_dll=()
 
     wineboot --init
-    # Wait 15 seconds for wine to finish Initialisation
+    # Wait for wine to finish Initialisation
     sleep 10
 
     cp "$wine_misc_folder/wine.reg" "$WINEPREFIX"
     wine regedit "$WINEPREFIX/wine.reg"
     wine winecfg -v win11
 
-    # # Wait 15 seconds for wine to finish Initialisation
+    # # Wait for wine to finish Initialisation
     sleep 10
 
     rm "$WINEPREFIX/wine.reg"
 
     ## ---------- Install DXVK ----------
     if [ -d "$HOME/misc/repo/dxvk/x32" ] && [ -d "$HOME/misc/repo/dxvk/x64" ]; then
-        echo -e "\e[31mInstall DXVK.\e[0m"
+        echo -e "\e[31mInstalling DXVK.\e[0m"
 
         cp "$HOME/misc/repo/dxvk/x64"/*.dll "$WINEPREFIX/drive_c/windows/system32"
         cp "$HOME/misc/repo/dxvk/x32"/*.dll "$WINEPREFIX/drive_c/windows/syswow64"
 
-        override_dll+=("d3d10core" "d3d11" "d3d8" "d3d9" "dxgi")
+        override_dll+=("d3d8" "d3d9" "d3d10core" "d3d11" "dxgi")
 
         if [ -f "$dxvk_version_file" ]; then
-            cp "$dxvk_version_file" "$HOME/.wine/$prefix_name/"
+            touch "$WINEPREFIX/$(basename -- "$dxvk_version_file")"
         else
             echo "$dxvk_version_file"
             echo -e "\e[31mDXVK has no version.\e[0m"
@@ -138,20 +138,13 @@ create-baseline() {
     fi
 
     ## ---------- Install DXVK-nvapi ----------
-    if (pacman -Q nvidia-open 1>/dev/null 2>&1 || pacman -Q nvidia 1>/dev/null 2>&1); then
+    if pacman -Q nvidia-open 1>/dev/null 2>&1; then
         if [ -d /lib64/nvidia/wine ]; then
-            echo -e "\e[31mInstall nvidia dll.\e[0m"
-            for dll in /lib64/nvidia/wine/*.dll; do
-                cp "$dll" "$WINEPREFIX/drive_c/windows/system32"
-                override_dll+=("$(basename -- "$dll")")
-            done
-        fi
+            echo -e "\e[31mInstalling nvidia dll.\e[0m"
+            cp /lib64/nvidia/wine/_nvngx.dll "$WINEPREFIX/drive_c/windows/system32"
+            cp /lib64/nvidia/wine/nvngx.dll "$WINEPREFIX/drive_c/windows/system32"
 
-        ## This should mirror lib64, no need to reg again
-        if [ -d /lib/nvidia/wine ]; then
-            for dll in /lib64/nvidia/wine/*.dll; do
-                cp "$dll" "$WINEPREFIX/drive_c/windows/syswow64"
-            done
+            override_dll+=("_nvngx" "nvngx")
         fi
 
         if [ -d "$HOME"/misc/repo/dxvk-nvapi ]; then
@@ -161,11 +154,18 @@ create-baseline() {
             cp "$HOME"/misc/repo/dxvk-nvapi/x64/nvapi64.dll "$WINEPREFIX/drive_c/windows/system32"
             cp "$HOME"/misc/repo/dxvk-nvapi/x64/nvofapi64.dll "$WINEPREFIX/drive_c/windows/system32"
 
-            override_dll+=("nvapi" "nvapi64" "nvofapi64")
+            override_dll+=("nvapi" "nvapi64")
         fi
 
+        cp "$wine_misc_folder/nvidia.reg" "$WINEPREFIX"
+        wine regedit "$WINEPREFIX/nvidia.reg"
+
+        # # Wait for wine to finish Initialisation
+        sleep 10
+        rm "$WINEPREFIX/nvidia.reg"
+
         if [ -f "$dxvk_nvapi_version_file" ]; then
-            cp "$dxvk_nvapi_version_file" "$HOME/.wine/$prefix_name/"
+            touch "$WINEPREFIX/$(basename -- "$dxvk_nvapi_version_file")"
         else
             echo -e "\e[31mDXVK-nvapi has no version.\e[0m"
         fi
@@ -173,20 +173,18 @@ create-baseline() {
 
     ## ---------- Install vkd3d-proton ----------
     if [ -d "$HOME"/misc/repo/vkd3d-proton ]; then
-        echo -e "\e[31mInstall vkd3d-proton.\e[0m"
+        echo -e "\e[31mInstalling vkd3d-proton.\e[0m"
+
+        cp "$HOME/misc/repo/vkd3d-proton/x86"/*.dll "$WINEPREFIX/drive_c/windows/syswow64"
+        cp "$HOME/misc/repo/vkd3d-proton/x64"/*.dll "$WINEPREFIX/drive_c/windows/system32"
+
+        override_dll+=("d3d12" "d3d12core")
 
         if [ -f "$vkd3d_proton_version_file" ]; then
-            cp "$vkd3d_proton_version_file" "$HOME/.wine/$prefix_name/"
+            touch "$WINEPREFIX/$(basename -- "$vkd3d_proton_version_file")"
         else
             echo -e "\e[31mvkd3d-proton has no version.\e[0m"
         fi
-
-        # (cd "$HOME"/misc/repo/vkd3d-proton && WINEPREFIX="$HOME/.wine/$prefix_name" ./setup_vkd3d_proton.sh install)
-
-        cp "$HOME/misc/repo/vkd3d-proton/x64"/*.dll "$WINEPREFIX/drive_c/windows/system32"
-        cp "$HOME/misc/repo/vkd3d-proton/x86"/*.dll "$WINEPREFIX/drive_c/windows/syswow64"
-
-        override_dll+=("d3d12" "d3d12core")
     fi
 
     ## ---------- Install Visual C++ runtime ----------

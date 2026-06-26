@@ -176,14 +176,15 @@ dxvk-nvapi-update() {
 
         if [ ! -f "$d/$dxvk_nvapi_version_file" ]; then
             echo -e "\e[31mUpdating wine bottle at '$d'.\e[0m"
+            cp "$work_path/x32/nvapi.dll" "$d/drive_c/windows/syswow64"
+            cp "$work_path/x64/nvapi64.dll" "$d/drive_c/windows/system32"
+            cp "$work_path/x64/nvofapi64.dll" "$d/drive_c/windows/system32"
+
             rm -f "$d"/dxvk_nvapi_*.txt
             touch "$d/$dxvk_nvapi_version_file"
 
-            cp "$work_path/x64/nvapi64.dll" "$d/drive_c/windows/system32"
-            cp "$work_path/x32/nvapi.dll" "$d/drive_c/windows/syswow64"
         fi
     done
-
 }
 
 vkd3d-proton-download() {
@@ -211,11 +212,12 @@ vkd3d-proton-update() {
 
         if [ ! -f "$d/$vkd3d_proton_version_file" ]; then
             echo -e "\e[31mUpdating wine bottle at '$d'.\e[0m"
+            cp "$work_path/x64"/*.dll "$d/drive_c/windows/system32"
+            cp "$work_path/x86"/*.dll "$d/drive_c/windows/syswow64"
+
             rm -f "$d"/vkd3d_proton_*.txt
             touch "$d/$vkd3d_proton_version_file"
 
-            cp "$work_path/x64"/*.dll "$d/drive_c/windows/system32"
-            cp "$work_path/x86"/*.dll "$d/drive_c/windows/syswow64"
         fi
     done
 }
