@@ -250,7 +250,6 @@ for prefix_name in "${args[@]}"; do
         ln -s "../drive_c/" "$WINEPREFIX/pfx/dosdevices/c:"
         [ -d "$HOME/win_d" ] && ln -s "$HOME/win_d" "$WINEPREFIX/pfx/dosdevices/d:"
         [ -d "$HOME/Downloads" ] && ln -s "$HOME/Downloads" "$WINEPREFIX/pfx/dosdevices/e:"
-        [ -d "$HOME/kingston" ] && ln -s "$HOME/kingston" "$WINEPREFIX/pfx/dosdevices/f:"
 
         # No need to create symbolic link using generic function, already done. Also,
         # it causes error.
