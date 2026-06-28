@@ -60,7 +60,7 @@ let mapleader = "\<Space>"
 " Use jj, jk to escape
 " imap jj <Esc>
 imap jk <Esc>
-imap kj <Esc>
+"imap kj <Esc>
 
 " Move by screen line
 nnoremap <expr> k v:count == 0 ? 'gk' : 'k'

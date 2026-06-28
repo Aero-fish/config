@@ -542,13 +542,13 @@ local default_keymaps = {
         mode = i,
         hidden = true
     },
-    {
-        "kj",
-        "<Esc>",
-        desc = "<Esc>",
-        mode = i,
-        hidden = true
-    },
+    -- {
+    --     "kj",
+    --     "<Esc>",
+    --     desc = "<Esc>",
+    --     mode = i,
+    --     hidden = true
+    -- },
 
     -- Goto beginning/end of line
     {
