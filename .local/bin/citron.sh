@@ -17,11 +17,6 @@ ro_bind_path+=(
 
 source /usr/local/share/bwrap_share/generate_args
 
-if pgrep -x Hyprland >/dev/null; then
-    hyprctl dispatch 'hl.dsp.focus({ workspace = "empty" })' >/dev/null
-
-fi
-
 user_config=()
 user_config+=("--bind-try" "$HOME/Games/switch/config/citron" "$HOME/.config/citron")
 user_config+=("--bind-try" "$HOME/Games/switch/config/citron team" "$HOME/.config/citron team")
