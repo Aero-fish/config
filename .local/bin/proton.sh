@@ -25,6 +25,7 @@ tmpfs_path+=(
 ro_bind_path+=(
     "$HOME/.config/fontconfig"
     "$HOME/.local/share/fonts"
+    "$HOME/misc/repo/dxvk-nvapi/layer"
     "$proton_path"
 )
 
@@ -72,6 +73,7 @@ bwrap \
     --setenv WINEDEBUG "-all" \
     --setenv PROTON_USE_WAYLAND 1 \
     --setenv PROTON_ENABLE_HDR 1 \
+    --setenv VK_ADD_IMPLICIT_LAYER_PATH "$HOME/misc/repo/dxvk-nvapi/layer" \
     \
     --dev /dev \
     "${dev_bind[@]}" \
