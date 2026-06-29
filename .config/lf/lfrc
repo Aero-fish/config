@@ -2035,7 +2035,7 @@ map gt          cd ~/.local/share/Trash
 map gu          goto_usb
 map gv          cd ~/Projects/vm_share
 map gw          cd ~/Projects
-map ;           push :cd<space>
+map ;           push :cd<space>""<left>
 
 ##### Sort #####
 map sn          sort_by_natural
