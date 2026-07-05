@@ -450,16 +450,26 @@ alias gpg-retrieve="gpg2 --keyserver-options auto-key-retrieve --receive-keys"
 # ---------- youtube-dl ----------
 _ytdl() {
     local COOKIE_PATH
-    COOKIE_PATH="$(find "$HOME/Documents/youtube-log/mozilla-ytdl" -type d -regex '.*default-release' | head -n 1)"
+    COOKIE_PATH="$(find "$HOME/Documents/youtube-log/mozilla-ytdl" -type d -regex '.*default-release' 2>/dev/null | head -n 1)"
     echo -e "\e[31mDownloading to Desktop\e[0m"
+
+    bwrap_cookie_opts=()
+    yt_dlp_cookie_opts=()
+
+    if [ -n "$COOKIE_PATH" ]; then
+        echo "Downloading with no cookies."
+        bwrap_cookie_opts=("--bind-try" "$COOKIE_PATH" "$HOME/.cache/yt")
+        yt_dlp_cookie_opts=("--cookies-from-browser" "firefox:$HOME/.cache/yt")
+    fi
+
     /usr/local/bin/generic_bwrap \
-        --bind-try "$COOKIE_PATH" "$HOME/.cache/yt" \
+        "${bwrap_cookie_opts[@]}" \
         --ro-bind-try "$HOME"/misc/repo/ffmpeg-yt-dlp "$HOME"/misc/repo/ffmpeg-yt-dlp \
         --ro-bind-try "$HOME"/misc/repo/yt-dlp "$HOME"/misc/repo/yt-dlp \
         "$HOME"/misc/repo/yt-dlp/bin/yt-dlp \
         --ffmpeg-location "$HOME/misc/repo/ffmpeg-yt-dlp" \
         --js-runtimes node \
-        --cookies-from-browser firefox:"$HOME/.cache/yt" \
+        "${yt_dlp_cookie_opts[@]}" \
         "$@"
 }
 

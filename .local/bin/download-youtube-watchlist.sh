@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 set -e
 
 ## Prevent multiple instances
@@ -10,6 +10,9 @@ for pid in $(pgrep -f "bash $0"); do
     fi
 done
 
+rv=""
+ytdl_pid=""
+
 trap 'rv=$?; [ ! -z $ytdl_pid ] && kill -INT $ytdl_pid; exit $rv' EXIT
 
 TMP_DIR="$(mktemp -d "$XDG_RUNTIME_DIR/tmp.XXXXXXXXXX")"
@@ -17,12 +20,14 @@ DOWNLOAD_DIR="$HOME"/Downloads/youtube
 LOG_DIR="$HOME"/Documents/youtube-log
 
 OUTPUT_EXT="mp4"
-WAIT_BETWEEN_DOWNLOADS_SEC=5
+WAIT_IF_ERROR_SEC=5
+WAIT_BETWEEN_DOWNLOADS_SEC_MIN=20
+WAIT_BETWEEN_DOWNLOADS_SEC_MAX=60
 
 MEMBERS_ONLY_CONTENT_KEYWORDS=" members-only "
 NOT_YET_PREMIERES_MESSAGE_REGEX=".* ?(premieres|will begin) ?.*"
 MAX_DISK_USAGE=95
-COOKIE_PATH="$(find "$HOME/Documents/youtube-log/mozilla-ytdl" -type d -regex '.*default-release' | head -n 1)"
+COOKIE_PATH="$(find "$HOME/Documents/youtube-log/mozilla-ytdl" -type d -regex '.*default-release' 2>/dev/null | head -n 1)"
 
 check_disk_usage() {
     disk_usage="$(
@@ -38,14 +43,22 @@ check_disk_usage() {
 }
 
 ytdl() {
+    bwrap_cookie_opts=()
+    yt_dlp_cookie_opts=()
+
+    if [ -n "$COOKIE_PATH" ]; then
+        bwrap_cookie_opts=("--bind-try" "$COOKIE_PATH" "$HOME/.cache/yt")
+        yt_dlp_cookie_opts=("--cookies-from-browser" "firefox:$HOME/.cache/yt")
+    fi
+
     /usr/local/bin/generic_bwrap \
-        --bind-try "$COOKIE_PATH" "$HOME/.cache/yt" \
-        --ro-bind "$HOME"/misc/repo/ffmpeg-yt-dlp "$HOME"/misc/repo/ffmpeg-yt-dlp \
-        --ro-bind "$HOME"/misc/repo/yt-dlp "$HOME"/misc/repo/yt-dlp \
+        "${bwrap_cookie_opts[@]}" \
+        --ro-bind-try "$HOME"/misc/repo/ffmpeg-yt-dlp "$HOME"/misc/repo/ffmpeg-yt-dlp \
+        --ro-bind-try "$HOME"/misc/repo/yt-dlp "$HOME"/misc/repo/yt-dlp \
         "$HOME"/misc/repo/yt-dlp/bin/yt-dlp \
-        --ffmpeg-location "$HOME"/misc/repo/ffmpeg-yt-dlp \
+        --ffmpeg-location "$HOME/misc/repo/ffmpeg-yt-dlp" \
         --js-runtimes node \
-        --cookies-from-browser firefox:"$HOME/.cache/yt" \
+        "${yt_dlp_cookie_opts[@]}" \
         "$@"
 }
 
@@ -58,6 +71,10 @@ elif [ ! -f "${LOG_DIR}/channel" ]; then
 fi
 
 mkdir -p "$DOWNLOAD_DIR" "$LOG_DIR"/history "$LOG_DIR"/member_only
+
+if [ -z "$COOKIE_PATH" ]; then
+    echo "Downloading with no cookies."
+fi
 
 while read -r line; do
     channel_link=$(echo "$line" | cut -d',' -f1 | sed -e 's/^\s*//' | sed -e 's/\s*$//')
@@ -108,12 +125,7 @@ while read -r line; do
     fi
 
     counter=1
-    success=0
     while read -r video_id; do
-        if [ "$success" -eq 1 ]; then
-            sleep "$WAIT_BETWEEN_DOWNLOADS_SEC"
-        fi
-
         check_disk_usage
 
         # Get video information
@@ -133,6 +145,8 @@ while read -r line; do
             error_msg="$(cat "/tmp/yt-dl_error")"
             error_msg_lower="$(echo "$error_msg" | tr "[:upper:]" "[:lower:]")"
             rm /tmp/yt-dl_error
+            echo "Fetch info error, sleep for $WAIT_IF_ERROR_SEC seconds"
+            sleep "$WAIT_IF_ERROR_SEC"
         fi
 
         if [ $error_code -ne 0 ]; then
@@ -153,10 +167,11 @@ while read -r line; do
                 echo -e "\e[31mFetch info error.\e[0m"
                 echo "$error_msg" >>"${DOWNLOAD_DIR}/${channel_name}_fail"
             fi
-            success=0
             counter=$((counter + 1))
             echo
+            echo "Sleep for $WAIT_IF_ERROR_SEC seconds"
             echo "--------------------------------------------------------"
+            sleep "$WAIT_IF_ERROR_SEC"
             continue
         fi
 
@@ -211,10 +226,14 @@ while read -r line; do
             fi
         done
 
-        success=1
         counter=$((counter + 1))
+        sleep_time="$((RANDOM % (WAIT_BETWEEN_DOWNLOADS_SEC_MAX - WAIT_BETWEEN_DOWNLOADS_SEC_MIN + 1) + WAIT_BETWEEN_DOWNLOADS_SEC_MIN))"
+        echo "Download successful, sleep for $sleep_time seconds"
         echo
         echo "--------------------------------------------------------"
+        if ! [ "$counter" = "$num_of_new_videos" ]; then
+            sleep "$sleep_time"
+        fi
 
     done <"${TMP_DIR}/new_video_ids"
 
