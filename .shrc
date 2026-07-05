@@ -632,9 +632,11 @@ alias ls-network-connections="ss --tcp --udp --processes"
 alias ls-network-port-listening="ss --listening --tcp --udp --processes"
 alias ls-network-bandwidth-usage="nethogs -v 4"
 
-alias soft-reboot="hyprshutdown --top-label 'Restarting...' --post-cmd 'systemctl soft-reboot'"
-alias reboot="hyprshutdown --top-label 'Restarting...' --post-cmd 'systemctl reboot'"
-alias poweroff="hyprshutdown --top-label 'Shutting down...' --post-cmd 'systemctl -i poweroff'"
+alias soft-reboot="if pgrep -u \"\$(whoami)\" -x Hyprland; then hyprshutdown --top-label 'Restarting...' --post-cmd 'systemctl soft-reboot'; else systemctl soft-reboot; fi"
+
+alias reboot="if pgrep -u \"\$(whoami)\" -x Hyprland; then hyprshutdown --top-label 'Restarting...' --post-cmd 'systemctl reboot'; else systemctl reboot; fi"
+
+alias poweroff="if pgrep -u \"\$(whoami)\" -x Hyprland; then hyprshutdown --top-label 'Shutting down...' --post-cmd 'systemctl -i poweroff'; else systemctl poweroff; fi"
 
 ls-dbus() {
     echo "---------- System ----------"
