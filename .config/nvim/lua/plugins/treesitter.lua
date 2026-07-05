@@ -1,28 +1,16 @@
 ----- Auto start treesitter -----
-local has_treesitter, treesitter = pcall(require, "nvim-treesitter")
-if has_treesitter then
-    -- local installed_parser = treesitter.get_installed()
-    vim.api.nvim_create_autocmd("FileType", {
-        pattern = "*",
-        callback = function(args)
-            local ok = pcall(vim.treesitter.start)
-            if ok then
-                vim.wo.foldexpr = "v:lua.vim.treesitter.foldexpr()"
-            end
-        end,
-    })
-end
+-- local installed_parser = treesitter.get_installed()
+vim.api.nvim_create_autocmd("FileType", {
+    pattern = "*",
+    callback = function(args)
+        local ok = pcall(vim.treesitter.start)
+        if ok then
+            vim.wo.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+        end
+    end,
+})
 
 return {
-    {
-        "nvim-treesitter/nvim-treesitter",
-        lazy = false,
-        branch = "main",
-        build = function()
-            require("nvim-treesitter").install({ "unstable" })
-            require("nvim-treesitter").update()
-        end,
-    },
     {
         "nvim-treesitter/nvim-treesitter-context",
         event = "VeryLazy",
