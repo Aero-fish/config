@@ -1,15 +1,3 @@
------ Auto start treesitter -----
--- local installed_parser = treesitter.get_installed()
-vim.api.nvim_create_autocmd("FileType", {
-    pattern = "*",
-    callback = function(args)
-        local ok = pcall(vim.treesitter.start)
-        if ok then
-            vim.wo.foldexpr = "v:lua.vim.treesitter.foldexpr()"
-        end
-    end,
-})
-
 return {
     {
         "nvim-treesitter/nvim-treesitter-context",
