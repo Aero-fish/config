@@ -142,7 +142,7 @@ dxvk-update() {
         [ ! -d "$d/drive_c" ] && continue
 
         if [ ! -f "$d/$dxvk_version_file" ]; then
-            echo -e "\e[31mUpdating wine bottle at '$d'.\e[0m"
+            echo -e "\e[31mUpdating wine bottle at '$d' for dxvk.\e[0m"
             rm -f "$d"/dxvk_*.txt
             touch "$d/$dxvk_version_file"
 
@@ -175,7 +175,7 @@ dxvk-nvapi-update() {
         [ ! -d "$d/drive_c" ] && continue
 
         if [ ! -f "$d/$dxvk_nvapi_version_file" ]; then
-            echo -e "\e[31mUpdating wine bottle at '$d'.\e[0m"
+            echo -e "\e[31mUpdating wine bottle at '$d' for nvapi.\e[0m"
             cp "$work_path/x32/nvapi.dll" "$d/drive_c/windows/syswow64"
             cp "$work_path/x64/nvapi64.dll" "$d/drive_c/windows/system32"
             cp "$work_path/x64/nvofapi64.dll" "$d/drive_c/windows/system32"
@@ -211,7 +211,7 @@ vkd3d-proton-update() {
         [ ! -d "$d/drive_c" ] && continue
 
         if [ ! -f "$d/$vkd3d_proton_version_file" ]; then
-            echo -e "\e[31mUpdating wine bottle at '$d'.\e[0m"
+            echo -e "\e[31mUpdating wine bottle at '$d' for vkd3d-proton.\e[0m"
             cp "$work_path/x64"/*.dll "$d/drive_c/windows/system32"
             cp "$work_path/x86"/*.dll "$d/drive_c/windows/syswow64"
 
