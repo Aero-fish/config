@@ -152,17 +152,17 @@ glob_ignore_pattern="*cache|.cargo|.git|.gnupg|.gphoto|.ipython|.jupyter|.lastpa
 
 if [ -f /usr/bin/eza ]; then
     # '--classify' indicates type at the end (*=exe, /=dir, |=FIFO, @=symbolic
-    alias ls="eza --colour=automatic --classify --group-directories-first"
-    alias ll="eza --colour=automatic --classify --long --group-directories-first --binary --group --links --modified"                   # long list
-    alias la="eza --colour=automatic --classify --long --all --group-directories-first --binary --group --links --modified"             # long list all
-    alias ld="eza --colour=automatic --classify --long --all --only-dirs --group-directories-first --binary --group --links --modified" # long list directory
-    alias l.="eza --colour=automatic --classify --long --all -d .* --group-directories-first --binary --group --links --modified"       # list hidden
+    alias ls="eza --color=auto --classify --group-directories-first"
+    alias ll="eza --color=auto --classify --long --group-directories-first --binary --group --links --modified"                   # long list
+    alias la="eza --color=auto --classify --long --all --group-directories-first --binary --group --links --modified"             # long list all
+    alias ld="eza --color=auto --classify --long --all --only-dirs --group-directories-first --binary --group --links --modified" # long list directory
+    alias l.="eza --color=auto --classify --long --all -d .* --group-directories-first --binary --group --links --modified"       # list hidden
 
-    alias llm="eza --colour=automatic --classify --long --reverse --sort=modified --group-directories-first --binary --group --links --modified" # long list sort by modified date
-    alias lls="eza --colour=automatic --classify --long --reverse --sort=size --group-directories-first --binary --group --links --modified"     # long list sort by size
+    alias llm="eza --color=auto --classify --long --reverse --sort=modified --group-directories-first --binary --group --links --modified" # long list sort by modified date
+    alias lls="eza --color=auto --classify --long --reverse --sort=size --group-directories-first --binary --group --links --modified"     # long list sort by size
 
     # shellcheck disable=SC2139
-    alias ltree="eza --colour=automatic --classify --tree --level=3 --all --group-directories-first --sort=name --ignore-glob='$glob_ignore_pattern'"
+    alias ltree="eza --color=auto --classify --tree --level=3 --all --group-directories-first --sort=name --ignore-glob='$glob_ignore_pattern'"
 
 else
     alias ls="ls --color=auto --classify --group-directories-first"
