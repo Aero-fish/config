@@ -31,9 +31,7 @@ ro_bind_path+=(
 
 bind_path=(
     "$HOME/Desktop"
-    "$HOME/Downloads"
-    "$HOME/kingston"
-    "$HOME/win_d"
+    "$HOME/win_d/Games"
     "$cache_pool"
     "$document_path"
     "$appdata_path"
