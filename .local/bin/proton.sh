@@ -1,6 +1,5 @@
 #!/usr/bin/bash
 set -e
-## Check https://umu.openwinecomponents.org/index.php for fixes
 
 [ "${UID}" -eq 0 ] && {
     echo "Do not run as root."
