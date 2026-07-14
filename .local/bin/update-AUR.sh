@@ -101,15 +101,6 @@ if [ "$pc_name" = "$main_pc" ]; then
 
         fi
     done
-
-    ## proton
-    if [ -d "$repo_dir/proton-ge-custom-bin/pkg" ]; then
-        echo -e "\e[31mClean up proton-ge-custom-bin.\e[0m"
-        rm -rf "$repo_dir/proton-ge-custom-bin/usr"
-        mv "$repo_dir/proton-ge-custom-bin/pkg/proton-ge-custom-bin/usr" "$repo_dir/proton-ge-custom-bin/usr"
-        sed -i 's:^\s*_proton=.*:_proton="$HOME/misc/repo/proton-ge-custom-bin/usr/share/steam/compatibilitytools.d/proton-ge-custom/proton":' "$repo_dir/proton-ge-custom-bin/usr/bin/proton-ge"
-        rm -rf "$repo_dir/proton-ge-custom-bin/pkg"
-    fi
 fi
 
 ## ----- Update and install github based packages -----
@@ -220,6 +211,19 @@ vkd3d-proton-update() {
 
         fi
     done
+}
+
+proton-ge-download() {
+    download_url="$(
+        curl -s -L "$1" |
+            jq -r ".assets[] | select(.name==\"${version}.tar.gz\") | .browser_download_url"
+    )"
+    _check_download_url
+
+    curl -L "$download_url" --output "${work_path}/${version}.tar.gz"
+    tar --strip-components=1 -xf "${work_path}/${version}.tar.gz" -C "$work_path"
+    rm "$work_path/${version}.tar.gz"
+    touch "$work_path/${version}.txt"
 }
 
 ksmbd-tools-download() {
@@ -436,6 +440,7 @@ declare -A non_aur_packages=(
     ["pandoc-eisvogel-template"]="https://api.github.com/repos/Wandmalfarbe/pandoc-latex-template/releases/latest"
     ["revealjs"]="https://api.github.com/repos/hakimel/reveal.js/releases/latest"
     ["vkd3d-proton"]="https://api.github.com/repos/HansKristian-Work/vkd3d-proton/releases/latest"
+    ["proton-ge"]="https://api.github.com/repos/GloriousEggroll/proton-ge-custom/releases/latest"
     ["yt-dlp"]="pip index versions --json yt-dlp"
 )
 

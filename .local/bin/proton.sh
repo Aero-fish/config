@@ -1,17 +1,20 @@
-#!/bin/bash
+#!/usr/bin/bash
 set -e
+## Check https://umu.openwinecomponents.org/index.php for fixes
+
 [ "${UID}" -eq 0 ] && {
     echo "Do not run as root."
     exit 0
 }
 
-proton_path="$HOME/misc/repo/proton-ge-custom-bin"
+proton_path="$HOME/misc/repo/proton-ge"
 proton_prefix="$HOME/.wine/proton"
 document_path="$HOME/.wine/games_documents"
 appdata_path="$HOME/.wine/games_appdata"
 cache_pool="$HOME/.cache/proton-cache-pool"
+umu_data_path="$HOME/.local/share/umu"
 
-mkdir -p "$proton_prefix" "$document_path" "$cache_pool"
+mkdir -p "$proton_prefix" "$document_path" "$cache_pool" "$umu_data_path"
 
 source /usr/local/share/bwrap_share/strict_rules
 
@@ -27,6 +30,7 @@ ro_bind_path+=(
     "$HOME/.local/share/fonts"
     "$HOME/misc/repo/dxvk-nvapi/layer"
     "$proton_path"
+    "/etc/ld.so.cache"
 )
 
 bind_path=(
@@ -36,10 +40,11 @@ bind_path=(
     "$document_path"
     "$appdata_path"
     "$proton_prefix"
+    "$umu_data_path"
 )
 source /usr/local/share/bwrap_share/generate_args
 
-if ! [[ "$1" =~ wineboot(\.exe)? ]] && ! [[ "$1" =~ winecfg(\.exe)? ]] && ! [[ "$1" =~ regedit(\.exe)? ]]; then
+if [ "$1" != "" ]; then
     if pgrep -x Hyprland >/dev/null; then
         hyprctl dispatch 'hl.dsp.focus({ workspace = "empty" })' >/dev/null
     fi
@@ -54,18 +59,17 @@ bwrap \
     --unshare-net \
     --unshare-cgroup \
     \
-    --disable-userns \
     --hostname my-pc \
     --proc /proc \
     --cap-drop ALL \
     --new-session \
     \
-    --setenv DXVK_LOG_LEVEL "none" \
     --setenv DXVK_STATE_CACHE_PATH "$cache_pool" \
-    --setenv SteamAppId 0 \
-    --setenv STEAM_COMPAT_CLIENT_INSTALL_PATH "$HOME/.local/share/Steam" \
-    --setenv STEAM_COMPAT_DATA_PATH "$proton_prefix" \
     --setenv VKD3D_SHADER_CACHE_PATH "$cache_pool" \
+    --setenv WINEPREFIX "$proton_prefix" \
+    --setenv PROTONPATH "$proton_path" \
+    \
+    --setenv DXVK_LOG_LEVEL "none" \
     --setenv PROTON_DLSS_UPGRADE 0 \
     --setenv PROTON_DLSS_INDICATOR 0 \
     --setenv WINEDEBUG "-all" \
@@ -73,7 +77,6 @@ bwrap \
     --setenv PROTON_ENABLE_HDR 1 \
     --setenv VK_ADD_IMPLICIT_LAYER_PATH "$HOME/misc/repo/dxvk-nvapi/layer" \
     \
-    --dev /dev \
     "${dev_bind[@]}" \
     "${tmpfs[@]}" \
     "${ro_bind[@]}" \
@@ -83,5 +86,10 @@ bwrap \
     "${unhide[@]}" \
     "${symbolic_link[@]}" \
     --ro-bind-try "$XDG_RUNTIME_DIR/tray-proxy" "$dbus_address" \
+    --perms 444 --file 6 /etc/group \
+    --perms 444 --file 7 /etc/passwd \
     --perms 444 --file 8 /etc/machine-id \
-    "$proton_path"/usr/bin/proton-ge run "$@" 8< <(dbus-uuidgen)
+    umu-run "$@" \
+    6< <(echo "hugh:x:1000:") \
+    7< <(echo "hugh:x:1000:1000::/home:/usr/bin/nologin") \
+    8< <(dbus-uuidgen)

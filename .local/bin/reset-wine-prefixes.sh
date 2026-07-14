@@ -237,19 +237,16 @@ for prefix_name in "${args[@]}"; do
     proton)
         rm -rf "$WINEPREFIX"
         mkdir -p "$HOME/.wine/games_documents" "$HOME/.wine/games_appdata"
-        "$HOME"/.local/bin/proton.sh wineboot --init
-        sleep 5
-        "$HOME"/.local/bin/proton.sh winecfg -v win11
+        "$HOME"/.local/bin/proton-net.sh ""
         sleep 3
-        rm -rf "$WINEPREFIX/pfx/drive_c/users/steamuser/"{Desktop,Documents,AppData}
-        ln -s "$HOME/Desktop" "$WINEPREFIX/pfx/drive_c/users/steamuser/Desktop"
-        ln -s "../../../../../games_documents" "$WINEPREFIX/pfx/drive_c/users/steamuser/Documents"
-        ln -s "../../../../../games_appdata" "$WINEPREFIX/pfx/drive_c/users/steamuser/AppData"
+        rm -rf "$WINEPREFIX/drive_c/users/steamuser/"{Desktop,Documents,AppData}
+        ln -s "$HOME/Desktop" "$WINEPREFIX/drive_c/users/steamuser/Desktop"
+        ln -s "../../../../games_documents" "$WINEPREFIX/drive_c/users/steamuser/Documents"
+        ln -s "../../../../games_appdata" "$WINEPREFIX/drive_c/users/steamuser/AppData"
 
-        rm "$WINEPREFIX/pfx/dosdevices"/*
-        ln -s "../drive_c/" "$WINEPREFIX/pfx/dosdevices/c:"
-        [ -d "$HOME/win_d" ] && ln -s "$HOME/win_d" "$WINEPREFIX/pfx/dosdevices/d:"
-        [ -d "$HOME/Downloads" ] && ln -s "$HOME/Downloads" "$WINEPREFIX/pfx/dosdevices/e:"
+        rm "$WINEPREFIX/dosdevices"/*
+        ln -s "../drive_c/" "$WINEPREFIX/dosdevices/c:"
+        [ -d "$HOME/win_d" ] && ln -s "$HOME/win_d" "$WINEPREFIX/dosdevices/d:"
 
         # No need to create symbolic link using generic function, already done. Also,
         # it causes error.
