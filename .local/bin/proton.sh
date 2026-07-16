@@ -34,7 +34,6 @@ ro_bind_path+=(
 
 bind_path=(
     "$HOME/Desktop"
-    "$HOME/win_d/Games"
     "$cache_pool"
     "$document_path"
     "$appdata_path"
@@ -42,6 +41,21 @@ bind_path=(
     "$umu_data_path"
 )
 source /usr/local/share/bwrap_share/generate_args
+
+overlay=()
+
+## 'workdir' needs to be on the same filesystem as the 'upperdir'
+game_overlay_lower="$HOME/win_d/Games"
+game_overlay_upper="$HOME/.wine/win_d_games"
+game_overlay_workdir="$HOME/.cache/win_d_games"
+
+if [ -d "$game_overlay_lower" ]; then
+    mkdir -p "$game_overlay_upper" "$game_overlay_workdir"
+    overlay+=(
+        "--overlay-src" "$game_overlay_lower"
+        "--overlay" "$game_overlay_upper" "$game_overlay_workdir" "$game_overlay_lower"
+    )
+fi
 
 if [ "$1" != "" ]; then
     if pgrep -x Hyprland >/dev/null; then
@@ -80,6 +94,7 @@ bwrap \
     "${tmpfs[@]}" \
     "${ro_bind[@]}" \
     "${bind[@]}" \
+    "${overlay[@]}" \
     "${hide[@]}" \
     "${unhide_ro[@]}" \
     "${unhide[@]}" \
