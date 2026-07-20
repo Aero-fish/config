@@ -919,6 +919,40 @@ image-to-pdf() {
         -background white -density 72 -units PixelsPerInch -page A4 "$pdf_name"
 }
 
+image-to-pdf-landscape() {
+    if [ "$#" == 0 ]; then
+        echo "Usage: image-to-pdf input-files [output.pdf]"
+        return
+    fi
+
+    local pdf_name
+    pdf_name="pdf_output.pdf" # Default name for the output pdf
+
+    if [ "$#" -gt 1 ]; then
+        local last_arg last_arg_lower
+
+        ## zsh only
+        # last_arg_lower="$(basename -- "${@[${#}]}" | tr '[:upper:]' '[:lower:]')"
+
+        ## bash only
+        # last_arg_lower="$(echo "${@:-1}" | tr '[:upper:]' '[:lower:]')"
+
+        ## Universal
+        for f in "$@"; do last_arg="$f"; done
+        last_arg_lower="$(echo "$last_arg" | tr '[:upper:]' '[:lower:]')"
+
+        if [[ "$last_arg_lower" == *"."* ]] && [ ".${last_arg_lower##*.}" = ".pdf" ]; then
+            # shellcheck disable=SC2124
+            pdf_name="$last_arg"        # use last argument as pdf name,
+            set -- "${@:1:$(($# - 1))}" # Remove the last argument
+        fi
+    fi
+
+    magick "$@" \
+        -background white -density 72 -units PixelsPerInch -page A4 -rotate -90 pdf:- |
+        magick - -rotate 90 "$pdf_name"
+}
+
 extract-pdf-images() {
     local file_name
     file_name="$(basename -- "$1")"
