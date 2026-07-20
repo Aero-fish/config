@@ -46,7 +46,7 @@ overlay=()
 
 ## 'workdir' needs to be on the same filesystem as the 'upperdir'
 game_overlay_lower="$HOME/win_d/Games"
-game_overlay_upper="$HOME/.wine/win_d_games"
+game_overlay_upper="$HOME/.wine/win_d_games_upper"
 game_overlay_workdir="$HOME/.cache/win_d_games"
 
 if [ -d "$game_overlay_lower" ]; then
