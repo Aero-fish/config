@@ -248,6 +248,18 @@ for prefix_name in "${args[@]}"; do
         ln -s "../drive_c/" "$WINEPREFIX/dosdevices/c:"
         [ -d "$HOME/win_d" ] && ln -s "$HOME/win_d" "$WINEPREFIX/dosdevices/d:"
 
+        if [ -f "$dxvk_version_file" ]; then
+            touch "$WINEPREFIX/$(basename -- "$dxvk_version_file")"
+        fi
+
+        if pacman -Q nvidia-open 1>/dev/null 2>&1 && [ -f "$dxvk_nvapi_version_file" ]; then
+            touch "$WINEPREFIX/$(basename -- "$dxvk_nvapi_version_file")"
+        fi
+
+        if [ -f "$vkd3d_proton_version_file" ]; then
+            touch "$WINEPREFIX/$(basename -- "$vkd3d_proton_version_file")"
+        fi
+
         # No need to create symbolic link using generic function, already done. Also,
         # it causes error.
         continue

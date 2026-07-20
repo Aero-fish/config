@@ -133,7 +133,7 @@ dxvk-update() {
         [ ! -d "$d/drive_c" ] && continue
 
         if [ ! -f "$d/$dxvk_version_file" ]; then
-            echo -e "\e[31mUpdating wine bottle at '$d' for dxvk.\e[0m"
+            echo -e "\e[31mUpdating wine prefix at '$d' for dxvk.\e[0m"
             rm -f "$d"/dxvk_*.txt
             touch "$d/$dxvk_version_file"
 
@@ -141,6 +141,22 @@ dxvk-update() {
             cp "$work_path/x32"/*.dll "$d/drive_c/windows/syswow64"
         fi
     done
+
+    dll_path="$HOME/misc/repo/proton-ge/files/lib/wine/dxvk"
+    if [ -d "$dll_path" ] && [ ! -f "$dll_path/$dxvk_version_file" ]; then
+        ## Default proton dll has permission 500, cp cannot override it.
+        ## Need to remove it first.
+        echo -e "\e[31mUpdating proton for dxvk.\e[0m"
+        for f in "$work_path/x64"/*.dll; do
+            rm -f "$dll_path/x86_64-windows/$(basename -- "$f")"
+            cp "$f" "$dll_path/x86_64-windows"
+        done
+        for f in "$work_path/x32"/*.dll; do
+            rm -f "$dll_path/i386-windows/$(basename -- "$f")"
+            cp "$f" "$dll_path/i386-windows"
+        done
+        touch "$dll_path/$dxvk_version_file"
+    fi
 }
 
 dxvk-nvapi-download() {
@@ -166,16 +182,31 @@ dxvk-nvapi-update() {
         [ ! -d "$d/drive_c" ] && continue
 
         if [ ! -f "$d/$dxvk_nvapi_version_file" ]; then
-            echo -e "\e[31mUpdating wine bottle at '$d' for nvapi.\e[0m"
+            echo -e "\e[31mUpdating wine prefix at '$d' for nvapi.\e[0m"
             cp "$work_path/x32/nvapi.dll" "$d/drive_c/windows/syswow64"
             cp "$work_path/x64/nvapi64.dll" "$d/drive_c/windows/system32"
             cp "$work_path/x64/nvofapi64.dll" "$d/drive_c/windows/system32"
 
             rm -f "$d"/dxvk_nvapi_*.txt
             touch "$d/$dxvk_nvapi_version_file"
-
         fi
     done
+
+    dll_path="$HOME/misc/repo/proton-ge/files/lib/wine/nvapi"
+    if [ -d "$dll_path" ] && [ ! -f "$dll_path/$dxvk_version_file" ]; then
+        ## Default proton dll has permission 500, cp cannot override it.
+        ## Need to remove it first.
+        echo -e "\e[31mUpdating proton for dxvk-nvapi.\e[0m"
+        for f in "$work_path/x64"/*.dll; do
+            rm -f "$dll_path/x86_64-windows/$(basename -- "$f")"
+            cp "$f" "$dll_path/x86_64-windows"
+        done
+        for f in "$work_path/x32"/*.dll; do
+            rm -f "$dll_path/i386-windows/$(basename -- "$f")"
+            cp "$f" "$dll_path/i386-windows"
+        done
+        touch "$dll_path/$dxvk_version_file"
+    fi
 }
 
 vkd3d-proton-download() {
@@ -202,15 +233,30 @@ vkd3d-proton-update() {
         [ ! -d "$d/drive_c" ] && continue
 
         if [ ! -f "$d/$vkd3d_proton_version_file" ]; then
-            echo -e "\e[31mUpdating wine bottle at '$d' for vkd3d-proton.\e[0m"
+            echo -e "\e[31mUpdating wine prefix at '$d' for vkd3d-proton.\e[0m"
             cp "$work_path/x64"/*.dll "$d/drive_c/windows/system32"
             cp "$work_path/x86"/*.dll "$d/drive_c/windows/syswow64"
 
             rm -f "$d"/vkd3d_proton_*.txt
             touch "$d/$vkd3d_proton_version_file"
-
         fi
     done
+
+    dll_path="$HOME/misc/repo/proton-ge/files/lib/wine/vkd3d-proton"
+    if [ -d "$dll_path" ] && [ ! -f "$dll_path/$dxvk_version_file" ]; then
+        ## Default proton dll has permission 500, cp cannot override it.
+        ## Need to remove it first.
+        echo -e "\e[31mUpdating proton for vkd3d-proton.\e[0m"
+        for f in "$work_path/x64"/*.dll; do
+            rm -f "$dll_path/x86_64-windows/$(basename -- "$f")"
+            cp "$f" "$dll_path/x86_64-windows"
+        done
+        for f in "$work_path/x86"/*.dll; do
+            rm -f "$dll_path/i386-windows/$(basename -- "$f")"
+            cp "$f" "$dll_path/i386-windows"
+        done
+        touch "$dll_path/$dxvk_version_file"
+    fi
 }
 
 proton-ge-download() {
@@ -428,6 +474,10 @@ huggingface_hub-download() {
 }
 
 declare -A non_aur_packages=(
+    ## Update proton before dxvk etc, so its dxvk/dxvk-nvapi/vkd3d-proton dlls
+    ## can be updated in subsequent dxvk/dxvk-nvapi/vkd3d-proton updates.
+    ["proton-ge"]="https://api.github.com/repos/GloriousEggroll/proton-ge-custom/releases/latest"
+    #
     ["dxvk"]="https://api.github.com/repos/doitsujin/dxvk/releases/latest"
     ["dxvk-nvapi"]="https://api.github.com/repos/jp7677/dxvk-nvapi/releases/latest"
     ["ffmpeg-yt-dlp"]="https://api.github.com/repos/yt-dlp/FFmpeg-Builds/releases/latest"
@@ -440,7 +490,6 @@ declare -A non_aur_packages=(
     ["pandoc-eisvogel-template"]="https://api.github.com/repos/Wandmalfarbe/pandoc-latex-template/releases/latest"
     ["revealjs"]="https://api.github.com/repos/hakimel/reveal.js/releases/latest"
     ["vkd3d-proton"]="https://api.github.com/repos/HansKristian-Work/vkd3d-proton/releases/latest"
-    ["proton-ge"]="https://api.github.com/repos/GloriousEggroll/proton-ge-custom/releases/latest"
     ["yt-dlp"]="pip index versions --json yt-dlp"
 )
 
