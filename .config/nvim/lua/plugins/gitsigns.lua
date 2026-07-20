@@ -138,12 +138,12 @@ return {
             },
 
             -- Text object (Not work)
-            -- {
-            --     "ih",
-            --     ":<C-U>Gitsigns select_hunk<CR>",
-            --     mode = { "o", "x" },
-            --     remap=true
-            -- },
+            {
+                "ih",
+                ":<C-U>Gitsigns select_hunk<CR>",
+                mode = { "o", "x" },
+                remap=true
+            },
         }
     }
 }
