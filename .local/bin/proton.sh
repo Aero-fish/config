@@ -83,6 +83,7 @@ bwrap \
     --setenv PROTONPATH "$proton_path" \
     \
     --setenv DXVK_LOG_LEVEL "none" \
+    --setenv PROTON_USE_D7VK 1 \
     --setenv PROTON_DLSS_UPGRADE 0 \
     --setenv PROTON_DLSS_INDICATOR 0 \
     --setenv WINEDEBUG "-all" \

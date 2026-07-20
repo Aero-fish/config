@@ -40,6 +40,13 @@ wine_misc_folder="$HOME/misc/wine"
 mkdir -p "$HOME/.wine"
 mkdir -p "$HOME/win_d"
 user_name="$(whoami)"
+
+d7vk_version_file="$(
+    fd --unrestricted -t f --exact-depth 1 --glob "d7vk_*.txt" "$HOME/misc/repo/d7vk" |
+        sort |
+        tail -n 1
+)"
+
 dxvk_version_file="$(
     fd --unrestricted -t f --exact-depth 1 --glob "dxvk_*.txt" "$HOME/misc/repo/dxvk" |
         sort |
@@ -119,6 +126,21 @@ create-baseline() {
     sleep 10
 
     rm "$WINEPREFIX/wine.reg"
+    ## ---------- Install D7VK ----------
+    if [ -d "$HOME/misc/repo/d7vk/x32" ]; then
+        echo -e "\e[31mInstalling D7VK.\e[0m"
+
+        cp "$HOME/misc/repo/d7vk/x32"/*.dll "$WINEPREFIX/drive_c/windows/syswow64"
+
+        override_dll+=("ddraw.dll")
+
+        if [ -f "$d7vk_version_file" ]; then
+            touch "$WINEPREFIX/$(basename -- "$d7vk_version_file")"
+        else
+            echo "$d7vk_version_file"
+            echo -e "\e[31mD7VK has no version.\e[0m"
+        fi
+    fi
 
     ## ---------- Install DXVK ----------
     if [ -d "$HOME/misc/repo/dxvk/x32" ] && [ -d "$HOME/misc/repo/dxvk/x64" ]; then
@@ -237,7 +259,7 @@ for prefix_name in "${args[@]}"; do
     proton)
         rm -rf "$WINEPREFIX"
         mkdir -p "$HOME/.wine/games_documents" "$HOME/.wine/games_appdata"
-        "$HOME"/.local/bin/proton-net.sh ""
+        PROTON_USE_D7VK=1 "$HOME"/.local/bin/proton-net.sh ""
         sleep 3
         rm -rf "$WINEPREFIX/drive_c/users/steamuser/"{Desktop,Documents,AppData}
         ln -s "$HOME/Desktop" "$WINEPREFIX/drive_c/users/steamuser/Desktop"
@@ -247,6 +269,10 @@ for prefix_name in "${args[@]}"; do
         rm "$WINEPREFIX/dosdevices"/*
         ln -s "../drive_c/" "$WINEPREFIX/dosdevices/c:"
         [ -d "$HOME/win_d" ] && ln -s "$HOME/win_d" "$WINEPREFIX/dosdevices/d:"
+
+        if [ -f "$d7vk_version_file" ]; then
+            touch "$WINEPREFIX/$(basename -- "$d7vk_version_file")"
+        fi
 
         if [ -f "$dxvk_version_file" ]; then
             touch "$WINEPREFIX/$(basename -- "$dxvk_version_file")"

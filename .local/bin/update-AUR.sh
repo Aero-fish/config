@@ -124,7 +124,38 @@ d7vk-download() {
         rm -rf "${work_path}/d7vk-${version}"
     fi
     rm "${work_path}/${version}.zip"
-    touch "$work_path/${version}.txt"
+    touch "$work_path/d7vk_${version}.txt"
+}
+
+d7vk-update() {
+    d7vk_version_file="$(fd -tf --glob "d7vk_*.txt" "$work_path" | head -n1)"
+    [ -z "$d7vk_version_file" ] && return
+    d7vk_version_file="$(basename -- "$d7vk_version_file")"
+
+    for d in "$HOME"/.wine/*/; do
+        [ ! -d "$d" ] && break
+        [ ! -d "$d/drive_c" ] && continue
+
+        if [ ! -f "$d/$d7vk_version_file" ]; then
+            echo -e "\e[31mUpdating wine prefix at '$d' for d7vk.\e[0m"
+            rm -f "$d"/d7vk_*.txt
+            touch "$d/$d7vk_version_file"
+
+            cp "$work_path/x32"/*.dll "$d/drive_c/windows/syswow64"
+        fi
+    done
+
+    dll_path="$HOME/misc/repo/proton-ge/files/lib/wine/d7vk"
+    if [ -d "$dll_path" ] && [ ! -f "$dll_path/$d7vk_version_file" ]; then
+        ## Default proton dll has permission 500, cp cannot override it.
+        ## Need to remove it first.
+        echo -e "\e[31mUpdating proton for d7vk.\e[0m"
+        for f in "$work_path/x32"/*.dll; do
+            rm -f "$dll_path/i386-windows/$(basename -- "$f")"
+            cp "$f" "$dll_path/i386-windows"
+        done
+        touch "$dll_path/$d7vk_version_file"
+    fi
 }
 
 dxvk-download() {
