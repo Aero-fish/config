@@ -1814,7 +1814,7 @@ files=(
 $(printf '    %s\n' "${arr[@]@Q}")
 )
 echo "scanning..."
-clamscan --recursive --infected "\${files[@]}"
+clamdscan --multiscan --fdpass --infected "\${files[@]}"
 
 notify-send "clamscan: scan complete" "$PWD"
 read -n 1 -s -p "Press any key to exit..."
