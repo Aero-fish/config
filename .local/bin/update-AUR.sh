@@ -111,6 +111,22 @@ _check_download_url() {
     fi
 }
 
+d7vk-download() {
+    download_url="$(
+        curl -s -L "$1" |
+            jq -r ".assets[] | select(.name==\"d7vk-${version}.zip\") | .browser_download_url"
+    )"
+    _check_download_url
+    curl -L "$download_url" --output "${work_path}/${version}.zip"
+    unzip "${work_path}/${version}.zip" -d "${work_path}"
+    if [ -d "${work_path}/d7vk-${version}" ]; then
+        mv "${work_path}/d7vk-${version}"/* "${work_path}"
+        rm -rf "${work_path}/d7vk-${version}"
+    fi
+    rm "${work_path}/${version}.zip"
+    touch "$work_path/${version}.txt"
+}
+
 dxvk-download() {
     download_url="$(
         curl -s -L "$1" |
@@ -478,6 +494,7 @@ declare -A non_aur_packages=(
     ## can be updated in subsequent dxvk/dxvk-nvapi/vkd3d-proton updates.
     ["proton-ge"]="https://api.github.com/repos/GloriousEggroll/proton-ge-custom/releases/latest"
     #
+    ["d7vk"]="https://api.github.com/repos/WinterSnowfall/d7vk/releases/latest"
     ["dxvk"]="https://api.github.com/repos/doitsujin/dxvk/releases/latest"
     ["dxvk-nvapi"]="https://api.github.com/repos/jp7677/dxvk-nvapi/releases/latest"
     ["ffmpeg-yt-dlp"]="https://api.github.com/repos/yt-dlp/FFmpeg-Builds/releases/latest"
