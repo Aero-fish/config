@@ -110,7 +110,7 @@ fi
 if [ "$mode" = "toggle_replay" ]; then
     output="$HOME/Pictures/ScreenRecording"
 else
-    output="$HOME/Pictures/ScreenRecording/$(date "+%Y-%m-%d_%H-%M-%S.%2N").mkv"
+    output="$HOME/Pictures/ScreenRecording/$(date "+%Y-%m-%d %H-%M-%S.%2N").mkv"
 fi
 
 # setsid gpu-screen-recorder "${extra_cmd[@]}" -pixfmt yuv444 -f 60 \
