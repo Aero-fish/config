@@ -138,18 +138,15 @@ while read -r line; do
         error_code=$?
         set -e
 
-        error_msg=""
-        if [ -f /tmp/yt-dl_error ]; then
-            echo "https://www.youtube.com/watch?v=$video_id" >>/tmp/yt-dl_error
-            echo "----------" >>/tmp/yt-dl_error
-            error_msg="$(cat "/tmp/yt-dl_error")"
-            error_msg_lower="$(echo "$error_msg" | tr "[:upper:]" "[:lower:]")"
-            rm /tmp/yt-dl_error
-            echo "Fetch info error, sleep for $WAIT_IF_ERROR_SEC seconds"
-            sleep "$WAIT_IF_ERROR_SEC"
-        fi
-
         if [ $error_code -ne 0 ]; then
+            error_msg="empty stderr message"
+            if [ -f /tmp/yt-dl_error ]; then
+                echo "https://www.youtube.com/watch?v=$video_id" >>/tmp/yt-dl_error
+                echo "----------" >>/tmp/yt-dl_error
+                error_msg="$(cat "/tmp/yt-dl_error")"
+                error_msg_lower="$(echo "$error_msg" | tr "[:upper:]" "[:lower:]")"
+            fi
+
             if [[ "$error_msg_lower" == *"$MEMBERS_ONLY_CONTENT_KEYWORDS"* ]]; then
                 echo -e "\e[31mMember only content, skip.\e[0m"
                 full_line="$(grep --max-count=1 --no-messages -- "$video_id" "$TMP_DIR/all_video_ids_and_names")"
@@ -174,6 +171,7 @@ while read -r line; do
             sleep "$WAIT_IF_ERROR_SEC"
             continue
         fi
+        rm -f /tmp/yt-dl_error
 
         # Set file name and date
         date="$(echo "$info" | sed -E 's:^([^,]+),.*:\1:')"
