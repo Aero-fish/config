@@ -591,7 +591,7 @@ if [ -x /usr/bin/lf ]; then
     fi
 fi
 
-# ---------- lf ----------
+# ---------- hf ----------
 if [ -x "$HOME/misc/repo/huggingface_hub/bin/hf" ]; then
     # shellcheck disable=SC2139
     alias hf="$HOME/misc/repo/huggingface_hub/bin/hf"
