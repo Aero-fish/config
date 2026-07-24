@@ -38,6 +38,12 @@ for prog in "${inhibit_programs[@]}"; do
     fi
 done
 
+running_ai_container="$(podman container ls --filter label="AI" --format "{{.Names}}")"
+if [ -n "$running_ai_container" ]; then
+    hyprctl --quiet dispatch 'hl.dsp.force_idle(0)'
+    exit 0
+fi
+
 if ! "$current_script_dir/lock.sh"; then
     exit 0
 fi
