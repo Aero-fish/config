@@ -1100,5 +1100,15 @@ mount-dev() {
     sudo mount "${extra_args[@]}" -o "$opt" "$dev_path" "$mount_path"
 }
 
+# ---------- Shortcut to project containers ----------
+if [ -z "$_CONTAINER_" ]; then
+    for d in "$HOME/Projects/coding/container_home_dir/"*/; do
+        [ ! -e "$d" ] && break
+        project_name="$(basename -- "$d")"
+        # shellcheck disable=SC2139
+        alias "${project_name// /_}"="$HOME/.local/bin/project-container.sh '${project_name}'"
+    done
+fi
+
 # ---------- Clean up ----------
 unset this_shell
