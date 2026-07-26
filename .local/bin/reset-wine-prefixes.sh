@@ -259,7 +259,7 @@ for prefix_name in "${args[@]}"; do
     proton)
         rm -rf "$WINEPREFIX"
         mkdir -p "$HOME/.wine/games_documents" "$HOME/.wine/games_appdata"
-        PROTON_USE_D7VK=1 "$HOME"/.local/bin/proton-net.sh ""
+        PROTON_USE_D7VK=1 "$HOME"/.local/bin/proton-net.sh "" || true
         sleep 3
         rm -rf "$WINEPREFIX/drive_c/users/steamuser/"{Desktop,Documents,AppData}
         ln -s "$HOME/Desktop" "$WINEPREFIX/drive_c/users/steamuser/Desktop"
