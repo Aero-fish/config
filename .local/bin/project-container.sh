@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 set -e
 
-project_path="$HOME/Projects/coding/container_home_dir"
+project_path="$HOME/Projects/container_home_dir"
 
 help() {
     echo "Usage: $(basename -- "$0") <project_name>"

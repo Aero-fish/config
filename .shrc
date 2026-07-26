@@ -1102,7 +1102,7 @@ mount-dev() {
 
 # ---------- Shortcut to project containers ----------
 if [ -z "$_CONTAINER_" ]; then
-    for d in "$HOME/Projects/coding/container_home_dir/"*/; do
+    for d in "$HOME/Projects/container_home_dir/"*/; do
         [ ! -e "$d" ] && break
         project_name="$(basename -- "$d")"
         # shellcheck disable=SC2139
