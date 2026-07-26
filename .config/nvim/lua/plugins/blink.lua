@@ -7,7 +7,6 @@ local dict_ft = {
 }
 
 return {
-    "rafamadriz/friendly-snippets", -- Snippet collection
     "jmbuhr/cmp-pandoc-references",
     "Kaiser-Yang/blink-cmp-dictionary",
     {
@@ -15,6 +14,9 @@ return {
         -- Not comparable with bwrap --unshare-pid, when two nvims are opened
         version = "1.*",
 
+        dependencies = {
+            "rafamadriz/friendly-snippets" -- Snippet collection, must load before blinks
+        },
         event = "InsertEnter",
 
         -- Use a release tag to download pre-built binaries
@@ -122,7 +124,6 @@ return {
                 --         "references",
                 --     },
                 -- },
-
 
                 -- Options for each provider
                 providers = {
