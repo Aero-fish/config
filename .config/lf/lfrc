@@ -899,7 +899,7 @@ cmd edit-cp-mv-list ${{
 
 #----------
 cmd open-shell-here &(setsid kitty &) >/dev/null 2>&1 </dev/null
-cmd open-in-new-nvim &(setsid /usr/local/share/nvim-via-desktop "$f" &) >/dev/null 2>&1 </dev/null
+cmd open-in-new-nvim &if [ -d "$f" ]; then setsid /usr/local/share/nvim-via-desktop  -c "cd $f" "$f" >/dev/null 2>&1 </dev/null; else setsid /usr/local/share/nvim-via-desktop "$f" >/dev/null 2>&1 </dev/null; fi
 
 cmd yank-paths &{{
     readarray -t arr <<<"$fx"
@@ -1951,7 +1951,7 @@ map r           rename
 map c           calcdirsize
 map C           edit-config
 
-map e           $$VISUAL "$f"
+map e           $if [ -d "$f" ]; then nvim -c "cd $f" "$f"; else nvim "$f"; fi
 map E           open-in-new-nvim
 map w           $$SHELL
 map W           open-shell-here
