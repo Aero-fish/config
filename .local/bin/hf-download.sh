@@ -4,6 +4,8 @@ set -e
 STORAGE_DIR="$HOME/Projects/AI/models"
 HF_PATH="$HOME/misc/repo/huggingface_hub"
 HF_BIN="$HOME/misc/repo/huggingface_hub/bin/hf"
+TOKEN_PATH="$HOME/.config/my-config/hf_token"
+
 if [ ! -x "$HF_PATH" ]; then
     echo "'hf' executable not found"
     exit 1
@@ -37,11 +39,15 @@ if [ -d "$MODEL_PATH" ]; then
 fi
 
 mkdir -p "$MODEL_PATH"
+token_args=()
+if [ -f "$TOKEN_PATH" ]; then
+    token_args+=("--token" "$(cat "$TOKEN_PATH")")
+fi
 /usr/local/bin/generic_bwrap \
     --setenv HF_HUB_DISABLE_TELEMETRY 1 \
     --bind "$MODEL_PATH" "$MODEL_PATH" \
     --ro-bind "$HF_PATH" "$HF_PATH" \
-    "$HF_BIN" download --local-dir "$MODEL_PATH" "$MODEL" "${include_paths[@]}"
+    "$HF_BIN" download "${token_args[@]}" --local-dir "$MODEL_PATH" "$MODEL" "${include_paths[@]}"
 
 exit_code="$?"
 if [ "$exit_code" = 0 ]; then
