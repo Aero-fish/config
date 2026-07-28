@@ -52,6 +52,7 @@ ytdl() {
     fi
 
     /usr/local/bin/generic_bwrap \
+        --bind "$DOWNLOAD_DIR" "$DOWNLOAD_DIR" \
         "${bwrap_cookie_opts[@]}" \
         --ro-bind-try "$HOME"/misc/repo/ffmpeg-yt-dlp "$HOME"/misc/repo/ffmpeg-yt-dlp \
         --ro-bind-try "$HOME"/misc/repo/yt-dlp "$HOME"/misc/repo/yt-dlp \

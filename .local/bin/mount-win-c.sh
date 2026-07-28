@@ -26,4 +26,4 @@ elif rg -q -F "$win_c_device" /proc/mounts; then
     echo "'$win_c_device' is already mounted."
 fi
 
-mount -t ntfs3 -o uid="$(id -u ${user})",gid="$(id -g ${user})",umask=077,noatime,prealloc,noexec,nodev,nosuid,iocharset=utf8,discard,windows_names,nocase,nofail "$win_c_device" "$win_c_mount_point"
+mount -t ntfs -o uid="$(id -u ${user})",gid="$(id -g ${user})",umask=077,noatime,noexec,nodev,nosuid,iocharset=utf8,discard,windows_names,nocase,nofail "$win_c_device" "$win_c_mount_point"

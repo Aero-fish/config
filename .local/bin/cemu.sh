@@ -52,7 +52,8 @@ bwrap \
     --cap-drop ALL \
     --new-session \
     --die-with-parent \
-    --seccomp 1 \
+    --seccomp 9 \
+    9</usr/local/share/seccomp-filter/default_seccomp_filter.bpf \
     \
     --dev /dev \
     "${dev_bind[@]}" \
@@ -65,5 +66,5 @@ bwrap \
     "${symbolic_link[@]}" \
     "${user_config[@]}" \
     --ro-bind-try "$XDG_RUNTIME_DIR/tray-proxy" "$dbus_address" \
-    --perms 444 --file 0 /etc/machine-id \
-    "$HOME"/misc/programs/cemu/Cemu "$@" 1</usr/local/share/seccomp-filter/default_seccomp_filter.bpf 0< <(dbus-uuidgen)
+    --perms 444 --file 8 /etc/machine-id 8< <(echo "") \
+    "$HOME"/misc/programs/cemu/Cemu "$@"

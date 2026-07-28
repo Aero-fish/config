@@ -10,5 +10,3 @@ if pgrep -x Hyprland >/dev/null; then
 fi
 
 exec wine "$@"
-
-

@@ -45,6 +45,7 @@ bwrap \
     --new-session \
     --die-with-parent \
     --seccomp 9 \
+    9</usr/local/share/seccomp-filter/default_seccomp_filter.bpf \
     \
     --setenv LD_LIBRARY_PATH "$HOME/misc/programs/citron/lib:$LD_LIBRARY_PATH" \
     \
@@ -59,7 +60,5 @@ bwrap \
     "${unhide[@]}" \
     "${symbolic_link[@]}" \
     --ro-bind-try "$XDG_RUNTIME_DIR"/tray-proxy "$dbus_address" \
-    --perms 444 --file 8 /etc/machine-id \
-    "$HOME"/misc/programs/citron/citron "$@" \
-    9</usr/local/share/seccomp-filter/default_seccomp_filter.bpf \
-    8< <(dbus-uuidgen)
+    --perms 444 --file 8 /etc/machine-id 8< <(echo "") \
+    "$HOME"/misc/programs/citron/citron "$@"

@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
-[ "${UID}" -eq 0 ] && { echo "Do not run as root."; exit 0; }
+[ "${UID}" -eq 0 ] && {
+    echo "Do not run as root."
+    exit 0
+}
 
 mkdir -p "$HOME/Desktop" "$HOME/.config/localsend"
 
@@ -34,7 +37,7 @@ bwrap \
     --new-session \
     --die-with-parent \
     --seccomp 9 \
-    9< /usr/local/share/seccomp-filter/seccomp_filter_allow_chroot_kcmp.bpf \
+    9</usr/local/share/seccomp-filter/seccomp_filter_allow_chroot_kcmp.bpf \
     \
     --dev /dev \
     "${dev_bind[@]}" \

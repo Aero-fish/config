@@ -34,13 +34,16 @@ if [ -e "$project_path" ] && [ ! -d "$project_path" ]; then
 fi
 
 mkdir -p "$project_path"
-overlay_arg=()
-setting_path=(
+overlay_args=()
+overlay_paths=(
     "$HOME/.config/lf"
     "$HOME/.config/my-config/wordlist"
     "$HOME/.config/nvim"
+    "$HOME/.config/opencode/opencode.json"
+    "$HOME/.config/opencode/tui.json"
     "$HOME/.config/starship.toml"
     "$HOME/.config/tz"
+    "$HOME/.config/vim"
     "$HOME/.local/share/nvim/lazy"
     "$HOME/.local/share/nvim/mason"
     "$HOME/.local/share/nvim/site"
@@ -48,14 +51,15 @@ setting_path=(
     "$HOME/.zshrc"
 )
 
-for s in "${setting_path[@]}"; do
-    if [ -f "$s" ]; then
-        overlay_arg+=("--ro-bind-try" "$s" "$s")
+for p in "${overlay_paths[@]}"; do
+    if [ -f "$p" ]; then
+        overlay_args+=("--ro-bind-try" "$p" "$p")
     else
-        overlay_arg+=("--overlay-src" "$s" "--tmp-overlay" "$s")
+        overlay_args+=("--overlay-src" "$p" "--tmp-overlay" "$p")
     fi
 done
 
+## '--new-session' breaks lf.
 bwrap \
     --unshare-user \
     --unshare-ipc \
@@ -65,14 +69,16 @@ bwrap \
     \
     --hostname "$1" \
     --cap-drop ALL \
-    --new-session \
     --die-with-parent \
+    --seccomp 9 \
+    9</usr/local/share/seccomp-filter/seccomp_filter_tiocsti.bpf
     \
-    --setenv "_CONTAINER_" "1" \
+    --setenv _CONTAINER_ 1 \
     \
     --dev-bind / / \
     --proc /proc \
-    --tmpfs "$HOME" \
+    --tmpfs /tmp \
+    --tmpfs "$XDG_RUNTIME_DIR" \
     --bind "$project_path" "$HOME" \
-    "${overlay_arg[@]}" \
+    "${overlay_args[@]}" \
     /usr/bin/zsh

@@ -2,7 +2,8 @@
 set -e
 
 STORAGE_DIR="$HOME/Projects/AI/models"
-HF_PATH="$HOME/misc/repo/huggingface_hub/bin/hf"
+HF_PATH="$HOME/misc/repo/huggingface_hub"
+HF_BIN="$HOME/misc/repo/huggingface_hub/bin/hf"
 if [ ! -x "$HF_PATH" ]; then
     echo "'hf' executable not found"
     exit 1
@@ -36,7 +37,11 @@ if [ -d "$MODEL_PATH" ]; then
 fi
 
 mkdir -p "$MODEL_PATH"
-HF_HUB_DISABLE_TELEMETRY=1 "$HF_PATH" download --local-dir "$MODEL_PATH" "$MODEL" "${include_paths[@]}"
+/usr/local/bin/generic_bwrap \
+    --setenv HF_HUB_DISABLE_TELEMETRY 1 \
+    --bind "$MODEL_PATH" "$MODEL_PATH" \
+    --ro-bind "$HF_PATH" "$HF_PATH" \
+    "$HF_BIN" download --local-dir "$MODEL_PATH" "$MODEL" "${include_paths[@]}"
 
 exit_code="$?"
 if [ "$exit_code" = 0 ]; then

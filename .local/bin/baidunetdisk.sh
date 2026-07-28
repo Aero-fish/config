@@ -36,7 +36,7 @@ bwrap \
     --new-session \
     --die-with-parent \
     --seccomp 9 \
-    9< /usr/local/share/seccomp-filter/default_seccomp_filter.bpf \
+    9</usr/local/share/seccomp-filter/default_seccomp_filter.bpf \
     \
     --dev /dev \
     "${dev_bind[@]}" \
@@ -49,4 +49,5 @@ bwrap \
     "${symbolic_link[@]}" \
     --ro-bind-try "$XDG_RUNTIME_DIR/tray-proxy" "$dbus_address" \
     \
-    "$HOME"/misc/programs/baidunetdisk/baidunetdisk --no-sandbox >/dev/null >/dev/null 2>&1
+    "$HOME"/misc/programs/baidunetdisk/baidunetdisk --no-sandbox \
+    >/dev/null >/dev/null 2>&1
