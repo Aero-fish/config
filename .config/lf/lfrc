@@ -2022,12 +2022,14 @@ map owN         open-in-proton-net
 
 ##### Goto #####
 map gb          cd ~/.snapshots/Bak
+map gc          cd ~/Projects/container_home_dir
+map gC          cd ~/Projects/coding
 map gD          cd ~/Downloads
 map gd          cd ~/Desktop
 map gh          cd ~
+map gi          goto_phone
 map ~           push :cd<space>~
 map gP          cd /srv/smb/printer
-map gi          goto_phone
 map gp          cd ~/Pictures
 map gr          cd ~/misc/repo
 map gs          cd ~/Sync
