@@ -463,6 +463,7 @@ _ytdl() {
     fi
 
     /usr/local/bin/generic_bwrap \
+        --bind-try "$HOME/Desktop" "$HOME/Desktop" \
         "${bwrap_cookie_opts[@]}" \
         --ro-bind-try "$HOME"/misc/repo/ffmpeg-yt-dlp "$HOME"/misc/repo/ffmpeg-yt-dlp \
         --ro-bind-try "$HOME"/misc/repo/yt-dlp "$HOME"/misc/repo/yt-dlp \
@@ -921,7 +922,7 @@ image-to-pdf() {
 
 image-to-pdf-landscape() {
     if [ "$#" == 0 ]; then
-        echo "Usage: image-to-pdf input-files [output.pdf]"
+        echo "Usage: image-to-pdf-landscape input-files [output.pdf]"
         return
     fi
 
@@ -930,14 +931,6 @@ image-to-pdf-landscape() {
 
     if [ "$#" -gt 1 ]; then
         local last_arg last_arg_lower
-
-        ## zsh only
-        # last_arg_lower="$(basename -- "${@[${#}]}" | tr '[:upper:]' '[:lower:]')"
-
-        ## bash only
-        # last_arg_lower="$(echo "${@:-1}" | tr '[:upper:]' '[:lower:]')"
-
-        ## Universal
         for f in "$@"; do last_arg="$f"; done
         last_arg_lower="$(echo "$last_arg" | tr '[:upper:]' '[:lower:]')"
 
@@ -951,6 +944,31 @@ image-to-pdf-landscape() {
     magick "$@" \
         -background white -density 72 -units PixelsPerInch -page A4 -rotate -90 pdf:- |
         magick - -rotate 90 "$pdf_name"
+}
+
+image-to-pdf-lossless() {
+    if [ "$#" == 0 ]; then
+        echo "Usage: image-to-pdf-lossless input-files [output.pdf]"
+        return
+    fi
+
+    local pdf_name
+    pdf_name="pdf_output.pdf" # Default name for the output pdf
+
+    if [ "$#" -gt 1 ]; then
+        local last_arg last_arg_lower
+
+        for f in "$@"; do last_arg="$f"; done
+        last_arg_lower="$(echo "$last_arg" | tr '[:upper:]' '[:lower:]')"
+
+        if [[ "$last_arg_lower" == *"."* ]] && [ ".${last_arg_lower##*.}" = ".pdf" ]; then
+            # shellcheck disable=SC2124
+            pdf_name="$last_arg"        # use last argument as pdf name,
+            set -- "${@:1:$(($# - 1))}" # Remove the last argument
+        fi
+    fi
+
+    img2pdf -o "$pdf_name" --border 1cm --auto-orient --pagesize A4 "$@"
 }
 
 extract-pdf-images() {
@@ -1093,8 +1111,8 @@ mount-dev() {
         opt="$opt,uid=$(id --user),gid=$(id --group),umask=077"
 
     elif [ "$fs" = "ntfs" ]; then
-        extra_args=("-t" "ntfs3")
-        opt="$opt,prealloc,iocharset=utf8,discard,windows_names,nocase,user,uid=$(id --user),gid=$(id --group),umask=077"
+        extra_args=("-t" "ntfs")
+        opt="$opt,iocharset=utf8,discard,windows_names,nocase,user,uid=$(id --user),gid=$(id --group),umask=077"
     fi
 
     sudo mount "${extra_args[@]}" -o "$opt" "$dev_path" "$mount_path"
@@ -1108,6 +1126,7 @@ if [ -z "$_CONTAINER_" ]; then
         # shellcheck disable=SC2139
         alias "${project_name// /_}"="$HOME/.local/bin/project-container.sh '${project_name}'"
     done
+    unset project_name
 fi
 
 # ---------- Clean up ----------
