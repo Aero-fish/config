@@ -30,6 +30,19 @@ export PERL_LOCAL_LIB_ROOT="$HOME/.perl5${PERL_LOCAL_LIB_ROOT:+:$PERL_LOCAL_LIB_
 export PERL_MB_OPT="--install_base '$HOME/.perl5'"
 export PERL_MM_OPT="INSTALL_BASE='$HOME/.perl5'"
 
+HISTORY_IGNORE='(?|??|???|...|....|.....|.*|cd *|diff *|nowtime|nowdate|mirror *|permission-fix *|ffmpeg-*|mkv-stream-extract *|archive-to-single-tar-zstd *|ex *|branch *|checkout *|commit *|tag *|newtag *|gpg-check *|gpg-retrieve *|yt-info *|ytdl* *|dec2hex *|hex2dec *|spawn *|trash *|get-mime-default *|set-mime-default *|open *|image-to-pdf* *|extract-pdf-images *|image-to-gray-scale *|combine-pdf *|convert-pdf-to-png *|latex-to-pdf *|md-to-* *|aria2-downlaod *|mount-dev *|jobs *|shasum *|mount *|umount *|history *|git *|bg *|fg *|sudo *|hf-download.sh *)'
+
+## Bash history ignore
+# shellcheck disable=SC2155
+if [ "$this_shell" == "bash" ]; then
+    export HISTIGNORE="$(echo "${HISTORY_IGNORE:1:-1}" | tr '|' ':')"
+    unset HISTORY_IGNORE
+
+elif [ "$this_shell" == "zsh" ]; then
+    ## ZSH history ignore
+    export HISTORY_IGNORE
+fi
+
 # nodejs
 # export PATH="$HOME/.node_modules/bin:$PATH"
 export npm_config_prefix="$HOME/.node_modules"
@@ -80,7 +93,6 @@ alias q="exit 0"
 alias :q="exit 0"
 
 alias wget="wget -c"
-alias sha="shasum -a 256"
 # shellcheck disable=SC2142
 alias mnt="mount | awk -F' ' '{ printf \"%s\t%s\n\",\$1,\$3; }' | column -t | grep -E ^/dev/ | sort" # List all mounts
 
@@ -92,14 +104,13 @@ alias nowdate="date +'%d-%m-%Y'"
 alias ping="ping -c 5"
 alias fastping="ping -c 100 -s.2"
 
-alias nv="nvim"
 alias v='$EDITOR'
-alias vv='$EDITOR_GUI'
 
 alias incognito=' unset HISTFILE'
 
+# ---------- Helper function ----------
 _get_basename() {
-    fullname="${1##*/}"
+    local fullname="${1##*/}"
     echo "${fullname%.*}"
 }
 
@@ -118,8 +129,8 @@ mirror() {
         return
     }
 
-    scr_path="$1"
-    dest_path="$2"
+    local scr_path="$1"
+    local dest_path="$2"
 
     ## Check destination path, never write to 'Bak' folder
     if echo "$dest_path" | grep -qEi -e ".*/(back|backup|.backup|T5_EVO)(/.*)?"; then
@@ -147,6 +158,7 @@ mirror-bak() {
     echo "mirror '/run/media/$(id -u -n)/T5_EVO' to '/run/media/$(id -u -n)/Bak'"
     mirror "/run/media/$(id -u -n)/T5_EVO/" "/run/media/$(id -u -n)/Bak/"
 }
+
 # ---------- ls ----------
 glob_ignore_pattern="*cache|.cargo|.git|.gnupg|.gphoto|.ipython|.jupyter|.lastpass|.npm|.nv|.password-store|.perl5|.pki|.svn|.texlive|.vscode-oss|.wine|__pycache__|go|lost+found|mozilla*|librewolf*|node_modules|thunderbird"
 
@@ -182,15 +194,12 @@ unset ignore_glob_pattern
 # ---------- head / tail / grep / VIM /sort ----------
 alias grep="grep --color=auto"
 alias sgrep="grep -R -n -H -C 5 --exclude-dir={.git,.svn,CVS} "
-alias egrep="egrep --color=auto"
-alias fgrep="fgrep --color=auto"
 
 alias t="tail -f"
 
 # ---------- RC file ----------
 alias bashrc='$EDITOR "$HOME/.bashrc"'
 alias shrc='$EDITOR "$HOME/.shrc"'
-alias vimrc='$EDITOR "$HOME/.config/vim/vimrc"'
 alias zshrc='$EDITOR "$HOME/.zshrc"'
 
 # ---------- pacman ----------
@@ -219,8 +228,6 @@ alias chgrp="chgrp --preserve-root"
 alias df="df -H"
 alias du="du -sh"
 alias dud="du -d 1 -h"
-
-alias count-file="find . -type f | wc -l"
 
 # ---------- Permission fix ---------
 permission-fix() {
@@ -292,9 +299,11 @@ ffmpeg-trim-audio-silence() {
 
 # ---------- archiver ----------
 archive-to-single-tar-zstd() {
-    # Guess the common dir
+    # Guess the common dir current_file_dir arr_trim file_name
+    local common_dir f
     common_dir=""
     for f in "${@}"; do
+        local current_file_dir
         if [ -z "$common_dir" ]; then
             common_dir="$(dirname -- "$f")"
         else
@@ -309,14 +318,15 @@ archive-to-single-tar-zstd() {
             break
         fi
     done
-    # Add tailing slash
+    # Add tailing slash *|
+    local prefix
     if [ "$common_dir" != "/" ]; then
         prefix="${common_dir}/"
     else
         prefix="$common_dir"
     fi
 
-    arr_trim=("${@#"$prefix"}")
+    local arr_trim=("${@#"$prefix"}")
 
     local tar_cmd=("tar" "--owner=0" "--group=0" "-C" "$common_dir" "-cpf" "-")
     local du_cmd=("du" "-cbs")
@@ -324,6 +334,7 @@ archive-to-single-tar-zstd() {
     tar_cmd+=("${arr_trim[@]}")
     du_cmd+=("${@}")
 
+    local file_name
     if [ "$#" -eq 1 ]; then
         file_name="$(basename -- "$1")"
     else
@@ -335,7 +346,7 @@ archive-to-single-tar-zstd() {
         echo "Empty file name"
         return
     fi
-    dest="${PWD}/${file_name}.tar.zst"
+    local dest="${PWD}/${file_name}.tar.zst"
 
     # Check if file of same name exists
     if [ -e "$dest" ]; then
@@ -394,6 +405,7 @@ ex() {
                     chmod o+x "$1"
                 fi
             fi
+            local work_path file_name
             work_path="$(dirname -- "$(realpath --no-symlinks -- "$1")")"
             file_name="$(basename -- "$1")"
             echo "Extracting '$1'"
@@ -419,7 +431,8 @@ ex() {
                 --symlink "/usr/lib" "/lib64" \
                 --bind-try "$work_path" "$work_path" \
                 "$work_path/$file_name" --appimage-extract \
-                9</usr/local/share/seccomp-filter/default_seccomp_filter.bpf >/dev/null
+                9</usr/local/share/seccomp-filter/default_seccomp_filter.bpf \
+                >/dev/null
             ;;
         *) echo "'$1' cannot be extracted via ex()" ;;
         esac
@@ -453,8 +466,8 @@ _ytdl() {
     COOKIE_PATH="$(find "$HOME/Documents/youtube-log/mozilla-ytdl" -type d -regex '.*default-release' 2>/dev/null | head -n 1)"
     echo -e "\e[31mDownloading to Desktop\e[0m"
 
-    bwrap_cookie_opts=()
-    yt_dlp_cookie_opts=()
+    local bwrap_cookie_opts=()
+    local yt_dlp_cookie_opts=()
 
     if [ -n "$COOKIE_PATH" ]; then
         echo "Downloading with no cookies."
@@ -490,7 +503,7 @@ ytdl() {
         "$1"
 }
 
-ytdl_long_name() {
+ytdl-long-name() {
     _ytdl --merge-output-format mp4 \
         --continue -N 3 \
         --retries "infinite" \
@@ -579,9 +592,6 @@ if [ -r /usr/bin/zoxide ]; then
     eval "$(zoxide init "$this_shell")"
 fi
 
-# Sort order, capitalise to reverse
-# 'a'pparent disk usage / 'd'isk usage / file 'e'xtension / 'r'everse / 's'ize / 't'ime / 'v'ersion
-
 # ---------- lf ----------
 # [ -n "$LF_LEVEL" ] && PS1="$PS1""(lf level: $LF_LEVEL) "
 if [ -x /usr/bin/lf ]; then
@@ -590,12 +600,6 @@ if [ -x /usr/bin/lf ]; then
         source /etc/profile.d/lfcd.sh
         alias lf=lfcd
     fi
-fi
-
-# ---------- hf ----------
-if [ -x "$HOME/misc/repo/huggingface_hub/bin/hf" ]; then
-    # shellcheck disable=SC2139
-    alias hf="$HOME/misc/repo/huggingface_hub/bin/hf"
 fi
 
 # ---------- System ----------
@@ -664,6 +668,7 @@ ls-dbus-method() {
         echo "E.g., ls-dbus-method org.gnome.NautilusPreviewer"
         return
     fi
+    local dest addr
     dest="$1"
     addr="/${dest//.//}"
     dbus-send --type=method_call --print-reply \
@@ -696,6 +701,7 @@ alias ls-kitty-fonts="kitty +list-fonts --psnames"
 
 ls-IOMMU() {
     # shopt -s nullglob
+    local g d
     for g in "/sys/kernel/iommu_groups"/*; do
         echo "IOMMU Group ${g##*/}:"
         for d in "$g/devices"/*; do
@@ -707,6 +713,7 @@ ls-IOMMU() {
 }
 
 ls-IOMMU-usb() {
+    local usb_ctrl
     for usb_ctrl in /sys/bus/pci/devices/*/usb*; do
         pci_path="${usb_ctrl%/*}"
         iommu_group=$(readlink "${pci_path}/iommu_group")
@@ -748,6 +755,7 @@ spawn() {
 print-24bit-colours() {
     # width=50  # Width, default terminal width
     # height=1  # Number of lines, default 1
+    local width height
     awk -v term_cols="${width:-$(tput cols || echo 80)}" \
         -v term_lines="${height:-1}" \
         'BEGIN{
@@ -764,7 +772,6 @@ print-24bit-colours() {
             if (colnum%term_cols==term_cols) printf "\n";
         }
         printf "\n";}'
-    unset width height
 }
 
 # alias scan-network-printers="lpinfo --include-schemes dnssd -v"
@@ -788,6 +795,7 @@ trash() {
         echo "Trash file/folder under 50MB, otherwise rm it. Usage: trash FILE..."
         return
     }
+    local f
     for f in "$@"; do
         [ ! -e "$f" ] && continue
         if [ "$(du -s --apparent-size --block-size=1M "$f" | tail -1 | awk '{print $1}')" -gt 50 ]; then
@@ -802,15 +810,11 @@ trash() {
 }
 
 check-smart() {
-    local result
-    for d in $(smartctl --scan -d scsi | cut -d' ' -f1); do
-        result="$(smartctl -H -d sat "$d" | grep "self-assessment test result:" | sed 's/^[^:]*:\s*//')"
-        mode="sat"
-        if [ -z "$result" ]; then
-            result="$(smartctl -H -d scsi "$d" | grep "SMART Health Status:" | sed 's/^[^:]*:\s*//')"
-            mode="scsi"
-        fi
-        echo "$d: $mode: $result"
+    local device
+    for device in $(smartctl --scan | cut -d' ' -f1); do
+        echo "Device: $device"
+        smartctl -x "$device"
+        echo "--------------------"
     done
 }
 
@@ -897,7 +901,7 @@ image-to-pdf() {
     pdf_name="pdf_output.pdf" # Default name for the output pdf
 
     if [ "$#" -gt 1 ]; then
-        local last_arg last_arg_lower
+        local last_arg last_arg_lower f
 
         ## zsh only
         # last_arg_lower="$(basename -- "${@[${#}]}" | tr '[:upper:]' '[:lower:]')"
@@ -910,7 +914,6 @@ image-to-pdf() {
         last_arg_lower="$(echo "$last_arg" | tr '[:upper:]' '[:lower:]')"
 
         if [[ "$last_arg_lower" == *"."* ]] && [ ".${last_arg_lower##*.}" = ".pdf" ]; then
-            # shellcheck disable=SC2124
             pdf_name="$last_arg"        # use last argument as pdf name,
             set -- "${@:1:$(($# - 1))}" # Remove the last argument
         fi
@@ -930,12 +933,11 @@ image-to-pdf-landscape() {
     pdf_name="pdf_output.pdf" # Default name for the output pdf
 
     if [ "$#" -gt 1 ]; then
-        local last_arg last_arg_lower
+        local last_arg last_arg_lower f
         for f in "$@"; do last_arg="$f"; done
         last_arg_lower="$(echo "$last_arg" | tr '[:upper:]' '[:lower:]')"
 
         if [[ "$last_arg_lower" == *"."* ]] && [ ".${last_arg_lower##*.}" = ".pdf" ]; then
-            # shellcheck disable=SC2124
             pdf_name="$last_arg"        # use last argument as pdf name,
             set -- "${@:1:$(($# - 1))}" # Remove the last argument
         fi
@@ -956,13 +958,12 @@ image-to-pdf-lossless() {
     pdf_name="pdf_output.pdf" # Default name for the output pdf
 
     if [ "$#" -gt 1 ]; then
-        local last_arg last_arg_lower
+        local last_arg last_arg_lower f
 
         for f in "$@"; do last_arg="$f"; done
         last_arg_lower="$(echo "$last_arg" | tr '[:upper:]' '[:lower:]')"
 
         if [[ "$last_arg_lower" == *"."* ]] && [ ".${last_arg_lower##*.}" = ".pdf" ]; then
-            # shellcheck disable=SC2124
             pdf_name="$last_arg"        # use last argument as pdf name,
             set -- "${@:1:$(($# - 1))}" # Remove the last argument
         fi
@@ -1004,7 +1005,7 @@ combine-pdf() {
     output_name="output.pdf" # Default name for the output pdf
 
     if [ "$#" -gt 1 ]; then
-        local last_arg
+        local last_arg f
         for f in "$@"; do last_arg="$f"; done
 
         if [ ! -e "$last_arg" ]; then
@@ -1021,12 +1022,9 @@ convert-pdf-to-png() {
 }
 
 # ---------- wine ----------
-alias kill-default-wine="WINEPREFIX=\"\$HOME/.wine/default\" wineserver -k 15"
-alias kill-games-wine="WINEPREFIX=\"\$HOME/.wine/games\" wineserver -k 15"
-alias kill-net-wine="WINEPREFIX=\"\$HOME/.wine/net\" wineserver -k 15"
-alias kill-tools-wine="WINEPREFIX=\"\$HOME/.wine/tools\" wineserver -k 15"
 alias kill-all-exe="pkill -9 -f '.exe'"
 
+# ---------- LaTeX ----------
 ## Keep consistency with texlab LSP for neovim. It only parse log in root dir.
 ## Lualatex does not detect update for 'tikz externalise'.
 ## Change '-pdflua' to '-pdf' to use pdflatex.
@@ -1066,6 +1064,7 @@ md-to-html-uikit() {
 }
 
 print-256-colors() {
+    local i
     for i in {0..255}; do
         printf '\e[48;5;%dm%3d ' "$i" "$i"
         (((i + 3) % 18)) || printf '\e[0m\n'
@@ -1073,9 +1072,10 @@ print-256-colors() {
 }
 
 # ---------- email ----------
-alias fetch-emails="systemctl --user start mbsync.service"
-alias sync_mail="systemctl --user --no-block start mbsync.service"
-alias sync_vdir="systemctl --user --no-block start vdirsyncer.service"
+alias sync-email-no-block="systemctl --user --no-block start mbsync.service"
+alias sync-email="/usr/bin/mbsync -a"
+alias sync-vdir-no-block="systemctl --user --no-block start vdirsyncer.service"
+alias sync-vdir="/usr/bin/vdirsyncer sync"
 
 # Allow broot to cd on exit. Use through lf for this function.
 # [ -f "$HOME/.config/broot/launcher/bash/br" ] && source "$HOME/.config/broot/launcher/bash/br"
@@ -1126,7 +1126,13 @@ if [ -z "$_CONTAINER_" ]; then
         # shellcheck disable=SC2139
         alias "${project_name// /_}"="$HOME/.local/bin/project-container.sh '${project_name}'"
     done
-    unset project_name
+    unset d project_name
+fi
+
+# ---------- Shortcut to programs ----------
+if [ -x "$HOME/misc/repo/huggingface_hub/bin/hf" ]; then
+    # shellcheck disable=SC2139
+    alias hf="$HOME/misc/repo/huggingface_hub/bin/hf"
 fi
 
 # ---------- Clean up ----------

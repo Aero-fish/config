@@ -23,8 +23,6 @@ export HISTCONTROL=erasedups:ignorespace
 # Append to the history instead of overwriting (good for multiple connections)
 shopt -s histappend
 
-export HISTIGNORE="?:??:...:....:.....:.*:[ \\t]*:cd *:cd..:dec2hex *:hex2dec *:ex *:bg *|fg *:ffmpeg-*:mkv-stream-extract *:history *:job *:mount *:permission-fix *:sha *:shasum *:archive-to-single-tar-zstd *:umount *:ytdl*:yt-info *:mirror *:ls-*:hf-download.sh *:sudo *:"
-
 ## ---------- Other settings ----------
 # Go to path without cs
 shopt -s autocd
@@ -49,14 +47,14 @@ if [ -n "${rclone_args+x}" ] && [ -n "${rclone_paths+x}" ]; then
         local_path="$(readlink -f "$local_path")"
 
         # shellcheck disable=SC2139
-        alias sync_"$alias_name"_to_onedrive="rclone sync $rclone_args --exclude-from=<(_rclone_ignore_list '$local_path') '$local_path' '$remote_path'"
+        alias "sync_${alias_name}_to_onedrive"="rclone sync $rclone_args --exclude-from=<(_rclone_ignore_list '$local_path') '$local_path' '$remote_path'"
         # shellcheck disable=SC2139
-        alias sync_"$alias_name"_from_onedrive="rclone sync $rclone_args --exclude-from=<(_rclone_ignore_list '$local_path') '$remote_path' '$local_path'"
+        alias "sync_${alias_name}_from_onedrive"="rclone sync $rclone_args --exclude-from=<(_rclone_ignore_list '$local_path') '$remote_path' '$local_path'"
 
         # shellcheck disable=SC2139
-        alias copy_"$alias_name"_to_onedrive="rclone copy $rclone_args --exclude-from=<(_rclone_ignore_list '$local_path') '$local_path' '$remote_path'"
+        alias "copy_${alias_name}_to_onedrive"="rclone copy $rclone_args --exclude-from=<(_rclone_ignore_list '$local_path') '$local_path' '$remote_path'"
         # shellcheck disable=SC2139
-        alias copy_"$alias_name"_from_onedrive="rclone copy $rclone_args --exclude-from=<(_rclone_ignore_list '$local_path') '$remote_path' '$local_path'"
+        alias "copy_${alias_name}_from_onedrive"="rclone copy $rclone_args --exclude-from=<(_rclone_ignore_list '$local_path') '$remote_path' '$local_path'"
 
     done
 

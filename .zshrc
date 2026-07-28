@@ -31,7 +31,7 @@ zstyle ':completion:*:manuals.(^1*)' insert-sections true
 
 ## Some functions, like _apt and _dpkg, are very slow. Use a cache in order to proxy the list of results
 zstyle ':completion:*' use-cache on
-zstyle ':completion:*' cache-path ${HOME}/.cache/zsh/
+zstyle ':completion:*' cache-path "$HOME/.cache/zsh/"
 
 ## Messages/warnings format
 zstyle ':completion:*' verbose yes    # Display verbose message if both short and verbose are available
@@ -39,7 +39,7 @@ zstyle ':completion:*' group-name ''    # Group candidates by their type
 zstyle ':completion:*:descriptions' format $'%{\e[01;31m%}--- %d% ---%{\e[m%}'    # Heading of each group of candidates
 zstyle ':completion:*:messages' format $'%{\e[01;04;31m%}--- %d ---%{\e[m%}'    # Shell messages. E.g., "Not a git repo"
 
-autoload -Uz compinit && compinit -d ${HOME}/.cache/zsh/zcompdump-$ZSH_VERSION    # Load the autocomplete plugin
+autoload -Uz compinit && compinit -d "$HOME/.cache/zsh/zcompdump-$ZSH_VERSION"    # Load the autocomplete plugin
 
 # ---------- Auto rehash new binaries in /bin/ ----------
 ## Relay on a packman hook to refresh the modified date of `/var/cache/zsh/pacman`
@@ -105,15 +105,13 @@ help() {
 }
 
 #---------- History ----------
-HISTFILE=${HOME}/.cache/zsh/zshhistory
+HISTFILE="$HOME/.cache/zsh/zshhistory"
 HISTSIZE=5000
 SAVEHIST=5000
 setopt HIST_IGNORE_ALL_DUPS    # Remove existing duplicate and append to the end
 setopt HIST_IGNORE_SPACE    # Do not add commands that start with a space
 setopt HIST_NO_FUNCTIONS    # Do not store functions
 setopt INC_APPEND_HISTORY    # Immediate append command to histoy
-
-export HISTORY_IGNORE='(?|??|...|....|.....|.*|cd#( *)#|dec2hex *|hex2dec *|ex *|bg *|fg *|ffmpeg-*|mkv-stream-extract *|history *|jobs *|mount *|permission-fix *|sha *|shasum *|archive-to-single-tar-zstd *|umount *|ytdl*|yt-info *|mirror *|ls-*|hf-download.sh *|sudo *)'
 
 # Do not store failed commands
  zshaddhistory() { whence ${${(z)1}[1]} >| /dev/null || return 1 }
@@ -296,7 +294,7 @@ bindkey "^b"   backward-char
 bindkey "^e"   end-of-line
 bindkey "^f"   forward-char
 bindkey "^d"   delete-char
-#bindkey "^k"   kill-whole-line    # Conflict with history search
+#bindkey "^k"   kill-whole-line    # Conflict with history search. Use Ctrl-c
 bindkey "^p"   up-history
 bindkey "^n"   down-history
 
@@ -329,21 +327,21 @@ eval $(dircolors)
 zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
 
 # ---------- Source aliases, functions and environment ----------
-[ -f ${HOME}/.shrc ] && source ${HOME}/.shrc
+[ -f "$HOME/.shrc" ] && source "$HOME/.shrc"
 
-## Alias for piping. Only zsh has -g option.
 if [ -f /usr/bin/bat ]; then
     pager="bat"
 else
     pager="less"
 fi
 
+## Alias for piping. Only zsh has -g option.
 alias -g CA="2>&1 | cat -A"
 alias -g G='| grep -i'
 alias -g GC='| grep --color=always -i'
 alias -g H='| head'
-alias -g L="| ${pager}"
-alias -g LL="2>&1 | ${pager}"
+alias -g L="| $pager"
+alias -g LL="2>&1 | $pager"
 alias -g M="| most"
 alias -g NE="2> /dev/null"
 alias -g NUL="> /dev/null 2>&1"
@@ -361,11 +359,11 @@ if [ -n "${rclone_args+x}" ] && [ -n "${rclone_paths+x}" ]; then
         remote_path="onedrive_encrypt:$(basename "$local_path")"
         local_path="$(readlink -f "$local_path")"
 
-        alias sync_"$alias_name"_to_onedrive="rclone sync $rclone_args --exclude-from=<(_rclone_ignore_list '$local_path') '$local_path' '$remote_path'"
-        alias sync_"$alias_name"_from_onedrive="rclone sync $rclone_args --exclude-from=<(_rclone_ignore_list '$local_path') '$remote_path' '$local_path'"
+        alias "sync_$alias_name_to_onedrive"="rclone sync $rclone_args --exclude-from=<(_rclone_ignore_list '$local_path') '$local_path' '$remote_path'"
+        alias "sync_$alias_name_from_onedrive"="rclone sync $rclone_args --exclude-from=<(_rclone_ignore_list '$local_path') '$remote_path' '$local_path'"
 
-        alias copy_"$alias_name"_to_onedrive="rclone copy $rclone_args --exclude-from=<(_rclone_ignore_list '$local_path') '$local_path' '$remote_path'"
-        alias copy_"$alias_name"_from_onedrive="rclone copy $rclone_args --exclude-from=<(_rclone_ignore_list '$local_path') '$remote_path' '$local_path'"
+        alias "copy_$alias_name_to_onedrive"="rclone copy $rclone_args --exclude-from=<(_rclone_ignore_list '$local_path') '$local_path' '$remote_path'"
+        alias "copy_$alias_name_from_onedrive"="rclone copy $rclone_args --exclude-from=<(_rclone_ignore_list '$local_path') '$remote_path' '$local_path'"
 
     done
 
