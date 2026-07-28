@@ -1,13 +1,54 @@
+-- Disable built-in explorer
+-- vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 0
+
+-- Open tfm when opening a directory buffer
+local processed_dir = "a"
+vim.api.nvim_create_autocmd("BufEnter", {
+    pattern = "*",
+    callback = function(args)
+        -- If netrw is enabled just keep it, but it should be disabled
+        if vim.bo[args.buf].filetype == "netrw" then
+            return
+        end
+        -- Get buffer name and check if it's a directory
+        local bufname = vim.api.nvim_buf_get_name(args.buf)
+        ----- Either user this logic or, the 'once' option to prevent opening lf twice.
+        -- if bufname == "" then
+        --     return
+        -- elseif bufname == processed_dir then
+        --     processed_dir = ""
+        --     return
+        -- else
+        --     processed_dir = bufname
+        -- end
+
+        if vim.fn.isdirectory(bufname) == 0 then
+            return
+        end
+
+        -- Open fzf in the directory
+        vim.schedule(function()
+            require("tfm").open(vim.fn.getcwd())
+        end)
+
+        -- Do not list directory buffer and wipe it on leave
+        vim.api.nvim_set_option_value("bufhidden", "wipe", { buf = args.buf })
+        vim.api.nvim_set_option_value("buflisted", false, { buf = args.buf })
+    end,
+    once = true
+})
+
 return {
     "rolv-apneseth/tfm.nvim",
     opts = {
         -- TFM to use
         -- Possible choices: "ranger" | "nnn" | "lf" | "vifm" | "yazi" (default)
         file_manager = "lf",
-        -- file_manager = "yazi",
         -- Replace netrw entirely
         -- Default: false
-        replace_netrw = true,
+        -- Use autocmd to achieve. Not working for nvim 0.12
+        replace_netrw = false,
         -- Enable creation of commands
         -- Default: false
         -- Commands:

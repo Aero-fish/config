@@ -224,7 +224,6 @@ vim.api.nvim_create_autocmd("LspAttach", {
 })
 
 ----- Builtin make -----
-
 vim.api.nvim_create_autocmd("FileType", {
     group = general_id,
     pattern = { "python" },
@@ -235,3 +234,4 @@ vim.api.nvim_create_autocmd("FileType", {
         -- vim.opt_local["errorformat"] = ""
     end,
 })
+
