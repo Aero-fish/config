@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 set -e
 
 Usage() { echo "$0 FontFile"; exit 1; }

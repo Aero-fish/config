@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 set -e
 [ "$UID" -eq 0 ] || exec sudo "$0" "$@"
 
@@ -40,7 +40,7 @@ if [ "$pc_name" = "beast" ]; then
 
     # Generate restore script
     cat <<EOF >"${snapshot_path}/restore-bare-metal-windows.sh"
-#!/bin/bash
+#!/usr/bin/bash
 set -e
 [ "\$UID" -eq 0 ] || exec sudo "\$0" "\$@"
 

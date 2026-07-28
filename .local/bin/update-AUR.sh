@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 set -e
 
 ## ----- Update aur based packages -----
@@ -487,7 +487,7 @@ maple-mono-download() {
     curl -L "$download_url" --output "${work_path}/${version}.zip"
     unzip "${work_path}/${version}.zip" -d "${work_path}"
     rm "${work_path}/${version}.zip"
-    touch "$work_path/${version}.txt"
+    touch "${work_path}/${version}.txt"
 }
 
 maple-mono-update() {
@@ -507,6 +507,7 @@ maple-mono-update() {
 yt-dlp-download() {
     python -m venv --clear "$work_path"
     (
+        # shellcheck disable=SC1091
         source "$work_path"/bin/activate
         pip install "yt-dlp[default,curl-cffi]"
     )
@@ -515,9 +516,30 @@ yt-dlp-download() {
 huggingface_hub-download() {
     python -m venv --clear "$work_path"
     (
+        # shellcheck disable=SC1091
         source "$work_path"/bin/activate
         pip install "huggingface_hub"
     )
+}
+
+opencode-download() {
+    download_url="$(
+        curl -s -L "$url" |
+            jq -r ".assets[] | select(.name==\"opencode-linux-x64-musl.tar.gz \") | .browser_download_url"
+    )"
+
+    download_url="$(
+        curl -s -L "$1" |
+            jq -r ".assets[] | select(.name==\"opencode-linux-arm64-musl.tar.gz\") | .browser_download_url"
+    )"
+    _check_download_url
+    curl -L "$download_url" --output "${work_path}/${version}.tar.gz"
+    tar -xf "${work_path}/${version}.tar.gz" -C "$work_path"
+    rm "${work_path}/${version}.tar.gz"
+    if [ -f "${work_path}/opencode" ]; then
+        chmod 700 "${work_path}/opencode"
+    fi
+    touch "${work_path}/${version}.txt"
 }
 
 declare -A non_aur_packages=(
@@ -535,6 +557,7 @@ declare -A non_aur_packages=(
     ["localsend"]="https://api.github.com/repos/localsend/localsend/releases/latest"
     ["ltex-ls-plus"]="https://api.github.com/repos/ltex-plus/ltex-ls-plus/releases/latest"
     ["maple-mono"]="https://api.github.com/repos/subframe7536/maple-font/releases/latest"
+    ["opencode"]="https://api.github.com/repos/anomalyco/opencode/releases/latest"
     ["pandoc-eisvogel-template"]="https://api.github.com/repos/Wandmalfarbe/pandoc-latex-template/releases/latest"
     ["revealjs"]="https://api.github.com/repos/hakimel/reveal.js/releases/latest"
     ["vkd3d-proton"]="https://api.github.com/repos/HansKristian-Work/vkd3d-proton/releases/latest"
@@ -542,7 +565,7 @@ declare -A non_aur_packages=(
 )
 
 ## Delete pip cache
-rm -rf "$HOME/.cache/pip"
+rm -rf "$HOME/.cachwork_pathe/pip"
 
 for p in "${!non_aur_packages[@]}"; do
     work_path="$repo_dir/$p"

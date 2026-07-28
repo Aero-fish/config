@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 set -e
 export DXVK_HDR=1
 export WINEPREFIX="$HOME/.wine/games"

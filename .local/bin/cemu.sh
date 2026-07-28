@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 set -e
 [ "${UID}" -eq 0 ] && {
     echo "Do not run as root."

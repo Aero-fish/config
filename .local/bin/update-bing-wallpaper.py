@@ -1,4 +1,4 @@
-#!/bin/python3
+#!/usr/bin/python3
 from urllib import request
 import contextlib
 import datetime

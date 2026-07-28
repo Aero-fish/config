@@ -240,6 +240,39 @@ case "$selected_model" in
     fi
     ;;
 
+*_Qwen3.6-*)
+    if [ "$framework" = "sglang" ]; then
+        ## WARNING server_args.py:2046: Disabling overlap schedule since
+        ## mamba no_buffer is not compatible with overlap schedule, try to
+        ## use --disable-radix-cache if overlap schedule is necessary
+        ## Temp solution: --mamba-scheduler-strategy extra_buffer
+
+        ## Use customised template to disable thinking. However, disable thinking
+        ## is in conflict with --reasoning-parser qwen3
+
+        run_container --context-length 262144 --kv-cache-dtype fp8_e4m3 \
+            --tool-call-parser qwen3_coder \
+            --chat-template "$TEMPLATE_CONTAINER_PATH/qwen3.5_no_thinking.jinja" \
+            --mamba-scheduler-strategy extra_buffer
+
+    elif [ "$framework" = "vllm" ]; then
+        run_container --max-model-len 262144 --reasoning-parser qwen3 \
+            --enable-auto-tool-choice --tool-call-parser qwen3_coder \
+            --default-chat-template-kwargs '{"enable_thinking":false}'
+
+    elif [ "$framework" = "llama.cpp" ]; then
+        if [ "$daemon_mode" -eq 1 ]; then
+            notify_on_open_ai_compatable_model_ready
+        fi
+        run_container --ctx-size 262144 --cache-type-k q8_0 --cache-type-v q8_0 \
+            --chat-template-kwargs '{"enable_thinking":false}'
+
+    fi
+
+    if [ "$daemon_mode" -eq 1 ]; then
+        notify_on_open_ai_compatable_model_ready
+    fi
+    ;;
 *)
     echo "Unknown model $selected_model"
     notify-send "Unknown model $selected_model"

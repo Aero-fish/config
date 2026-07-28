@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 set -e
 
 if [ "$#" -ne 0 ] && [ -n "$1" ]; then
@@ -92,7 +92,7 @@ if [ -d "$HOME/.config/libvirt/qemu/swtpm/$uuid" ]; then
 fi
 
 cat <<EOF >"${snapshot_path}/restore-vm.sh"
-#!/bin/bash
+#!/usr/bin/bash
 set -e
 
 snapshot_path="\$HOME/"${snapshots_dir@Q}

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 set -e
 export WINEPREFIX="$HOME/.wine/default"
 unset DISPLAY

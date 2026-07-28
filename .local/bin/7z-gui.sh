@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 if [ $# -eq 0 ]; then
     "$HOME"/.local/bin/wine-default-cn.sh 'D:\Myware\7-Zip\7zFM.exe' "."
 else

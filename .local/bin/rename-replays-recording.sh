@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 set -e
 
 src_dir="$HOME/Pictures/ScreenRecording"

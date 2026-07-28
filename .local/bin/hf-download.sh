@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 set -e
 
 STORAGE_DIR="$HOME/Projects/AI/models"
