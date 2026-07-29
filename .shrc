@@ -30,7 +30,7 @@ export PERL_LOCAL_LIB_ROOT="$HOME/.perl5${PERL_LOCAL_LIB_ROOT:+:$PERL_LOCAL_LIB_
 export PERL_MB_OPT="--install_base '$HOME/.perl5'"
 export PERL_MM_OPT="INSTALL_BASE='$HOME/.perl5'"
 
-HISTORY_IGNORE='(?|??|???|...|....|.....|.*|cd *|diff *|nowtime|nowdate|mirror *|permission-fix *|ffmpeg-*|mkv-stream-extract *|archive-to-single-tar-zstd *|ex *|branch *|checkout *|commit *|tag *|newtag *|gpg-check *|gpg-retrieve *|yt-info *|ytdl* *|dec2hex *|hex2dec *|spawn *|trash *|get-mime-default *|set-mime-default *|open *|image-to-pdf* *|extract-pdf-images *|image-to-gray-scale *|combine-pdf *|convert-pdf-to-png *|latex-to-pdf *|md-to-* *|aria2-downlaod *|mount-dev *|jobs *|shasum *|mount *|umount *|history *|git *|bg *|fg *|sudo *|hf-download.sh *)'
+HISTORY_IGNORE='(?|??|???|...|....|.....|.*|cd *|diff *|nowtime|nowdate|mirror *|permission-fix *|ffmpeg-*|mkv-stream-extract *|archive-to-single-tar-zstd *|ex *|branch *|checkout *|commit *|tag *|newtag *|gpg-check *|gpg-retrieve *|yt-info *|ytdl* *|dec2hex *|hex2dec *|spawn *|trash *|get-mime-default *|set-mime-default *|open *|image-to-pdf* *|extract-pdf-images *|image-to-gray-scale *|combine-pdf *|convert-pdf-to-png *|latex-to-pdf *|md-to-* *|aria2-downlaod *|mount-dev *|ln *|mkdir *|touch *|jobs *|shasum *|mount *|umount *|history *|git *|bg *|fg *|sudo *|hf-download.sh *)'
 
 ## Bash history ignore
 # shellcheck disable=SC2155
@@ -1133,6 +1133,11 @@ fi
 if [ -x "$HOME/misc/repo/huggingface_hub/bin/hf" ]; then
     # shellcheck disable=SC2139
     alias hf="$HOME/misc/repo/huggingface_hub/bin/hf"
+fi
+
+if [ -x "$HOME/misc/repo/opencode/opencode" ] && [ -x "$HOME/.local/bin/opencode.sh" ]; then
+    # shellcheck disable=SC2139
+    alias opencode="$HOME/.local/bin/opencode.sh"
 fi
 
 # ---------- Clean up ----------
