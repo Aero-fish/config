@@ -524,13 +524,8 @@ huggingface_hub-download() {
 
 opencode-download() {
     download_url="$(
-        curl -s -L "$url" |
-            jq -r ".assets[] | select(.name==\"opencode-linux-x64-musl.tar.gz \") | .browser_download_url"
-    )"
-
-    download_url="$(
         curl -s -L "$1" |
-            jq -r ".assets[] | select(.name==\"opencode-linux-arm64-musl.tar.gz\") | .browser_download_url"
+            jq -r ".assets[] | select(.name==\"opencode-linux-x64.tar.gz\") | .browser_download_url"
     )"
     _check_download_url
     curl -L "$download_url" --output "${work_path}/${version}.tar.gz"
