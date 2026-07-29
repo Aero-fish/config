@@ -30,7 +30,7 @@ echo_red "Ranking pacman mirrors"
 buildah run "$container" pacman -Syu --noconfirm curl pacman-contrib
 buildah run "$container" sh -c "echo '$(cat /etc/pacman.d/mirrorlist)' >/etc/pacman.d/mirrorlist"
 
-echo_red "Installing base-devel"
+echo_red "Installing packages"
 buildah run "$container" sed -i -E 's:^#\s*ParallelDownloads\s*.*:ParallelDownloads = 5:' /etc/pacman.conf
 buildah run "$container" pacman -Syu --noconfirm --needed "${packages[@]}"
 buildah run "$container" paccache -rk1

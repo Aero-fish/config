@@ -524,6 +524,18 @@ huggingface-hub-download() {
     )
 }
 
+web-ui-download() {
+    if ! podman image exists "localhost/archlinux-ai-model-build"; then
+        "$HOME/.local/bin/rebuild_ai_container_images.sh"
+    fi
+
+    podman_net_cmd="podman run --rm -it --userns keep-id -u user"
+    podman_net_cmd+=" --network host"
+    podman_net_cmd+=" -v '$work_path':/home/user/venv"
+    podman_net_cmd+=" localhost/archlinux-ai-agent-build"
+    eval "$podman_net_cmd sh -c 'python3 -m venv --prompt web-ui --clear /home/user/venv; source /home/user/venv/bin/activate; pip install \"cptr[all]\"'"
+}
+
 opencode-download() {
     download_url="$(
         curl -s -L "$1" |
@@ -558,7 +570,6 @@ declare -A non_aur_packages=(
     ["dxvk"]="https://api.github.com/repos/doitsujin/dxvk/releases/latest"
     ["dxvk-nvapi"]="https://api.github.com/repos/jp7677/dxvk-nvapi/releases/latest"
     ["ffmpeg-yt-dlp"]="https://api.github.com/repos/yt-dlp/FFmpeg-Builds/releases/latest"
-    ["huggingface-hub"]="pip index versions --json huggingface_hub"
     ["katex"]="https://api.github.com/repos/KaTeX/KaTeX/releases/latest"
     ["ksmbd-tools"]="https://api.github.com/repos/cifsd-team/ksmbd-tools/releases/latest"
     ["localsend"]="https://api.github.com/repos/localsend/localsend/releases/latest"
@@ -568,6 +579,9 @@ declare -A non_aur_packages=(
     ["pandoc-eisvogel-template"]="https://api.github.com/repos/Wandmalfarbe/pandoc-latex-template/releases/latest"
     ["revealjs"]="https://api.github.com/repos/hakimel/reveal.js/releases/latest"
     ["vkd3d-proton"]="https://api.github.com/repos/HansKristian-Work/vkd3d-proton/releases/latest"
+    #
+    ["huggingface-hub"]="pip index versions --json huggingface_hub"
+    ["web-ui"]="pip index versions --json cptr"
     ["yt-dlp"]="pip index versions --json yt-dlp"
 )
 
