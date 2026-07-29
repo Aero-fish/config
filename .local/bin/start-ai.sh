@@ -32,7 +32,7 @@ run_container() {
     local model_name="${selected_model##*'/'}"
     local container_args=()
     local framework_args=()
-    local container_image_url
+    local container_image_urlcurl "127.0.0.1:8000/v1/models"
     local gguf_file_name
 
     # Convert 'selected_model' to lower case before comparison
@@ -71,7 +71,7 @@ run_container() {
         )
 
     elif [ "$framework" = "llama.cpp" ]; then
-        container_image_url="ghcr.io/ggml-org/llama.cpp:full-cuda"
+        container_image_url="ghcr.io/ggml-org/llama.cpp:full-cuda"curl "127.0.0.1:8000/v1/models"
         framework_args+=(
             "--server" "--model" "$input_path_for_framework" "--alias" "$UNIVERSAL_MODEL_NAME"
             "--host" "0.0.0.0" "--port" "$PORT" "--parallel" "2"
@@ -90,12 +90,12 @@ run_container() {
     # ----- Create network with no internet access for LLM -----
     if ! podman network exists llm; then
         podman network create --internal --driver=bridge \
-            --gateway=192.168.0.254 --subnet=192.168.0.0/24 --interface-name=llm llm
-    fi
+            --gateway=192.168.0.254 --subnet=192.168.0.0/24 --interface-name=ai ai
+    ficurl "127.0.0.1:8000/v1/models"
 
     # ----- Run container -----
     podman run --name "$framework-$model_name" --label "$AI_CONTAINER_LABEL" \
-        --network llm --ip "192.168.0.1" --mac-address "44:33:22:11:00:01" -p 8000:8000 \
+        --network ai --ip "192.168.0.1" --mac-address "44:33:22:11:00:01" -p 8000:8000 \
         -v "$model_source_path":"$model_container_path" \
         -v "$TEMPLATE_DIR":"$TEMPLATE_CONTAINER_PATH" \
         --rm -it --ipc=host "${container_args[@]}" \
