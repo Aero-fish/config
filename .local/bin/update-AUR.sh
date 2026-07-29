@@ -47,13 +47,15 @@ if [ "$pc_name" = "$main_pc" ]; then
     ## Use container to build
     if [ -s "$repo_dir/pending_make.txt" ]; then
         #Create the image of the container if it does not exist.
-        if ! podman images | rg -q -F "localhost/archlinux-aur-build"; then
-            "$HOME"/misc/programs/containers/aur_build/create_image.sh
+        if ! podman image exists localhost/archlinux-aur-build; then
+            "$HOME/.local/bin/rebuild_aur_container_images.sh"
         fi
 
         # Run the container
-        podman run -it --name aur --rm -v "$HOME"/misc/repo:/home/user/aur \
-            --userns keep-id -u user localhost/archlinux-aur-build \
+        podman run --rm -it --userns keep-id -u user \
+            --name aur --label aur --network host \
+            -v "$HOME/misc/repo":/home/user/aur \
+            localhost/archlinux-aur-build \
             /home/user/aur/update-AUR-here.sh || echo "Container exit with $?"
     fi
 
@@ -505,19 +507,19 @@ maple-mono-update() {
 }
 
 yt-dlp-download() {
-    python -m venv --clear "$work_path"
+    python -m venv --prompt "yt-dlp" --clear "$work_path"
     (
         # shellcheck disable=SC1091
-        source "$work_path"/bin/activate
+        source "$work_path/bin/activate"
         pip install "yt-dlp[default,curl-cffi]"
     )
 }
 
-huggingface_hub-download() {
-    python -m venv --clear "$work_path"
+huggingface-hub-download() {
+    python -m venv --prompt "huggingface-hub" --clear "$work_path"
     (
         # shellcheck disable=SC1091
-        source "$work_path"/bin/activate
+        source "$work_path/bin/activate"
         pip install "huggingface_hub"
     )
 }
@@ -537,6 +539,13 @@ opencode-download() {
     touch "$work_path/$version.txt"
 }
 
+comfy-ui-download() {
+    download_url="$(curl -s -L "$1" | jq -r ".tarball_url")"
+    _check_download_url
+    curl -L "$download_url" --output "$work_path/$version.tar.gz"
+    tar -xf "$work_path/$version.tar.gz" -C "$work_path" --strip-components=1
+    rm "$work_path/$version.tar.gz"
+    touch "$work_path/$version.txt"
 }
 
 declare -A non_aur_packages=(
@@ -544,11 +553,12 @@ declare -A non_aur_packages=(
     ## can be updated in subsequent dxvk/dxvk-nvapi/vkd3d-proton updates.
     ["proton-ge"]="https://api.github.com/repos/GloriousEggroll/proton-ge-custom/releases/latest"
     #
+    ["comfy-ui"]="https://api.github.com/repos/Comfy-Org/ComfyUI/releases/latest"
     ["d7vk"]="https://api.github.com/repos/WinterSnowfall/d7vk/releases/latest"
     ["dxvk"]="https://api.github.com/repos/doitsujin/dxvk/releases/latest"
     ["dxvk-nvapi"]="https://api.github.com/repos/jp7677/dxvk-nvapi/releases/latest"
     ["ffmpeg-yt-dlp"]="https://api.github.com/repos/yt-dlp/FFmpeg-Builds/releases/latest"
-    ["huggingface_hub"]="pip index versions --json huggingface_hub"
+    ["huggingface-hub"]="pip index versions --json huggingface_hub"
     ["katex"]="https://api.github.com/repos/KaTeX/KaTeX/releases/latest"
     ["ksmbd-tools"]="https://api.github.com/repos/cifsd-team/ksmbd-tools/releases/latest"
     ["localsend"]="https://api.github.com/repos/localsend/localsend/releases/latest"
