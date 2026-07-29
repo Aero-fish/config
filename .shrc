@@ -30,7 +30,7 @@ export PERL_LOCAL_LIB_ROOT="$HOME/.perl5${PERL_LOCAL_LIB_ROOT:+:$PERL_LOCAL_LIB_
 export PERL_MB_OPT="--install_base '$HOME/.perl5'"
 export PERL_MM_OPT="INSTALL_BASE='$HOME/.perl5'"
 
-HISTORY_IGNORE='(?|??|???|...|....|.....|.*|cd *|diff *|nowtime|nowdate|mirror *|permission-fix *|ffmpeg-*|mkv-stream-extract *|archive-to-single-tar-zstd *|ex *|branch *|checkout *|commit *|tag *|newtag *|gpg-check *|gpg-retrieve *|yt-info *|ytdl* *|dec2hex *|hex2dec *|spawn *|trash *|get-mime-default *|set-mime-default *|open *|image-to-pdf* *|extract-pdf-images *|image-to-gray-scale *|combine-pdf *|convert-pdf-to-png *|latex-to-pdf *|md-to-* *|aria2-downlaod *|mount-dev *|ln *|mkdir *|touch *|jobs *|shasum *|mount *|umount *|history *|git *|bg *|fg *|sudo *|hf-download.sh *)'
+HISTORY_IGNORE='(?|??|???|...|....|.....|.*|cd *|diff *|nowtime|nowdate|mirror *|permission-fix *|ffmpeg-*|mkv-stream-extract *|archive-to-single-tar-zstd *|ex *|branch *|checkout *|commit *|tag *|newtag *|gpg-check *|gpg-retrieve *|yt-info *|ytdl* *|dec2hex *|hex2dec *|spawn *|trash *|get-mime-default *|set-mime-default *|open *|image-to-pdf* *|extract-pdf-images *|image-to-gray-scale *|combine-pdf *|convert-pdf-to-png *|latex-to-pdf *|md-to-* *|aria2-downlaod *|mount-dev *|ln *|mkdir *|touch *|jobs *|shasum *|mount *|umount *|chmod *|chown *|history *|git *|bg *|fg *|sudo *|hf-download.sh *)'
 
 ## Bash history ignore
 # shellcheck disable=SC2155
@@ -210,7 +210,7 @@ alias pacs="pacman -Ss"                                 # Search
 alias paci="pacman -Si"                                 # Info
 alias paclo="pacman -Qdt"                               # List orphans
 alias pacro='paclo && sudo pacman -Rns $(pacman -Qtdq)' # Remove orphans
-alias pacc="sudo acman -Scc"                            # Clean cache
+alias pacc="sudo pacman -Scc"                           # Clean cache
 alias paclf="pacman -Ql"                                # List files for a package
 alias pacls="pacman -Qe"                                # List explicitly installed package
 
@@ -631,7 +631,16 @@ alias clean-zsh-history='\rm -f "$HOME/.cache/zsh"/*'
 alias test-terminal-bell="echo -e '\07'"
 
 # Container for building
-alias aur-container="podman run -it --rm -v \$HOME/misc/repo:/home/user/aur --userns keep-id -u user localhost/archlinux-aur-build bash"
+aur-container() {
+    if ! podman image exists localhost/archlinux-aur-build; then
+        "$HOME/.local/bin/rebuild_aur_container_images.sh"
+    fi
+    podman run --rm -it --userns keep-id -u user \
+        --name aur --label aur --network host \
+        -v "$HOME/misc/repo":/home/user/aur \
+        localhost/archlinux-aur-build \
+        bash
+}
 
 alias ls-network-connections="ss --tcp --udp --processes"
 alias ls-network-port-listening="ss --listening --tcp --udp --processes"
