@@ -10,7 +10,7 @@ main_pc="beast"
 ## Only update if it is the main PC. Other PC only check to installed newer package.
 if [ "$pc_name" = "$main_pc" ]; then
     # Update from git repo
-    for d in "${repo_dir}"/*/; do
+    for d in "$repo_dir"/*/; do
         [ ! -d "$d" ] && break # Break if no directories
 
         cd "$d"
@@ -20,7 +20,7 @@ if [ "$pc_name" = "$main_pc" ]; then
             dir_name="$(echo "$d" | sed -E 's=.*/([^/]*)/=\1=')"
 
             if [ "$git_pull_result" != "Already up to date." ]; then
-                echo -ne "\e[31mPulled '${dir_name}' from repo\e[0m"
+                echo -ne "\e[31mPulled '$dir_name' from repo\e[0m"
                 if [ -f "PKGBUILD" ]; then
                     echo -e "\e[31m, pending make.\e[0m"
                     echo "$dir_name" >>"$repo_dir/pending_make.txt"
@@ -28,7 +28,7 @@ if [ "$pc_name" = "$main_pc" ]; then
                     echo -e "\e[31m.\e[0m"
                 fi
             else
-                echo "'${dir_name}' is already up to date."
+                echo "'$dir_name' is already up to date."
 
             fi
         fi
@@ -37,7 +37,7 @@ if [ "$pc_name" = "$main_pc" ]; then
     ## Check icu update for libpdfium-nojs
     if [ -d "$repo_dir"/libpdfium-nojs ] && pacman -Q icu 1>/dev/null 2>&1; then
         icu_installed_version="$(pacman -Q icu | cut -d" " -f2)"
-        if [ ! -f "$repo_dir/libpdfium-nojs/icu_${icu_installed_version}".txt ]; then
+        if [ ! -f "$repo_dir/libpdfium-nojs/icu_$icu_installed_version".txt ]; then
             echo -e "\e[31mRebuilding 'libpdfium-nojs' for new 'icu'\e[0m"
             rm -f "$repo_dir"/libpdfium-nojs/icu_*.txt
             echo "libpdfium-nojs" >>"$repo_dir/pending_make.txt"
@@ -114,17 +114,17 @@ _check_download_url() {
 d7vk-download() {
     download_url="$(
         curl -s -L "$1" |
-            jq -r ".assets[] | select(.name==\"d7vk-${version}.zip\") | .browser_download_url"
+            jq -r ".assets[] | select(.name==\"d7vk-$version.zip\") | .browser_download_url"
     )"
     _check_download_url
-    curl -L "$download_url" --output "${work_path}/${version}.zip"
-    unzip "${work_path}/${version}.zip" -d "${work_path}"
-    if [ -d "${work_path}/d7vk-${version}" ]; then
-        mv "${work_path}/d7vk-${version}"/* "${work_path}"
-        rm -rf "${work_path}/d7vk-${version}"
+    curl -L "$download_url" --output "$work_path/$version.zip"
+    unzip "$work_path/$version.zip" -d "$work_path"
+    if [ -d "$work_path/d7vk-$version" ]; then
+        mv "$work_path/d7vk-$version"/* "$work_path"
+        rm -rf "$work_path/d7vk-$version"
     fi
-    rm "${work_path}/${version}.zip"
-    touch "$work_path/d7vk_${version}.txt"
+    rm "$work_path/$version.zip"
+    touch "$work_path/d7vk_$version.txt"
 }
 
 d7vk-update() {
@@ -164,10 +164,10 @@ dxvk-download() {
             jq -r ".assets[] | select(.name==\"dxvk-${version#v}.tar.gz\") | .browser_download_url"
     )"
     _check_download_url
-    curl -L "$download_url" --output "${work_path}/${version}.tar.gz"
-    tar -xf "${work_path}/${version}.tar.gz" -C "$work_path" --strip-components=1
-    rm "$work_path/${version}.tar.gz"
-    touch "$work_path/dxvk_${version}.txt"
+    curl -L "$download_url" --output "$work_path/$version.tar.gz"
+    tar -xf "$work_path/$version.tar.gz" -C "$work_path" --strip-components=1
+    rm "$work_path/$version.tar.gz"
+    touch "$work_path/dxvk_$version.txt"
 }
 
 dxvk-update() {
@@ -209,14 +209,14 @@ dxvk-update() {
 dxvk-nvapi-download() {
     download_url="$(
         curl -s -L "$1" |
-            jq -r ".assets[] | select(.name==\"dxvk-nvapi-${version}.tar.gz\") | .browser_download_url"
+            jq -r ".assets[] | select(.name==\"dxvk-nvapi-$version.tar.gz\") | .browser_download_url"
     )"
     _check_download_url
 
-    curl -L "$download_url" --output "${work_path}/${version}.tar.gz"
-    tar -xf "${work_path}/${version}.tar.gz" -C "$work_path"
-    rm "$work_path/${version}.tar.gz"
-    touch "$work_path/dxvk_nvapi_${version}.txt"
+    curl -L "$download_url" --output "$work_path/$version.tar.gz"
+    tar -xf "$work_path/$version.tar.gz" -C "$work_path"
+    rm "$work_path/$version.tar.gz"
+    touch "$work_path/dxvk_nvapi_$version.txt"
 }
 
 dxvk-nvapi-update() {
@@ -263,11 +263,11 @@ vkd3d-proton-download() {
     )"
     _check_download_url
 
-    curl -L "$download_url" --output "${work_path}/${version}.tar.zst"
+    curl -L "$download_url" --output "$work_path/$version.tar.zst"
 
-    tar -xf "${work_path}/${version}.tar.zst" -C "$work_path" --strip-components=1
-    rm "$work_path/${version}.tar.zst"
-    touch "$work_path/vkd3d_proton_${version}.txt"
+    tar -xf "$work_path/$version.tar.zst" -C "$work_path" --strip-components=1
+    rm "$work_path/$version.tar.zst"
+    touch "$work_path/vkd3d_proton_$version.txt"
 }
 
 vkd3d-proton-update() {
@@ -309,14 +309,14 @@ vkd3d-proton-update() {
 proton-ge-download() {
     download_url="$(
         curl -s -L "$1" |
-            jq -r ".assets[] | select(.name==\"${version}.tar.gz\") | .browser_download_url"
+            jq -r ".assets[] | select(.name==\"$version.tar.gz\") | .browser_download_url"
     )"
     _check_download_url
 
-    curl -L "$download_url" --output "${work_path}/${version}.tar.gz"
-    tar --strip-components=1 -xf "${work_path}/${version}.tar.gz" -C "$work_path"
-    rm "$work_path/${version}.tar.gz"
-    touch "$work_path/${version}.txt"
+    curl -L "$download_url" --output "$work_path/$version.tar.gz"
+    tar --strip-components=1 -xf "$work_path/$version.tar.gz" -C "$work_path"
+    rm "$work_path/$version.tar.gz"
+    touch "$work_path/$version.txt"
 }
 
 ksmbd-tools-download() {
@@ -326,11 +326,11 @@ ksmbd-tools-download() {
     )"
     _check_download_url
 
-    mkdir -p "${work_path}/src"
-    curl -L "$download_url" --output "${work_path}/src/${version}.tar.gz"
-    tar --strip-components=1 -xf "${work_path}/src/${version}.tar.gz" -C "$work_path"/src
+    mkdir -p "$work_path/src"
+    curl -L "$download_url" --output "$work_path/src/$version.tar.gz"
+    tar --strip-components=1 -xf "$work_path/src/$version.tar.gz" -C "$work_path"/src
 
-    cd "${work_path}/src"
+    cd "$work_path/src"
     ./configure --prefix=/usr --sbindir=/usr/local/sbin --libexecdir=/usr/lib/ksmbd-tools --sysconfdir=/etc --with-rundir=/run
     make
 
@@ -357,9 +357,9 @@ localsend-download() {
     )"
     _check_download_url
 
-    curl -L "$download_url" --output "${work_path}/${version}.AppImage"
+    curl -L "$download_url" --output "$work_path/$version.AppImage"
 
-    chmod 700 "${work_path}/${version}.AppImage"
+    chmod 700 "$work_path/$version.AppImage"
     echo "Extracting AppImage"
     bwrap \
         --unshare-user \
@@ -382,17 +382,17 @@ localsend-download() {
         --symlink "/usr/lib" "/lib" \
         --symlink "/usr/lib" "/lib64" \
         --bind-try "$work_path" "$work_path" \
-        "$work_path/${version}.AppImage" --appimage-extract \
+        "$work_path/$version.AppImage" --appimage-extract \
         9</usr/local/share/seccomp-filter/default_seccomp_filter.bpf >/dev/null
 
-    mv "${work_path}/squashfs-root"/* "${work_path}"
-    rm -rf "${work_path}/${version}.AppImage" \
-        "${work_path}/squashfs-root" \
-        "${work_path}"/org.localsend.localsend_app.desktop
+    mv "$work_path/squashfs-root"/* "$work_path"
+    rm -rf "$work_path/$version.AppImage" \
+        "$work_path/squashfs-root" \
+        "$work_path"/org.localsend.localsend_app.desktop
 
-    fd --unrestricted -tf . "${work_path}" --exec-batch chmod 600 {}
-    fd --unrestricted -td . "${work_path}" --exec-batch chmod 700 {}
-    chmod 700 "${work_path}"/{AppRun,localsend_app}
+    fd --unrestricted -tf . "$work_path" --exec-batch chmod 600 {}
+    fd --unrestricted -td . "$work_path" --exec-batch chmod 700 {}
+    chmod 700 "$work_path"/{AppRun,localsend_app}
 
 }
 
@@ -403,11 +403,11 @@ pandoc-eisvogel-template-download() {
     )"
     _check_download_url
 
-    curl -L "$download_url" --output "${work_path}/${version}.tar.gz"
-    tar -xf "${work_path}/${version}.tar.gz" -C "$work_path"
-    rm "${work_path}/${version}.tar.gz"
-    fd --unrestricted -tf . "${work_path}" --exec-batch /usr/bin/chmod 600 {}
-    fd --unrestricted -td . "${work_path}" --exec-batch /usr/bin/chmod 700 {}
+    curl -L "$download_url" --output "$work_path/$version.tar.gz"
+    tar -xf "$work_path/$version.tar.gz" -C "$work_path"
+    rm "$work_path/$version.tar.gz"
+    fd --unrestricted -tf . "$work_path" --exec-batch /usr/bin/chmod 600 {}
+    fd --unrestricted -td . "$work_path" --exec-batch /usr/bin/chmod 700 {}
 }
 
 pandoc-eisvogel-template-update() {
@@ -431,10 +431,10 @@ revealjs-download() {
     )"
     _check_download_url
 
-    curl -L "$download_url" --output "${work_path}/${version}.tar.gz"
-    tar -xf "${work_path}/${version}.tar.gz" -C "$work_path" --strip-components=1
-    rm "${work_path}/${version}.tar.gz"
-    rm -r "${work_path}/.github"
+    curl -L "$download_url" --output "$work_path/$version.tar.gz"
+    tar -xf "$work_path/$version.tar.gz" -C "$work_path" --strip-components=1
+    rm "$work_path/$version.tar.gz"
+    rm -r "$work_path/.github"
 }
 
 katex-download() {
@@ -444,9 +444,9 @@ katex-download() {
     )"
     _check_download_url
 
-    curl -L "$download_url" --output "${work_path}/${version}.tar.gz"
-    tar -xf "${work_path}/${version}.tar.gz" -C "$work_path" --strip-components=1
-    rm "${work_path}/${version}.tar.gz"
+    curl -L "$download_url" --output "$work_path/$version.tar.gz"
+    tar -xf "$work_path/$version.tar.gz" -C "$work_path" --strip-components=1
+    rm "$work_path/$version.tar.gz"
 }
 
 ffmpeg-yt-dlp-download() {
@@ -456,26 +456,26 @@ ffmpeg-yt-dlp-download() {
     )"
     _check_download_url
 
-    curl -L "$download_url" --output "${work_path}/${version}.tar.xz"
-    tar -I pixz -xf "${work_path}/${version}.tar.xz" -C "$work_path"
-    rm "${work_path}/${version}.tar.xz"
-    chmod 700 "${work_path}/ffmpeg-master-latest-linux64-gpl/bin/"*
-    mv "${work_path}/ffmpeg-master-latest-linux64-gpl/bin/"* "${work_path}"
-    rm -rf "${work_path}/ffmpeg-master-latest-linux64-gpl"
+    curl -L "$download_url" --output "$work_path/$version.tar.xz"
+    tar -I pixz -xf "$work_path/$version.tar.xz" -C "$work_path"
+    rm "$work_path/$version.tar.xz"
+    chmod 700 "$work_path/ffmpeg-master-latest-linux64-gpl/bin/"*
+    mv "$work_path/ffmpeg-master-latest-linux64-gpl/bin/"* "$work_path"
+    rm -rf "$work_path/ffmpeg-master-latest-linux64-gpl"
 }
 
 ltex-ls-plus-download() {
     download_url="$(
         curl -s -L "$1" |
-            jq -r ".assets[] | select(.name==\"ltex-ls-plus-${version}-linux-x64.tar.gz\") | .browser_download_url"
+            jq -r ".assets[] | select(.name==\"ltex-ls-plus-$version-linux-x64.tar.gz\") | .browser_download_url"
     )"
     _check_download_url
 
-    curl -L "$download_url" --output "${work_path}/${version}.tar.gz"
-    tar -xf "${work_path}/${version}.tar.gz" -C "$work_path"
-    rm "${work_path}/${version}.tar.gz"
-    mv "${work_path}"/*/* "${work_path}"
-    rmdir --ignore-fail-on-non-empty "${work_path}"/*/
+    curl -L "$download_url" --output "$work_path/$version.tar.gz"
+    tar -xf "$work_path/$version.tar.gz" -C "$work_path"
+    rm "$work_path/$version.tar.gz"
+    mv "$work_path"/*/* "$work_path"
+    rmdir --ignore-fail-on-non-empty "$work_path"/*/
 }
 
 maple-mono-download() {
@@ -484,10 +484,10 @@ maple-mono-download() {
             jq -r ".assets[] | select(.name==\"MapleMono-NF-CN-unhinted.zip\") | .browser_download_url"
     )"
     _check_download_url
-    curl -L "$download_url" --output "${work_path}/${version}.zip"
-    unzip "${work_path}/${version}.zip" -d "${work_path}"
-    rm "${work_path}/${version}.zip"
-    touch "${work_path}/${version}.txt"
+    curl -L "$download_url" --output "$work_path/$version.zip"
+    unzip "$work_path/$version.zip" -d "$work_path"
+    rm "$work_path/$version.zip"
+    touch "$work_path/$version.txt"
 }
 
 maple-mono-update() {
@@ -528,13 +528,15 @@ opencode-download() {
             jq -r ".assets[] | select(.name==\"opencode-linux-x64.tar.gz\") | .browser_download_url"
     )"
     _check_download_url
-    curl -L "$download_url" --output "${work_path}/${version}.tar.gz"
-    tar -xf "${work_path}/${version}.tar.gz" -C "$work_path"
-    rm "${work_path}/${version}.tar.gz"
-    if [ -f "${work_path}/opencode" ]; then
-        chmod 700 "${work_path}/opencode"
+    curl -L "$download_url" --output "$work_path/$version.tar.gz"
+    tar -xf "$work_path/$version.tar.gz" -C "$work_path"
+    rm "$work_path/$version.tar.gz"
+    if [ -f "$work_path/opencode" ]; then
+        chmod 700 "$work_path/opencode"
     fi
-    touch "${work_path}/${version}.txt"
+    touch "$work_path/$version.txt"
+}
+
 }
 
 declare -A non_aur_packages=(
@@ -590,15 +592,15 @@ for p in "${!non_aur_packages[@]}"; do
                 echo -e "\e[31mUpdating '$p'.\e[0m"
                 rm -rf "${work_path:?}"/*
 
-                if declare -F "${p}-download" >/dev/null; then
+                if declare -F "$p-download" >/dev/null; then
                     # Call custom function to download new version
                     set +e
-                    "${p}-download" "$url"
+                    "$p-download" "$url"
                     result="$?"
                     set -e
 
                     if [ "$result" -eq 0 ]; then
-                        echo "$url" >"$work_path/${version}.txt"
+                        echo "$url" >"$work_path/$version.txt"
                     fi
                 else
 
@@ -609,9 +611,9 @@ for p in "${!non_aur_packages[@]}"; do
             fi
         fi
 
-        if declare -F "${p}-update" >/dev/null; then
+        if declare -F "$p-update" >/dev/null; then
             # Call custom function to update the installation
-            "${p}-update"
+            "$p-update"
         fi
     fi
 done
@@ -662,16 +664,16 @@ if [ -d "$repo_dir/yacreader" ] && [ -d "$repo_dir/libpdfium-nojs" ]; then
 
     if [ -n "$libpdfium_repo" ] && [ -n "$libpdfium_icu" ] &&
         {
-            [ ! -f "$LIB_PATH/libpdfium-nojs_${libpdfium_repo}.txt" ] ||
-                [ ! -f "$LIB_PATH/icu_${libpdfium_icu}.txt" ]
+            [ ! -f "$LIB_PATH/libpdfium-nojs_$libpdfium_repo.txt" ] ||
+                [ ! -f "$LIB_PATH/icu_$libpdfium_icu.txt" ]
         }; then
         rm -rf "${LIB_PATH:?}"/*
         tar --zstd --directory "$LIB_PATH" -xpf "$repo_dir/libpdfium-nojs/libpdfium-nojs-$libpdfium_repo-x86_64.pkg.tar.zst" usr/lib
         fd -tf -tl --exact-depth 1 ".*\.so(\..*)?" "$LIB_PATH/usr/lib" --exec-batch mv {} "$LIB_PATH"
 
         rm -rf "${LIB_PATH:?}/usr"
-        touch "$LIB_PATH/libpdfium-nojs_${libpdfium_repo}.txt" \
-            "$LIB_PATH/icu_${libpdfium_icu}.txt"
+        touch "$LIB_PATH/libpdfium-nojs_$libpdfium_repo.txt" \
+            "$LIB_PATH/icu_$libpdfium_icu.txt"
     fi
     unset LIB_PATH
 fi
