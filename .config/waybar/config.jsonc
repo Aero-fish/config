@@ -13,6 +13,7 @@
         "tray",
         "custom/replay",
         "custom/recorder",
+        "custom/comfy_ui",
         "custom/ai",
         "battery",
         "pulseaudio#output",
@@ -304,7 +305,15 @@
         "exec-if": "[ -f $HOME/.config/waybar/scripts/check-ai-container.sh ]",
         "exec": "$HOME/.config/waybar/scripts/check-ai-container.sh",
         "format": "{}",
-        "interval": 5,
+        "interval": 30,
+        "return-type": "json",
+        "tooltip": true
+    },
+    "custom/comfy_ui": {
+        "exec-if": "[ -f $HOME/.config/waybar/scripts/check-comfy-ui-container.sh ]",
+        "exec": "$HOME/.config/waybar/scripts/check-comfy-ui-container.sh",
+        "format": "{}",
+        "interval": 30,
         "return-type": "json",
         "tooltip": true
     },
