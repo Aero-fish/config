@@ -39,7 +39,7 @@ while read -r file; do
     if [ -d "$model_path/${model_author}_${model_name}" ]; then
         config_with_available_model+=("$file")
     fi
-done < <(find "$framework_config_path/$framework_name/" -mindepth 1 -maxdepth 1 -type f -name "*.conf" -printf '%P\n')
+done < <(find "$framework_config_path/$framework_name/" -mindepth 1 -maxdepth 1 -name "*.conf" -printf '%P\n')
 
 if [ "${#config_with_available_model[@]}" -le 0 ]; then
     echo "No config, or all config has no corresponding model available."

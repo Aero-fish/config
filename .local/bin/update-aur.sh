@@ -507,21 +507,17 @@ maple-mono-update() {
 }
 
 yt-dlp-download() {
-    uv venv --prompt "yt-dlp" --clear --force "$work_path"
-    (
-        # shellcheck disable=SC1091
-        source "$work_path/bin/activate"
-        uv pip install "yt-dlp[default,curl-cffi]"
-    )
+    python -m venv --prompt "yt-dlp" --clear "$work_path"
+    source "$work_path/bin/activate"
+    uv pip install "yt-dlp[default,curl-cffi]"
+    deactivate
 }
 
 huggingface-hub-download() {
-    uv venv --prompt "huggingface-hub" --clear --force "$work_path"
-    (
-        # shellcheck disable=SC1091
-        source "$work_path/bin/activate"
-        uv pip install "huggingface_hub"
-    )
+    python -m venv --prompt "yt-dlp" --clear "$work_path"
+    source "$work_path/bin/activate"
+    uv pip install "huggingface_hub"
+    deactivate
 }
 
 web-ui-download() {
