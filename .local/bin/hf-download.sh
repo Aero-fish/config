@@ -1,20 +1,20 @@
 #!/usr/bin/bash
 set -e
 
-STORAGE_DIR="$HOME/Projects/AI/models"
-HF_PATH="$HOME/misc/repo/huggingface_hub"
-HF_BIN="$HOME/misc/repo/huggingface_hub/bin/hf"
-TOKEN_PATH="$HOME/.config/my-config/hf_token"
+storage_path="$HOME/Projects/AI/models"
+hf_path="$HOME/misc/repo/huggingface-hub"
+hf_bin="$HOME/misc/repo/huggingface-hub/bin/hf"
+token_path="$HOME/.config/my-config/hf_token"
 
-if [ ! -x "$HF_PATH" ]; then
+if [ ! -x "$hf_bin" ]; then
     echo "'hf' executable not found"
     exit 1
 fi
 
-MODEL="$1"
-MODEL_NAME="${MODEL##*'/'}"
-MODEL_AUTHOR="${MODEL%%'/'*}"
-MODEL_PATH="$STORAGE_DIR/${MODEL_AUTHOR}_${MODEL_NAME}"
+model="$1"
+model_name="${model##*'/'}"
+model_author="${model%%'/'*}"
+model_path="$storage_path/${model_author}_${model_name}"
 shift
 
 include_paths=()
@@ -25,8 +25,8 @@ for p in "$@"; do
     include_paths+=("--include" "$p")
 done
 
-if [ -d "$MODEL_PATH" ]; then
-    download_date="$(find "$MODEL_PATH" -regex ".*/Download_[0-9-]*" -printf "%f\n" | head -n1 | sed "s:^Download_::")"
+if [ -d "$model_path" ]; then
+    download_date="$(find "$model_path" -regex ".*/Download_[0-9-]*" -printf "%f\n" | head -n1 | sed "s:^Download_::")"
     if [ -n "$download_date" ]; then
         read -n 1 -r -p "Model was download on $download_date, do you want to remove it and re-download? [y/n] " res
         echo
@@ -35,21 +35,22 @@ if [ -d "$MODEL_PATH" ]; then
             exit 0
         fi
     fi
-    rm -rf "$MODEL_PATH"
+    rm -rf "$model_path"
 fi
 
-mkdir -p "$MODEL_PATH"
+mkdir -p "$model_path"
 token_args=()
-if [ -f "$TOKEN_PATH" ]; then
-    token_args+=("--token" "$(cat "$TOKEN_PATH")")
+if [ -f "$token_path" ]; then
+    token_args+=("--token" "$(cat "$token_path")")
 fi
+
 /usr/local/bin/generic_bwrap \
     --setenv HF_HUB_DISABLE_TELEMETRY 1 \
-    --bind "$MODEL_PATH" "$MODEL_PATH" \
-    --ro-bind "$HF_PATH" "$HF_PATH" \
-    "$HF_BIN" download "${token_args[@]}" --local-dir "$MODEL_PATH" "$MODEL" "${include_paths[@]}"
+    --bind "$model_path" "$model_path" \
+    --ro-bind "$hf_path" "$hf_path" \
+    "$hf_bin" download "${token_args[@]}" --local-dir "$model_path" "$model" "${include_paths[@]}"
 
-exit_code="$?"
-if [ "$exit_code" = 0 ]; then
-    touch "$MODEL_PATH/Download_$(date "+%Y-%m-%d")"
-fi
+# exit_code="$?"
+# if [ "$exit_code" = 0 ]; then
+#     touch "$model_path/Download_$(date "+%Y-%m-%d")"
+# fi
