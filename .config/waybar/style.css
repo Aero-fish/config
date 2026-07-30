@@ -72,16 +72,14 @@ tooltip label {
 
 #battery,
 #cpu,
-#custom-ai,
 #custom-clock,
-#custom-comfy_ui,
 #custom-config_repo,
-#custom-eq,
 #custom-file_operation,
 #custom-home-storage,
 #custom-mail,
 #custom-mail_sync,
 #custom-pacman,
+#custom-podman,
 #custom-power_button,
 #custom-recorder,
 #custom-replay,
@@ -219,8 +217,7 @@ tooltip label {
     color: tomato;
 }
 
-#custom-ai,
-#custom-comfy_ui {
+#custom-podman {
     color: gold;
 }
 

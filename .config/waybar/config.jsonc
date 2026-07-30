@@ -13,8 +13,7 @@
         "tray",
         "custom/replay",
         "custom/recorder",
-        "custom/comfy_ui",
-        "custom/ai",
+        "custom/podman",
         "battery",
         "pulseaudio#output",
         "pulseaudio#mic",
@@ -301,19 +300,11 @@
         "signal": 12,
         "tooltip": false
     },
-    "custom/ai": {
-        "exec-if": "[ -f $HOME/.config/waybar/scripts/check-ai-container.sh ]",
-        "exec": "$HOME/.config/waybar/scripts/check-ai-container.sh",
+    "custom/podman": {
+        "exec-if": "[ -f $HOME/.config/waybar/scripts/check-podman.sh ]",
+        "exec": "$HOME/.config/waybar/scripts/check-podman.sh",
         "format": "{}",
-        "interval": 30,
-        "return-type": "json",
-        "tooltip": true
-    },
-    "custom/comfy_ui": {
-        "exec-if": "[ -f $HOME/.config/waybar/scripts/check-comfy-ui-container.sh ]",
-        "exec": "$HOME/.config/waybar/scripts/check-comfy-ui-container.sh",
-        "format": "{}",
-        "interval": 30,
+        "interval": 20,
         "return-type": "json",
         "tooltip": true
     },
