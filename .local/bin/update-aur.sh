@@ -507,20 +507,20 @@ maple-mono-update() {
 }
 
 yt-dlp-download() {
-    python -m venv --prompt "yt-dlp" --clear "$work_path"
+    uv venv --prompt "yt-dlp" --clear "$work_path"
     (
         # shellcheck disable=SC1091
         source "$work_path/bin/activate"
-        pip install "yt-dlp[default,curl-cffi]"
+        uv pip install "yt-dlp[default,curl-cffi]"
     )
 }
 
 huggingface-hub-download() {
-    python -m venv --prompt "huggingface-hub" --clear "$work_path"
+    uv venv --prompt "huggingface-hub" --clear "$work_path"
     (
         # shellcheck disable=SC1091
         source "$work_path/bin/activate"
-        pip install "huggingface_hub"
+        uv pip install "huggingface_hub"
     )
 }
 
@@ -533,7 +533,31 @@ web-ui-download() {
     podman_net_cmd+=" --network host"
     podman_net_cmd+=" -v '$work_path':/home/user/venv"
     podman_net_cmd+=" localhost/archlinux-ai-agent-build"
-    eval "$podman_net_cmd sh -c 'python3 -m venv --prompt web-ui --clear /home/user/venv; source /home/user/venv/bin/activate; pip install \"cptr[all]\"'"
+    eval "$podman_net_cmd sh -c 'uv venv --prompt web-ui --clear /home/user/venv; source /home/user/venv/bin/activate; uv pip install \"cptr[all]\"'"
+}
+
+sglang-download() {
+    if ! podman image exists "localhost/archlinux-ai-model-build"; then
+        "$HOME/.local/bin/rebuild_ai_container_images.sh"
+    fi
+
+    podman_net_cmd="podman run --rm -it --userns keep-id -u user"
+    podman_net_cmd+=" --network host"
+    podman_net_cmd+=" -v '$work_path':/home/user/venv"
+    podman_net_cmd+=" localhost/archlinux-ai-agent-build"
+    eval "$podman_net_cmd sh -c 'uv venv --prompt sgland --clear /home/user/venv; source /home/user/venv/bin/activate; uv pip install --prerelease=allow sglang'"
+}
+
+vllm-download() {
+    if ! podman image exists "localhost/archlinux-ai-model-build"; then
+        "$HOME/.local/bin/rebuild_ai_container_images.sh"
+    fi
+
+    podman_net_cmd="podman run --rm -it --userns keep-id -u user"
+    podman_net_cmd+=" --network host"
+    podman_net_cmd+=" -v '$work_path':/home/user/venv"
+    podman_net_cmd+=" localhost/archlinux-ai-agent-build"
+    eval "$podman_net_cmd sh -c 'uv venv --prompt vllm --clear /home/user/venv; source /home/user/venv/bin/activate; uv pip install vllm --torch-backend=auto'"
 }
 
 opencode-download() {
@@ -581,6 +605,8 @@ declare -A non_aur_packages=(
     ["vkd3d-proton"]="https://api.github.com/repos/HansKristian-Work/vkd3d-proton/releases/latest"
     #
     ["huggingface-hub"]="pip index versions --json huggingface_hub"
+    ["sglang"]="pip index versions --json sglang"
+    ["vllm"]="pip index versions --json vllm"
     ["web-ui"]="pip index versions --json cptr"
     ["yt-dlp"]="pip index versions --json yt-dlp"
 )
