@@ -507,7 +507,7 @@ maple-mono-update() {
 }
 
 yt-dlp-download() {
-    uv venv --prompt "yt-dlp" --clear "$work_path"
+    uv venv --prompt "yt-dlp" --clear --force "$work_path"
     (
         # shellcheck disable=SC1091
         source "$work_path/bin/activate"
@@ -516,7 +516,7 @@ yt-dlp-download() {
 }
 
 huggingface-hub-download() {
-    uv venv --prompt "huggingface-hub" --clear "$work_path"
+    uv venv --prompt "huggingface-hub" --clear --force "$work_path"
     (
         # shellcheck disable=SC1091
         source "$work_path/bin/activate"
@@ -532,8 +532,8 @@ web-ui-download() {
     podman_net_cmd="podman run --rm -it --userns keep-id -u user"
     podman_net_cmd+=" --network host"
     podman_net_cmd+=" -v '$work_path':/home/user/venv"
-    podman_net_cmd+=" localhost/archlinux-ai-agent-build"
-    eval "$podman_net_cmd sh -c 'uv venv --prompt web-ui --clear /home/user/venv; source /home/user/venv/bin/activate; uv pip install \"cptr[all]\"'"
+    podman_net_cmd+=" localhost/archlinux-ai-model-build"
+    eval "$podman_net_cmd sh -c 'uv venv --prompt web-ui --clear --force /home/user/venv; source /home/user/venv/bin/activate; uv pip install \"cptr[all]\"'"
 }
 
 sglang-download() {
@@ -544,8 +544,8 @@ sglang-download() {
     podman_net_cmd="podman run --rm -it --userns keep-id -u user"
     podman_net_cmd+=" --network host"
     podman_net_cmd+=" -v '$work_path':/home/user/venv"
-    podman_net_cmd+=" localhost/archlinux-ai-agent-build"
-    eval "$podman_net_cmd sh -c 'uv venv --prompt sgland --clear /home/user/venv; source /home/user/venv/bin/activate; uv pip install --prerelease=allow sglang'"
+    podman_net_cmd+=" localhost/archlinux-ai-model-build"
+    eval "$podman_net_cmd sh -c 'uv venv --prompt sgland --clear --force /home/user/venv; source /home/user/venv/bin/activate; uv pip install --prerelease=allow sglang'"
 }
 
 vllm-download() {
@@ -556,8 +556,8 @@ vllm-download() {
     podman_net_cmd="podman run --rm -it --userns keep-id -u user"
     podman_net_cmd+=" --network host"
     podman_net_cmd+=" -v '$work_path':/home/user/venv"
-    podman_net_cmd+=" localhost/archlinux-ai-agent-build"
-    eval "$podman_net_cmd sh -c 'uv venv --prompt vllm --clear /home/user/venv; source /home/user/venv/bin/activate; uv pip install vllm --torch-backend=auto'"
+    podman_net_cmd+=" localhost/archlinux-ai-model-build"
+    eval "$podman_net_cmd sh -c 'uv venv --prompt vllm --clear --force /home/user/venv; source /home/user/venv/bin/activate; uv pip install vllm --torch-backend=auto'"
 }
 
 opencode-download() {
