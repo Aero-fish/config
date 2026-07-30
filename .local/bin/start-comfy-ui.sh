@@ -17,7 +17,7 @@ fi
 
 ## Container with internal network only
 podman_cmd="podman run --rm -it --userns keep-id -u user --cap-drop=all $detach_mode"
-podman_cmd+=" --shm-size=-0 --detach-keys='ctrl-q'  --init"
+podman_cmd+=" --shm-size=-0 --detach-keys='ctrl-q' --init"
 podman_cmd+=" --name '$container_name' --label '$container_name'"
 podman_cmd+=" --network ai_internal --ip '192.168.0.2' --mac-address '44:33:22:11:00:02' -p $port:$port"
 
@@ -34,7 +34,7 @@ podman_cmd+=" localhost/archlinux-ai-model-build"
 
 ## Container with internet, for downloading package for venv
 podman_net_cmd="podman run --rm -it --userns keep-id -u user --cap-drop=all"
-podman_net_cmd+=" --shm-size=-0 --detach-keys='ctrl-q'"
+podman_net_cmd+=" --shm-size=-0 --detach-keys='ctrl-q' --init"
 podman_net_cmd+=" --name '$container_name' --label '$container_name'"
 podman_net_cmd+=" --network host"
 podman_net_cmd+=" -v '$comfy_ui_path':/home/user/comfy-ui"

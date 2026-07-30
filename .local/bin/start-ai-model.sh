@@ -68,7 +68,7 @@ fi
 
 ## Container with internal network only
 podman_cmd="podman run --rm -it --cap-drop=all $detach_mode"
-podman_cmd+=" --shm-size=-0 --detach-keys='ctrl-q'"
+podman_cmd+=" --shm-size=-0 --detach-keys='ctrl-q' --init"
 podman_cmd+=" --name '$container_name' --label '$container_label'"
 podman_cmd+=" --network ai_internal --ip '192.168.0.1' --mac-address '44:33:22:11:00:01' -p $port:$port"
 
