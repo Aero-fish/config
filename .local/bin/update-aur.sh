@@ -571,6 +571,15 @@ opencode-download() {
     touch "$work_path/$version.txt"
 }
 
+hermes-agent-download() {
+    download_url="$(curl -s -L "$1" | jq -r ".tarball_url")"
+    _check_download_url
+    curl -L "$download_url" --output "$work_path/$version.tar.gz"
+    tar -xf "$work_path/$version.tar.gz" -C "$work_path" --strip-components=1
+    rm "$work_path/$version.tar.gz"
+    touch "$work_path/$version.txt"
+}
+
 comfy-ui-download() {
     download_url="$(curl -s -L "$1" | jq -r ".tarball_url")"
     _check_download_url
@@ -590,6 +599,7 @@ declare -A non_aur_packages=(
     ["dxvk"]="https://api.github.com/repos/doitsujin/dxvk/releases/latest"
     ["dxvk-nvapi"]="https://api.github.com/repos/jp7677/dxvk-nvapi/releases/latest"
     ["ffmpeg-yt-dlp"]="https://api.github.com/repos/yt-dlp/FFmpeg-Builds/releases/latest"
+    ["hermes-agent"]="https://api.github.com/repos/NousResearch/hermes-agent/releases/latest"
     ["katex"]="https://api.github.com/repos/KaTeX/KaTeX/releases/latest"
     ["ksmbd-tools"]="https://api.github.com/repos/cifsd-team/ksmbd-tools/releases/latest"
     ["localsend"]="https://api.github.com/repos/localsend/localsend/releases/latest"
