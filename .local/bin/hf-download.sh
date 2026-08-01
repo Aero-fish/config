@@ -50,7 +50,7 @@ fi
     --ro-bind "$hf_path" "$hf_path" \
     "$hf_bin" download "${token_args[@]}" --local-dir "$model_path" "$model" "${include_paths[@]}"
 
-# exit_code="$?"
-# if [ "$exit_code" = 0 ]; then
-#     touch "$model_path/Download_$(date "+%Y-%m-%d")"
-# fi
+exit_code="$?"
+if [ "$exit_code" = 0 ]; then
+    touch "$model_path/Download_$(date "+%Y-%m-%d")"
+fi

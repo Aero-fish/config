@@ -104,6 +104,6 @@ bwrap \
     "${symbolic_link[@]}" \
     --ro-bind-try "$XDG_RUNTIME_DIR/tray-proxy" "$dbus_address" \
     --perms 444 --file 6 /etc/group 6< <(echo "hugh:x:1000:") \
-    --perms 444 --file 7 /etc/passwd 7< <(echo "hugh:x:1000:1000::/home:/usr/bin/nologin") \
+    --perms 444 --file 7 /etc/passwd 7< <(echo "hugh:x:1000:1000::/home/hugh:/bin/nologin") \
     --perms 444 --file 8 /etc/machine-id 8< <(echo "") \
     umu-run "$@"
