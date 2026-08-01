@@ -11,7 +11,7 @@ tmp_path="$XDG_RUNTIME_DIR/agent/$agent_name/tmp"
 
 current_path="$(pwd)"
 
-mkdir -p "$tmp_path" "$run_path" "$container_path/"
+mkdir -p "$tmp_path" "$run_path" "$container_path"
 
 source /usr/local/share/bwrap_share/strict_rules
 source /usr/local/share/bwrap_share/net_addon
@@ -23,9 +23,6 @@ ro_bind_path+=(
     "/usr/local/share/seccomp-filter"
 )
 
-# shellcheck disable=SC2119
-generate_hide_default
-generate_hide_rc
 source /usr/local/share/bwrap_share/generate_args
 
 ## Set baseline agent configs
@@ -63,6 +60,25 @@ if [ "$current_path" != "$config_path" ] && [ "$current_path" != "$HOME" ]; then
     extra_args+=("--chdir" "$current_path")
 fi
 
+## Map nvim config, allow editing prompt with nvim
+overlay_paths=(
+    "$HOME/.config/my-config/wordlist"
+    "$HOME/.config/nvim"
+    "$HOME/.local/share/nvim/lazy"
+    "$HOME/.local/share/nvim/mason"
+    "$HOME/.local/share/nvim/site"
+)
+
+## Overlay file only works with dir. Use '--ro-bind-try' if its a file.
+for p in "${overlay_paths[@]}"; do
+    [ ! -e "$p" ] && continue
+    if [ -f "$p" ]; then
+        extra_args+=("--ro-bind-try" "$p" "$p")
+    else
+        extra_args+=("--overlay-src" "$(readlink -f "$p")" "--tmp-overlay" "$p")
+    fi
+done
+
 ## '--new-session' breaks lf, and maybe some other tools.
 ## Use another disposable container to do testing on the generated code.
 ## Use 'seccomp_filter_tiocsti' only not 'default_seccomp_filter' to avoid crashing tools.
@@ -81,6 +97,8 @@ bwrap \
     \
     --clearenv \
     --setenv COLORTERM truecolor \
+    --setenv DBUS_SESSION_BUS_ADDRESS "$DBUS_SESSION_BUS_ADDRESS" \
+    --setenv EDITOR nvim \
     --setenv HOME "$HOME" \
     --setenv PATH "$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:/usr/lib/rustup/bin" \
     --setenv SHELL "$SHELL" \
@@ -98,6 +116,7 @@ bwrap \
     "${unhide_ro[@]}" \
     "${unhide[@]}" \
     "${symbolic_link[@]}" \
+    --ro-bind-try "$XDG_RUNTIME_DIR"/tray-proxy "$dbus_address" \
     --perms 444 --file 7 /etc/passwd \
     --perms 444 --file 8 /etc/group \
     "${remount_ro[@]}" \
