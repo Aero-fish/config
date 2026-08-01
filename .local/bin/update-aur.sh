@@ -506,6 +506,15 @@ maple-mono-update() {
     fi
 }
 
+yay-download() {
+    download_url="$(curl -s -L "$1" | jq -r ".assets[] | select(.name==\"yay_${version#v}_x86_64.tar.gz\") | .browser_download_url")"
+    _check_download_url
+    curl -L "$download_url" --output "$work_path/$version.tar.gz"
+    tar -xf "$work_path/$version.tar.gz" -C "$work_path" --strip-components=1
+    rm "$work_path/$version.tar.gz"
+    touch "$work_path/$version.txt"
+}
+
 yt-dlp-download() {
     python -m venv --prompt "yt-dlp" --clear "$work_path"
     source "$work_path/bin/activate"
@@ -593,7 +602,7 @@ declare -A non_aur_packages=(
     ## Update proton before dxvk etc, so its dxvk/dxvk-nvapi/vkd3d-proton dlls
     ## can be updated in subsequent dxvk/dxvk-nvapi/vkd3d-proton updates.
     ["proton-ge"]="https://api.github.com/repos/GloriousEggroll/proton-ge-custom/releases/latest"
-    #
+
     ["comfy-ui"]="https://api.github.com/repos/Comfy-Org/ComfyUI/releases/latest"
     ["d7vk"]="https://api.github.com/repos/WinterSnowfall/d7vk/releases/latest"
     ["dxvk"]="https://api.github.com/repos/doitsujin/dxvk/releases/latest"
@@ -609,7 +618,8 @@ declare -A non_aur_packages=(
     ["pandoc-eisvogel-template"]="https://api.github.com/repos/Wandmalfarbe/pandoc-latex-template/releases/latest"
     ["revealjs"]="https://api.github.com/repos/hakimel/reveal.js/releases/latest"
     ["vkd3d-proton"]="https://api.github.com/repos/HansKristian-Work/vkd3d-proton/releases/latest"
-    #
+    ["yay"]="https://api.github.com/repos/Jguer/yay/releases/latest"
+
     ["huggingface-hub"]="pip index versions --json huggingface_hub"
     ["sglang"]="pip index versions --json sglang"
     ["vllm"]="pip index versions --json vllm"
@@ -686,11 +696,11 @@ for p in "${update_package[@]}"; do
     fi
 
     installed_version="$(pacman -Q "$p" | cut -d" " -f2)"
-    repo_version="$(fd -tf --glob "$p-*.pkg.tar.zst" "$repo_dir/$p" | head -n1 | sed -E "s:(.*/)?$p-(.*)-.*:\2:")"
+    repo_version="$(find "$repo_dir/$p" -maxdepth 1 -mindepth 1 -type f -name "$p-*.pkg.tar.zst" | head -n1 | sed -E "s:(.*/)?$p-(.*)-.*:\2:")"
 
     if [ "$installed_version" != "$repo_version" ]; then
         echo -e "\e[31mUpdating $p\e[0m"
-        fd -tf --glob "$p-*.pkg.tar.zst" "$repo_dir/$p" --exec-batch sudo pacman -U --noconfirm {}
+        find "$repo_dir/$p" -maxdepth 1 -mindepth 1 -type f -name "$p-*.pkg.tar.zst" -exec sudo pacman -U --noconfirm {} \;
     fi
 
 done
