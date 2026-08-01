@@ -11,6 +11,7 @@ if [ ! -f "$HOME/.config/tz" ]; then
     echo "## Use tzselect to find the name of time zone" >"$HOME/.config/tz"
     echo "export TZ='Pacific/Auckland'" >>"$HOME/.config/tz"
 fi
+# shellcheck disable=SC1091
 source "$HOME/.config/tz"
 
 # ---------- Var for this script ----------
@@ -1147,6 +1148,13 @@ if [ -x "$HOME/misc/repo/opencode/opencode" ] && [ -x "$HOME/.local/bin/opencode
     alias opencode="$HOME/.local/bin/opencode.sh"
     # shellcheck disable=SC2139
     alias oc="$HOME/.local/bin/opencode.sh"
+fi
+
+if [ -x "$HOME/misc/repo/hermes-agent/setup-hermes.sh" ] && [ -x "$HOME/.local/bin/hermes-agent.sh" ]; then
+    # shellcheck disable=SC2139
+    alias hermes="$HOME/.local/bin/hermes-agent.sh"
+    # shellcheck disable=SC2139
+    alias ha="$HOME/.local/bin/hermes-agent.sh"
 fi
 
 if [ -x "$HOME/.local/bin/tmp_container.sh" ]; then
