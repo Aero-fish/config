@@ -29,7 +29,7 @@ vim.api.nvim_create_autocmd("BufEnter", {
 
         -- Open fzf in the directory
         vim.schedule(function()
-            require("tfm").open(vim.fn.getcwd())
+            require("tfm").open(bufname .. "/")
         end)
 
         -- Do not list directory buffer and wipe it on leave
