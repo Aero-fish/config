@@ -40,15 +40,15 @@ source /usr/local/share/bwrap_share/generate_args
 
 extra_args=(
     "--bind-try" "$container_path" "$HOME"
-    #
+
     "--bind-try" "$config_path/agents" "$HOME/.config/opencode/agents"
     "--bind-try" "$config_path/prompts" "$HOME/.config/opencode/prompts"
     "--bind-try" "$config_path/skills" "$HOME/.config/opencode/skills"
-    #
+
     "--bind-try" "$config_path/auth.json" "$HOME/.local/share/opencode/auth.json"
     "--bind-try" "$config_path/opencode.jsonc" "$HOME/.config/opencode/opencode.jsonc"
     "--bind-try" "$config_path/kv.json" "$HOME/.local/state/opencode/kv.json"
-    #
+
     # Let all instance share the same tmpfs
     "--bind-try" "$XDG_RUNTIME_DIR/$agent_name/tmp" "/tmp"
     "--bind-try" "$XDG_RUNTIME_DIR/$agent_name/run" "$XDG_RUNTIME_DIR"
@@ -77,8 +77,10 @@ bwrap \
     \
     --clearenv \
     --setenv _CONTAINER_ 1 \
+    --setenv SHELL "$SHELL" \
     --setenv XDG_RUNTIME_DIR "$XDG_RUNTIME_DIR" \
     --setenv PATH "/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:/usr/lib/rustup/bin" \
+    --setenv "$HOME" "$HOME" \
     \
     --dev /dev \
     "${dev_bind[@]}" \

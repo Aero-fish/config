@@ -1089,9 +1089,12 @@ alias sync-vdir="/usr/bin/vdirsyncer sync"
 # Allow broot to cd on exit. Use through lf for this function.
 # [ -f "$HOME/.config/broot/launcher/bash/br" ] && source "$HOME/.config/broot/launcher/bash/br"
 
-# Start starship. Use different config for the black background in tty
+# Start starship.
+# Use different config for the black background in tty, and host name for container.
 if [ "$TERM" = "linux" ]; then
     export STARSHIP_CONFIG=~/.config/starship.tty.toml
+elif [ "$_CONTAINER_" -eq 1 ]; then
+    export STARSHIP_CONFIG=~/.config/starship.container.toml
 fi
 eval "$(starship init "$this_shell")"
 
@@ -1133,7 +1136,7 @@ if [ -z "$_CONTAINER_" ]; then
         [ ! -e "$d" ] && break
         project_name="$(basename -- "$d")"
         # shellcheck disable=SC2139
-        alias "${project_name// /_}"="$HOME/.local/bin/project-container.sh '${project_name}'"
+        alias "${project_name// /_}"="$HOME/.local/bin/project-in-container.sh '${project_name}'"
     done
     unset d project_name
 fi
@@ -1144,6 +1147,11 @@ if [ -x "$HOME/misc/repo/opencode/opencode" ] && [ -x "$HOME/.local/bin/opencode
     alias opencode="$HOME/.local/bin/opencode.sh"
     # shellcheck disable=SC2139
     alias oc="$HOME/.local/bin/opencode.sh"
+fi
+
+if [ -x "$HOME/.local/bin/tmp_container.sh" ]; then
+    # shellcheck disable=SC2139
+    alias tt="$HOME/.local/bin/tmp_container.sh"
 fi
 
 # ---------- Clean up ----------
