@@ -1139,14 +1139,11 @@ if [ -z "$_CONTAINER_" ]; then
 fi
 
 # ---------- Shortcut to programs ----------
-if [ -x "$HOME/misc/repo/huggingface-hub/bin/hf" ]; then
-    # shellcheck disable=SC2139
-    alias hf="$HOME/misc/repo/huggingface-hub/bin/hf"
-fi
-
 if [ -x "$HOME/misc/repo/opencode/opencode" ] && [ -x "$HOME/.local/bin/opencode.sh" ]; then
     # shellcheck disable=SC2139
     alias opencode="$HOME/.local/bin/opencode.sh"
+    # shellcheck disable=SC2139
+    alias oc="$HOME/.local/bin/opencode.sh"
 fi
 
 # ---------- Clean up ----------
