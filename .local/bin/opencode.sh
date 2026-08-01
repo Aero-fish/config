@@ -25,8 +25,28 @@ ro_bind_path+=(
 
 source /usr/local/share/bwrap_share/generate_args
 
-## Set baseline agent configs
-mkdir -p "$config_path/"{agents,prompts,skills}
+## Container baseline
+extra_args=(
+    "--bind-try" "$container_path" "$HOME"
+    "--ro-bind" "$(readlink -f "$agent_path")" "$agent_path"
+    "--bind-try" "$HOME/Projects/AI/skills" "$HOME/Projects/AI/skills"
+
+    # Let all instance share the same tmpfs
+    "--bind-try" "$tmp_path" "/tmp"
+    "--bind-try" "$run_path" "$XDG_RUNTIME_DIR"
+)
+
+## Agent configs
+config_dir=(
+    "agent"
+    "prompts"
+    "skills"
+)
+for d in "${config_dir[@]}"; do
+    mkdir -p "$config_path/$d"
+    extra_args+=("--bind-try" "$config_path/$d" "$HOME/.config/opencode/$d")
+done
+
 config_files=(
     "auth.json"
     "opencode.jsonc"
@@ -38,21 +58,10 @@ for f in "${config_files[@]}"; do
     fi
 done
 
-extra_args=(
-    "--bind-try" "$container_path" "$HOME"
-    "--ro-bind" "$(readlink -f "$agent_path")" "$agent_path"
-
-    "--bind-try" "$config_path/agents" "$HOME/.config/opencode/agents"
-    "--bind-try" "$config_path/prompts" "$HOME/.config/opencode/prompts"
-    "--bind-try" "$config_path/skills" "$HOME/.config/opencode/skills"
-
+extra_args+=(
     "--bind-try" "$config_path/auth.json" "$HOME/.local/share/opencode/auth.json"
     "--bind-try" "$config_path/opencode.jsonc" "$HOME/.config/opencode/opencode.jsonc"
     "--bind-try" "$config_path/kv.json" "$HOME/.local/state/opencode/kv.json"
-
-    # Let all instance share the same tmpfs
-    "--bind-try" "$tmp_path" "/tmp"
-    "--bind-try" "$run_path" "$XDG_RUNTIME_DIR"
 )
 
 if [ "$current_path" != "$config_path" ] && [ "$current_path" != "$HOME" ]; then
@@ -82,6 +91,7 @@ done
 ## '--new-session' breaks lf, and maybe some other tools.
 ## Use another disposable container to do testing on the generated code.
 ## Use 'seccomp_filter_tiocsti' only not 'default_seccomp_filter' to avoid crashing tools.
+## dbus is needed if wanting to use nvim in the container
 bwrap \
     --unshare-user \
     --unshare-ipc \

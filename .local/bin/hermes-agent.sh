@@ -27,15 +27,30 @@ ro_bind_path+=(
 
 source /usr/local/share/bwrap_share/generate_args
 
-## Set baseline agent configs
+## Container baseline
 extra_args=(
     "--bind-try" "$container_path" "$HOME"
+    "--bind-try" "$HOME/Projects/AI/skills" "$HOME/Projects/AI/skills"
 
     # Let all instance share the same tmpfs
     "--bind-try" "$tmp_path" "/tmp"
     "--bind-try" "$run_path" "$XDG_RUNTIME_DIR"
 )
 
+# Hermes download node packages and setup venv in the same directory.
+# Have to map the files inside one by one instead of '--ro-bind'
+# the whole directory.
+for f in "$agent_path/"*; do
+    file_name="$(basename -- "$f")"
+    ## npm needs write access to download the packages
+    if [ "$file_name" == "package.json" ] || [ "$file_name" == "package-lock.json" ]; then
+        extra_args+=("--bind-try" "$f" "$HOME/.hermes/hermes-agent/$file_name")
+    else
+        extra_args+=("--ro-bind" "$f" "$HOME/.hermes/hermes-agent/$file_name")
+    fi
+done
+
+## Agent configs
 config_dir=(
     "bin"
     "plugins"
@@ -65,26 +80,16 @@ for f in "${config_files[@]}"; do
     extra_args+=("--bind-try" "$config_path/$f" "$HOME/.hermes/$f")
 done
 
-if [ "$current_path" != "$config_path" ] && [ "$current_path" != "$HOME" ]; then
-    extra_args+=("--bind" "$current_path" "$current_path")
-    extra_args+=("--chdir" "$current_path")
-fi
-
-for f in "$agent_path/"*; do
-    file_name="$(basename -- "$f")"
-    ## npm needs write access to download the packages
-    if [ "$file_name" == "package.json" ] || [ "$file_name" == "package-lock.json" ]; then
-        extra_args+=("--bind-try" "$f" "$HOME/.hermes/hermes-agent/$file_name")
-    else
-        extra_args+=("--ro-bind" "$f" "$HOME/.hermes/hermes-agent/$file_name")
-    fi
-done
-
 bin_path=""
 if [ -f "$container_path/.hermes/hermes-agent/venv/bin/hermes" ]; then
     bin_path="$HOME/.hermes/hermes-agent/venv/bin/hermes"
 else
     bin_path="$HOME/.hermes/hermes-agent/setup-hermes.sh"
+fi
+
+if [ "$current_path" != "$config_path" ] && [ "$current_path" != "$HOME" ]; then
+    extra_args+=("--bind" "$current_path" "$current_path")
+    extra_args+=("--chdir" "$current_path")
 fi
 
 ## Map nvim config, allow editing prompt with nvim
@@ -109,6 +114,7 @@ done
 ## '--new-session' breaks lf, and maybe some other tools.
 ## Use another disposable container to do testing on the generated code.
 ## Use 'seccomp_filter_tiocsti' only not 'default_seccomp_filter' to avoid crashing tools.
+## dbus is needed if wanting to use nvim in the container
 bwrap \
     --unshare-user \
     --unshare-ipc \
