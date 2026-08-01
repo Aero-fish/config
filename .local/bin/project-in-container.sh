@@ -22,7 +22,10 @@ while getopts "h" opt; do
 done
 
 ## Need exactly one argument
-if [ "$#" -ne 1 ]; then
+if [ -n "$_CONTAINER_" ]; then
+    echo "Already inside a container."
+    exit 1
+elif [ "$#" -ne 1 ]; then
     help
 fi
 
@@ -114,7 +117,9 @@ bwrap \
     --die-with-parent \
     --seccomp 9 \
     \
+    --clearenv \
     --setenv COLORTERM truecolor \
+    --setenv DBUS_SESSION_BUS_ADDRESS "$DBUS_SESSION_BUS_ADDRESS" \
     --setenv EDITOR nvim \
     --setenv HOME "$HOME" \
     --setenv LANG "en_NZ.UTF-8" \
@@ -126,7 +131,7 @@ bwrap \
     --setenv LESS_TERMCAP_ue $'\E[0m' \
     --setenv LESS_TERMCAP_us $'\E[1;32m' \
     --setenv PAGER less \
-    --setenv PATH "/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:/usr/lib/rustup/bin" \
+    --setenv PATH "$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:/usr/lib/rustup/bin" \
     --setenv PYTHONSTARTUP "$HOME/.config/pythonrc" \
     --setenv SHELL /bin/zsh \
     --setenv STARSHIP_SHELL zsh \
@@ -135,8 +140,7 @@ bwrap \
     --setenv VISUAL nvim \
     --setenv XDG_RUNTIME_DIR "$XDG_RUNTIME_DIR" \
     --setenv _CONTAINER_ 1 \
-    --setenv _ZO_DATA_DIR "$/HOME/.cache/zsh" \
-    --setenv LANG "en_NZ.UTF-8" \
+    --setenv _ZO_DATA_DIR "$HOME/.cache/zsh" \
     \
     --dev /dev \
     "${dev_bind[@]}" \
@@ -148,6 +152,7 @@ bwrap \
     "${unhide_ro[@]}" \
     "${unhide[@]}" \
     "${symbolic_link[@]}" \
+    --ro-bind-try "$XDG_RUNTIME_DIR"/tray-proxy "$dbus_address" \
     --perms 444 --file 7 /etc/passwd \
     --perms 444 --file 8 /etc/group \
     "${remount_ro[@]}" \
