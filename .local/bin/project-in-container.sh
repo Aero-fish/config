@@ -50,6 +50,9 @@ source /usr/local/share/bwrap_share/generate_args
 extra_args=()
 if [ "$project_name" == "tmp_container" ]; then
     extra_args+=("--tmpfs" "$HOME" "--perms" "700" "--dir" "$HOME/.cache/zsh")
+    current_path="$(pwd)"
+    echo "$current_path"
+    extra_args+=("--bind-try" "$current_path" "$current_path" "--chdir" "$current_path")
 
 else
     ## Let instance of a project share the same HOME and tmpfs
