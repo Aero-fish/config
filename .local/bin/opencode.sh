@@ -6,12 +6,30 @@ agent_path="$HOME/misc/repo/$agent_name"
 
 config_path="$HOME/Projects/AI/agent_configs/$agent_name"
 container_path="$HOME/Projects/AI/agent_workspaces/$agent_name"
+run_path="$XDG_RUNTIME_DIR/agent/$agent_name/run"
+tmp_path="$XDG_RUNTIME_DIR/agent/$agent_name/tmp"
 
 current_path="$(pwd)"
 
-mkdir -p "$config_path/"{agents,prompts,skills} "$container_path"
-mkdir -p "$XDG_RUNTIME_DIR/$agent_name/"{tmp,run}
+mkdir -p "$tmp_path" "$run_path" "$container_path/"
 
+source /usr/local/share/bwrap_share/strict_rules
+source /usr/local/share/bwrap_share/net_addon
+
+ro_bind_path+=(
+    "/usr/include"
+    "/usr/local/bin"
+    "/usr/local/share/bwrap_share"
+    "/usr/local/share/seccomp-filter"
+)
+
+# shellcheck disable=SC2119
+generate_hide_default
+generate_hide_rc
+source /usr/local/share/bwrap_share/generate_args
+
+## Set baseline agent configs
+mkdir -p "$config_path/"{agents,prompts,skills}
 config_files=(
     "auth.json"
     "opencode.jsonc"
@@ -23,23 +41,9 @@ for f in "${config_files[@]}"; do
     fi
 done
 
-source /usr/local/share/bwrap_share/strict_rules
-source /usr/local/share/bwrap_share/net_addon
-
-ro_bind_path+=(
-    "$agent_path"
-    "/usr/include"
-    "/usr/local/bin"
-    "/usr/local/share/bwrap_share"
-    "/usr/local/share/seccomp-filter"
-)
-
-generate_hide_default
-generate_hide_rc
-source /usr/local/share/bwrap_share/generate_args
-
 extra_args=(
     "--bind-try" "$container_path" "$HOME"
+    "--ro-bind" "$(readlink -f "$agent_path")" "$agent_path"
 
     "--bind-try" "$config_path/agents" "$HOME/.config/opencode/agents"
     "--bind-try" "$config_path/prompts" "$HOME/.config/opencode/prompts"
@@ -50,8 +54,8 @@ extra_args=(
     "--bind-try" "$config_path/kv.json" "$HOME/.local/state/opencode/kv.json"
 
     # Let all instance share the same tmpfs
-    "--bind-try" "$XDG_RUNTIME_DIR/$agent_name/tmp" "/tmp"
-    "--bind-try" "$XDG_RUNTIME_DIR/$agent_name/run" "$XDG_RUNTIME_DIR"
+    "--bind-try" "$tmp_path" "/tmp"
+    "--bind-try" "$run_path" "$XDG_RUNTIME_DIR"
 )
 
 if [ "$current_path" != "$config_path" ] && [ "$current_path" != "$HOME" ]; then
@@ -76,11 +80,13 @@ bwrap \
     --seccomp 9 \
     \
     --clearenv \
-    --setenv _CONTAINER_ 1 \
+    --setenv COLORTERM truecolor \
+    --setenv HOME "$HOME" \
+    --setenv PATH "$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:/usr/lib/rustup/bin" \
     --setenv SHELL "$SHELL" \
+    --setenv TERM xterm-kitty \
     --setenv XDG_RUNTIME_DIR "$XDG_RUNTIME_DIR" \
-    --setenv PATH "/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:/usr/lib/rustup/bin" \
-    --setenv "$HOME" "$HOME" \
+    --setenv _CONTAINER_ 1 \
     \
     --dev /dev \
     "${dev_bind[@]}" \
