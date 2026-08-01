@@ -51,7 +51,6 @@ extra_args=()
 if [ "$project_name" == "tmp_container" ]; then
     extra_args+=("--tmpfs" "$HOME" "--perms" "700" "--dir" "$HOME/.cache/zsh")
     current_path="$(pwd)"
-    echo "$current_path"
     extra_args+=("--bind-try" "$current_path" "$current_path" "--chdir" "$current_path")
 
 else
@@ -102,6 +101,21 @@ for p in "${overlay_paths[@]}"; do
         extra_args+=("--overlay-src" "$(readlink -f "$p")" "--tmp-overlay" "$p")
     fi
 done
+
+## AI agent
+extra_args+=(
+    ## Agent bin
+    "--ro-bind" "$(readlink -f "$HOME/misc/repo/opencode")" "$HOME/misc/repo/opencode"
+    "--ro-bind" "$(readlink -f "$HOME/misc/repo/hermes-agent")" "$HOME/misc/repo/hermes-agent"
+
+    ## Agent containerised
+    "--ro-bind" "$(readlink -f "$HOME/.local/bin/opencode.sh")" "$HOME/.local/bin/opencode.sh"
+    "--ro-bind" "$(readlink -f "$HOME/.local/bin/hermes-agent.sh")" "$HOME/.local/bin/hermes-agent.sh"
+
+    ## Agent config
+    "--bind-try" "$(readlink -f "$HOME/Projects/AI/agent_configs")" "$HOME/Projects/AI/agent_configs"
+    "--bind-try" "$(readlink -f "$HOME/Projects/AI/skills")" "$HOME/Projects/AI/skills"
+)
 
 ## '--new-session' breaks lf, and maybe some other tools.
 ## Use another disposable container to do testing on the generated code.
