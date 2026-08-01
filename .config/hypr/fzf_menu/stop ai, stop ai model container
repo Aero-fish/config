@@ -1,4 +1,4 @@
 #!/usr/bin/bash
 set -e
 
-"$HOME/.local/bin/stop_ai.sh"
+"$HOME/.local/bin/stop-ai-model.sh"
