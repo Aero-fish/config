@@ -49,6 +49,7 @@ buildah run "$container" \
     rm -f /etc/pacman.d/gnupg/S.gpg-agent /etc/pacman.d/gnupg/S.gpg-agent.browser \
     /etc/pacman.d/gnupg/S.gpg-agent.extra /etc/pacman.d/gnupg/S.gpg-agent.ssh
 
+buildah config --user "user" "$container"
 buildah config --cmd "/bin/bash" "$container"
 buildah commit "$container" "$image_name"
 
