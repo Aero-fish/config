@@ -4,10 +4,12 @@ set -e
 agent_name="hermes-agent"
 agent_path="$HOME/misc/repo/$agent_name"
 
-config_path="$HOME/Projects/AI/agent_configs/$agent_name"
-container_path="$HOME/Projects/AI/agent_workspaces/$agent_name"
-run_path="$XDG_RUNTIME_DIR/agent/$agent_name/run"
-tmp_path="$XDG_RUNTIME_DIR/agent/$agent_name/tmp"
+host_name="$(cat /proc/sys/kernel/hostname)"
+host_name="${host_name// /_}"
+config_path="$HOME/Projects/AI/agent_configs/${agent_name}_${host_name}"
+container_path="$HOME/Projects/AI/agent_workspaces/${agent_name}_${host_name}"
+run_path="$XDG_RUNTIME_DIR/agent/${agent_name}_${host_name}/run"
+tmp_path="$XDG_RUNTIME_DIR/agent/${agent_name}_${host_name}/tmp"
 
 current_path="$(pwd)"
 
@@ -23,7 +25,6 @@ ro_bind_path+=(
     "/usr/local/share/seccomp-filter"
 )
 
-# shellcheck disable=SC2119
 source /usr/local/share/bwrap_share/generate_args
 
 ## Set baseline agent configs
@@ -71,7 +72,12 @@ fi
 
 for f in "$agent_path/"*; do
     file_name="$(basename -- "$f")"
-    extra_args+=("--ro-bind" "$f" "$HOME/.hermes/hermes-agent/$file_name")
+    ## npm needs write access to download the packages
+    if [ "$file_name" == "package.json" ] || [ "$file_name" == "package-lock.json" ]; then
+        extra_args+=("--bind-try" "$f" "$HOME/.hermes/hermes-agent/$file_name")
+    else
+        extra_args+=("--ro-bind" "$f" "$HOME/.hermes/hermes-agent/$file_name")
+    fi
 done
 
 bin_path=""
