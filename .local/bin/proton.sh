@@ -110,4 +110,8 @@ bwrap \
     --perms 444 --file 6 /etc/group \
     --perms 444 --file 7 /etc/passwd \
     --perms 444 --file 8 /etc/machine-id \
-    umu-run "$@" 9</usr/local/share/seccomp-filter/seccomp_filter_tiocsti.bpf 6< <(echo "hugh:x:1000:") 7< <(echo "hugh:x:1000:1000::/home/hugh:/bin/nologin") 8< <(dbus-uuidgen)
+    umu-run "$@" \
+    6< <(echo "hugh:x:1000:") \
+    7< <(echo "hugh:x:1000:1000::/home/hugh:/bin/nologin") \
+    8< <(dbus-uuidgen) \
+    9</usr/local/share/seccomp-filter/seccomp_filter_tiocsti.bpf
