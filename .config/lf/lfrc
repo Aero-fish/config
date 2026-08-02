@@ -1912,7 +1912,7 @@ map <pgdn>      page-down
 
 map ]           jump-next  # forward
 map [           jump-prev  # back
-map <backspace2>    jump-prev
+map <backspace>    jump-prev
 
 map H           high
 map M           middle
