@@ -87,9 +87,8 @@ else
     bin_path="$HOME/.hermes/hermes-agent/setup-hermes.sh"
 fi
 
-if [ "$current_path" != "$config_path" ] && [ "$current_path" != "$HOME" ]; then
-    extra_args+=("--bind" "$current_path" "$current_path")
-    extra_args+=("--chdir" "$current_path")
+if [ "$current_path" != "$HOME" ]; then
+    extra_args+=("--bind" "$current_path" "$current_path" "--chdir" "$current_path")
 fi
 
 ## Map nvim config, allow editing prompt with nvim

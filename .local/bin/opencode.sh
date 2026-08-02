@@ -64,9 +64,8 @@ extra_args+=(
     "--bind-try" "$config_path/kv.json" "$HOME/.local/state/opencode/kv.json"
 )
 
-if [ "$current_path" != "$config_path" ] && [ "$current_path" != "$HOME" ]; then
-    extra_args+=("--bind" "$current_path" "$current_path")
-    extra_args+=("--chdir" "$current_path")
+if [ "$current_path" != "$HOME" ]; then
+    extra_args+=("--bind" "$current_path" "$current_path" "--chdir" "$current_path")
 fi
 
 ## Map nvim config, allow editing prompt with nvim
