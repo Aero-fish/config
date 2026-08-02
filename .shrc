@@ -1094,7 +1094,7 @@ alias sync-vdir="/usr/bin/vdirsyncer sync"
 # Use different config for the black background in tty, and host name for container.
 if [ "$TERM" = "linux" ]; then
     export STARSHIP_CONFIG=~/.config/starship.tty.toml
-elif [ "$_CONTAINER_" -eq 1 ]; then
+elif [ -n "$_CONTAINER_" ]; then
     export STARSHIP_CONFIG=~/.config/starship.container.toml
 fi
 eval "$(starship init "$this_shell")"

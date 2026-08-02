@@ -113,6 +113,7 @@ bwrap \
     --setenv PATH "$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:/usr/lib/rustup/bin" \
     --setenv SHELL "$SHELL" \
     --setenv TERM xterm-kitty \
+    --setenv TERMINFO "/usr/lib/kitty/terminfo" \
     --setenv XDG_RUNTIME_DIR "$XDG_RUNTIME_DIR" \
     --setenv _CONTAINER_ 1 \
     \

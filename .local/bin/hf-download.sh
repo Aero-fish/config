@@ -52,5 +52,5 @@ fi
 
 exit_code="$?"
 if [ "$exit_code" = 0 ]; then
-    touch "$model_path/Download_$(date "+%Y-%m-%d")"
+    touch "$model_path/Downloaded_$(date "+%Y-%m-%d")"
 fi
