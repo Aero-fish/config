@@ -86,6 +86,7 @@ bwrap \
     --setenv PATH "$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:/usr/lib/rustup/bin" \
     --setenv WAYLAND_DISPLAY "$WAYLAND_DISPLAY" \
     --setenv WINEPREFIX "$WINEPREFIX" \
+    --setenv XDG_RUNTIME_DIR "$XDG_RUNTIME_DIR" \
     \
     --setenv DXVK_STATE_CACHE_PATH "$cache_pool" \
     --setenv VKD3D_SHADER_CACHE_PATH "$cache_pool" \
@@ -96,6 +97,7 @@ bwrap \
     --setenv PROTON_USE_D7VK 1 \
     --setenv PROTON_DLSS_UPGRADE 0 \
     --setenv PROTON_DLSS_INDICATOR 0 \
+    --setenv PROTON_FSR4_UPGRADE 0 \
     --setenv WINEDEBUG "-all" \
     --setenv PROTON_USE_WAYLAND 1 \
     --setenv PROTON_ENABLE_HDR 1 \
@@ -113,5 +115,5 @@ bwrap \
     --ro-bind-try "$XDG_RUNTIME_DIR/tray-proxy" "$dbus_address" \
     --perms 444 --file 6 /etc/group 6< <(echo "hugh:x:1000:") \
     --perms 444 --file 7 /etc/passwd 7< <(echo "hugh:x:1000:1000::/home/hugh:/bin/nologin") \
-    --perms 444 --file 8 /etc/machine-id 8< <(echo "") \
+    --perms 444 --file 8 /etc/machine-id 8< <(dbus-uuidgen) \
     umu-run "$@"
