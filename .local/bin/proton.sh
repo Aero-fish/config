@@ -1,11 +1,6 @@
 #!/usr/bin/bash
 set -e
 
-[ "${UID}" -eq 0 ] && {
-    echo "Do not run as root."
-    exit 0
-}
-
 proton_path="$HOME/misc/repo/proton-ge"
 proton_prefix="$HOME/.wine/proton"
 document_path="$HOME/.wine/games_documents"
@@ -77,7 +72,6 @@ bwrap \
     --cap-drop ALL \
     --new-session \
     --seccomp 9 \
-    9</usr/local/share/seccomp-filter/seccomp_filter_tiocsti.bpf \
     \
     --clearenv \
     --setenv DBUS_SESSION_BUS_ADDRESS "$DBUS_SESSION_BUS_ADDRESS" \
@@ -113,7 +107,7 @@ bwrap \
     "${unhide[@]}" \
     "${symbolic_link[@]}" \
     --ro-bind-try "$XDG_RUNTIME_DIR/tray-proxy" "$dbus_address" \
-    --perms 444 --file 6 /etc/group 6< <(echo "hugh:x:1000:") \
-    --perms 444 --file 7 /etc/passwd 7< <(echo "hugh:x:1000:1000::/home/hugh:/bin/nologin") \
-    --perms 444 --file 8 /etc/machine-id 8< <(dbus-uuidgen) \
-    umu-run "$@"
+    --perms 444 --file 6 /etc/group \
+    --perms 444 --file 7 /etc/passwd \
+    --perms 444 --file 8 /etc/machine-id \
+    umu-run "$@" 9</usr/local/share/seccomp-filter/seccomp_filter_tiocsti.bpf 6< <(echo "hugh:x:1000:") 7< <(echo "hugh:x:1000:1000::/home/hugh:/bin/nologin") 8< <(dbus-uuidgen)
