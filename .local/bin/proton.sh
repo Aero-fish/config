@@ -79,6 +79,14 @@ bwrap \
     --seccomp 9 \
     9</usr/local/share/seccomp-filter/seccomp_filter_tiocsti.bpf \
     \
+    --clearenv \
+    --setenv DBUS_SESSION_BUS_ADDRESS "$DBUS_SESSION_BUS_ADDRESS" \
+    --setenv DISPLAY "$DISPLAY" \
+    --setenv HOME "$HOME" \
+    --setenv PATH "$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:/usr/lib/rustup/bin" \
+    --setenv WAYLAND_DISPLAY "$WAYLAND_DISPLAY" \
+    --setenv WINEPREFIX "$WINEPREFIX" \
+    \
     --setenv DXVK_STATE_CACHE_PATH "$cache_pool" \
     --setenv VKD3D_SHADER_CACHE_PATH "$cache_pool" \
     --setenv WINEPREFIX "$proton_prefix" \
