@@ -29,6 +29,7 @@ inhibit_programs=(
     "^(/usr/bin/|/bin/|)tar ?"
     "^(/usr/bin/|/bin/|)zip ?"
     "yt-dlp ?"
+    "hf ?"
 )
 
 for prog in "${inhibit_programs[@]}"; do
