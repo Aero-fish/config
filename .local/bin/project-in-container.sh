@@ -66,6 +66,10 @@ if [ "$project_name" == "tmp_container" ]; then
         "--bind-try" "$tmp_path" "/tmp"
         "--bind-try" "$run_path" "$XDG_RUNTIME_DIR"
     )
+    current_path="$(pwd)"
+    if [ "$current_path" != "$HOME" ]; then
+        extra_args+=("--bind" "$current_path" "$current_path" "--chdir" "$current_path")
+    fi
 
 else
     ## Let instance of a project share the same HOME and tmpfs
