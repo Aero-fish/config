@@ -3,5 +3,5 @@ from: markdown
 to: beamer
 pdf-engine: latexmk
 pdf-engine-opt:
-  - -pdf
+  - -pdflua
   - -interaction=nonstopmode

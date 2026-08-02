@@ -4,5 +4,5 @@ to: pdf
 template: eisvogel.tex
 pdf-engine: latexmk
 pdf-engine-opt:
-    - -pdf
+    - -pdflua
     - -interaction=nonstopmode
