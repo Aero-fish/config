@@ -11,12 +11,13 @@ inhibit_programs=(
     "^(/usr/bin/|/bin/|)(bash|sh) (/usr/local/share/|)wine-net .*115(chrome)?\\.exe"
     "^(/usr/bin/|/bin/|)(bash|sh) (/usr/local/share/|)wine-net .*PikPak\\.exe"
     "^(/usr/bin/|/bin/|)7z ?"
-    "^(/usr/bin/|/bin/|)bash $HOME/.local/bin/cemu.sh"
-    "^(/usr/bin/|/bin/|)bash $HOME/.local/bin/download-youtube-watchlist.sh"
-    "^(/usr/bin/|/bin/|)bash $HOME/.local/bin/hf-download.sh"
-    "^(/usr/bin/|/bin/|)bash $HOME/.local/bin/jdownloader.sh"
-    "^(/usr/bin/|/bin/|)bash $HOME/.local/bin/yuzu.sh"
     "^(/usr/bin/|/bin/|)bash -c sleep infinity; echo no-suspension ended\$"
+    "^(/usr/bin/|/bin/|)bash .*/cemu.sh"
+    "^(/usr/bin/|/bin/|)bash .*/download-youtube-watchlist.sh"
+    "^(/usr/bin/|/bin/|)bash .*/hf-download.sh"
+    "^(/usr/bin/|/bin/|)bash .*/jdownloader.sh"
+    "^(/usr/bin/|/bin/|)bash .*/start_download.sh"
+    "^(/usr/bin/|/bin/|)bash .*/yuzu.sh"
     "^(/usr/bin/|/bin/|)cp ?"
     "^(/usr/bin/|/bin/|)ffmpeg ?"
     "^(/usr/bin/|/bin/|)hf ?"
@@ -28,8 +29,8 @@ inhibit_programs=(
     "^(/usr/bin/|/bin/|)rsync ?"
     "^(/usr/bin/|/bin/|)tar ?"
     "^(/usr/bin/|/bin/|)zip ?"
-    "yt-dlp ?"
     "hf ?"
+    "yt-dlp ?"
 )
 
 for prog in "${inhibit_programs[@]}"; do
