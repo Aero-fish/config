@@ -10,10 +10,10 @@ for pid in $(pgrep -f "bash $0"); do
     fi
 done
 
-rv=""
+rv=0
 ytdl_pid=""
 
-trap 'rv=$?; [ ! -z $ytdl_pid ] && kill -INT $ytdl_pid; exit $rv' EXIT
+trap 'rv=$?; [ ! -z $ytdl_pid ] && kill -INT $ytdl_pid; rm -rf "$TMP_DIR"; exit $rv' EXIT
 
 TMP_DIR="$(mktemp -d "$XDG_RUNTIME_DIR/tmp.XXXXXXXXXX")"
 DOWNLOAD_DIR="$HOME"/Downloads/youtube
