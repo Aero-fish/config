@@ -49,13 +49,27 @@ source /usr/local/share/bwrap_share/generate_args
 
 extra_args=()
 if [ "$project_name" == "tmp_container" ]; then
-    extra_args+=("--tmpfs" "$HOME" "--perms" "700" "--dir" "$HOME/.cache/zsh")
-    current_path="$(pwd)"
-    extra_args+=("--bind-try" "$current_path" "$current_path" "--chdir" "$current_path")
+    ## Let instance of a project share the same HOME and tmpfs
+
+    mkdir -p "$XDG_RUNTIME_DIR/projects/$project_name"
+    container_path="$(mktemp -d "$XDG_RUNTIME_DIR/projects/$project_name/workspace_XXXXX")"
+    run_path="$XDG_RUNTIME_DIR/projects/$project_name/run"
+    tmp_path="$XDG_RUNTIME_DIR/projects/$project_name/tmp"
+
+    trap 'rm -rf "$container_path"; if [ "$(find "$XDG_RUNTIME_DIR/projects/$project_name" -maxdepth 1 -mindepth 1 -type d -name "workspace_*" -printf "%f\n" | wc -l)" -eq 0 ]; then echo hi; rm -rf "$XDG_RUNTIME_DIR/projects/$project_name"; fi' EXIT
+
+    mkdir -p "$container_path/.cache/zsh" "$run_path" "$tmp_path"
+
+    extra_args+=(
+        # Let all instance share the same HOME and tmpfs
+        "--bind-try" "$container_path" "$HOME"
+        "--bind-try" "$tmp_path" "/tmp"
+        "--bind-try" "$run_path" "$XDG_RUNTIME_DIR"
+    )
 
 else
     ## Let instance of a project share the same HOME and tmpfs
-    container_path="$project_storage/${1}"
+    container_path="$project_storage/$project_name"
     run_path="$XDG_RUNTIME_DIR/projects/$project_name/run"
     tmp_path="$XDG_RUNTIME_DIR/projects/$project_name/tmp"
 
