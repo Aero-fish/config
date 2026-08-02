@@ -31,7 +31,7 @@ export PERL_LOCAL_LIB_ROOT="$HOME/.perl5${PERL_LOCAL_LIB_ROOT:+:$PERL_LOCAL_LIB_
 export PERL_MB_OPT="--install_base '$HOME/.perl5'"
 export PERL_MM_OPT="INSTALL_BASE='$HOME/.perl5'"
 
-HISTORY_IGNORE='(?|??|???|...|....|.....|.*|cd *|diff *|nowtime|nowdate|mirror *|permission-fix *|ffmpeg-*|mkv-stream-extract *|archive-to-single-tar-zstd *|ex *|branch *|checkout *|commit *|tag *|newtag *|gpg-check *|gpg-retrieve *|yt-info *|ytdl* *|dec2hex *|hex2dec *|spawn *|trash *|get-mime-default *|set-mime-default *|open *|image-to-pdf* *|extract-pdf-images *|image-to-gray-scale *|combine-pdf *|convert-pdf-to-png *|latex-to-pdf *|md-to-* *|aria2-downlaod *|mount-dev *|ln *|mkdir *|touch *|jobs *|shasum *|mount *|umount *|chmod *|chown *|history *|git *|bg *|fg *|sudo *|hf-download.sh *)'
+HISTORY_IGNORE='(?|??|???|...|....|.....|.*|cd *|diff *|nowtime|nowdate|mirror *|permission-fix *|ffmpeg-*|mkv-stream-extract *|archive-to-single-tar-zstd *|ex *|branch *|checkout *|commit *|tag *|newtag *|gpg-check *|gpg-retrieve *|yt-info *|ytdl* *|dec2hex *|hex2dec *|spawn *|trash *|get-mime-default *|set-mime-default *|open *|image-to-pdf* *|extract-pdf-images *|image-to-gray-scale *|combine-pdf *|convert-pdf-to-png *|latex-to-pdf *|md-to-* *|tex-install-package *|aria2-downlaod *|mount-dev *|ln *|mkdir *|touch *|jobs *|shasum *|mount *|umount *|chmod *|chown *|history *|git *|bg *|fg *|sudo *|hf-download.sh *)'
 
 ## Bash history ignore
 # shellcheck disable=SC2155
@@ -50,6 +50,9 @@ export npm_config_prefix="$HOME/.node_modules"
 
 # WINE
 export WINEPREFIX="$HOME/.wine/default"
+
+# Tex live package manager
+export TEXMFHOME="$HOME/.local/share/texmf"
 
 # Add my scripts to PATH
 # export PATH="$HOME/.cargo/bin:$PATH"
@@ -1079,6 +1082,16 @@ print-256-colors() {
         printf '\e[48;5;%dm%3d ' "$i" "$i"
         (((i + 3) % 18)) || printf '\e[0m\n'
     done
+}
+
+# ---------- Tex live ----------
+tex-install-package() {
+    if [ -z "$(find "$TEXMFHOME/" -maxdepth 1 -mindepth 1)" ]; then
+        echo "Initialising '$TEXMFHOME'"
+        tlmgr init-usertree
+    fi
+    echo "Installing packages"
+    tlmgr --usermode install "$@"
 }
 
 # ---------- email ----------
