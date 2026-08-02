@@ -2,7 +2,7 @@
 set -e
 
 # ---------- Config ----------
-model_path="$HOME/Projects/AI/models"
+model_lib_path="$HOME/Projects/AI/models"
 template_path="$HOME/Projects/AI/templates"
 framework_config_path="$HOME/Projects/AI/framework_config"
 
@@ -36,7 +36,7 @@ while read -r file; do
     file_basename="$(basename -s .conf -- "$file")"
     model_name="${file_basename##*'_'}"
     model_author="${file_basename%%'_'*}"
-    if [ -d "$model_path/${model_author}_${model_name}" ]; then
+    if [ -d "$model_lib_path/${model_author}_${model_name}" ]; then
         config_with_available_model+=("$file")
     fi
 done < <(find "$framework_config_path/$framework_name/" -mindepth 1 -maxdepth 1 -name "*.conf" -printf '%P\n')
@@ -52,7 +52,11 @@ model_config_path="$(
         fzf --exact --reverse --prompt="Choose a model:" --no-multi
 )"
 
-mkdir -p "$model_path" "$template_path"
+file_basename="$(basename -s .conf -- "$model_config_path")"
+model_name="${file_basename##*'_'}"
+model_author="${file_basename%%'_'*}"
+
+mkdir -p "$model_lib_path" "$template_path"
 
 # ---------- pre-processing ----------
 
@@ -76,7 +80,7 @@ if lspci | grep -E "(VGA|Display controller)" | grep -q "NVIDIA"; then
     podman_cmd+=" --device 'nvidia.com/gpu=all'"
 fi
 
-podman_cmd+=" -v '$model_path/${model_author}_${model_name}':'$model_path_container'"
+podman_cmd+=" -v '$model_lib_path/${model_author}_${model_name}':'$model_path_container'"
 podman_cmd+=" -v '$template_path':'$template_path_container'"
 # podman_cmd+=" -v '$HOME/misc/repo/$framework_name':'/home/user/venv'"
 
