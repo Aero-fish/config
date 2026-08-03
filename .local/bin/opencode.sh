@@ -67,6 +67,8 @@ extra_args+=(
 
 if [ "$current_path" != "$HOME" ]; then
     extra_args+=("--bind" "$current_path" "$current_path" "--chdir" "$current_path")
+else
+    extra_args+=("--chdir" "$HOME")
 fi
 
 ## Map nvim config, allow editing prompt with nvim
@@ -111,6 +113,7 @@ bwrap \
     --setenv DISPLAY "$DISPLAY" \
     --setenv EDITOR nvim \
     --setenv HOME "$HOME" \
+    --setenv NPM_CONFIG_PREFIX "$HOME/.node_modules" \
     --setenv PATH "$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:/usr/lib/rustup/bin" \
     --setenv SHELL "$SHELL" \
     --setenv TERM xterm-kitty \

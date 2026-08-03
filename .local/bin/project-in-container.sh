@@ -101,12 +101,6 @@ overlay_paths=(
     "$HOME/.local/share/nvim/site"
     "$HOME/.shrc"
     "$HOME/.zshrc"
-
-    # AI agents
-    "$HOME/misc/repo/opencode"
-    "$HOME/.local/bin/opencode.sh"
-    "$HOME/misc/repo/hermes-agent"
-    "$HOME/.local/bin/hermes.sh"
 )
 
 ## Overlay file only works with dir. Use '--ro-bind-try' if its a file.

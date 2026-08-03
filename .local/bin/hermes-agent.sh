@@ -14,7 +14,7 @@ tmp_path="$XDG_RUNTIME_DIR/agent/${agent_name}_${host_name}/tmp"
 
 current_path="$(pwd)"
 
-mkdir -p "$tmp_path" "$run_path" "$container_path/.cache/zsh"
+mkdir -p "$tmp_path" "$run_path" "$container_path/.hermes/hermes-agent" "$container_path/.cache/zsh"
 
 source /usr/local/share/bwrap_share/strict_rules
 source /usr/local/share/bwrap_share/net_addon
@@ -38,27 +38,22 @@ extra_args=(
     "--bind-try" "$run_path" "$XDG_RUNTIME_DIR"
 )
 
-# Hermes download node packages and setup venv in the same directory.
-# Have to map the files inside one by one instead of '--ro-bind'
-# the whole directory.
-for f in "$agent_path/"*; do
-    file_name="$(basename -- "$f")"
-    ## npm needs write access to download the packages
-    if [ "$file_name" == "package.json" ] || [ "$file_name" == "package-lock.json" ]; then
-        extra_args+=("--bind-try" "$f" "$HOME/.hermes/hermes-agent/$file_name")
-    else
-        extra_args+=("--ro-bind" "$f" "$HOME/.hermes/hermes-agent/$file_name")
-    fi
-done
+## Hermes download node packages and setup venv in the same directory.
+## Too hard to do it with ro-bind
+if [ ! -f "$container_path/.hermes/hermes-agent/setup-hermes.sh" ]; then
+    rm -rf "$container_path/.hermes/hermes-agent"/*
+    cp -r "$agent_path"/* "$container_path/.hermes/hermes-agent"
+fi
 
 ## Agent configs
 config_dir=(
+    "cron"
+    "memories"
     "plugins"
     "profiles"
-    "memories"
-    "skills"
-    "cron"
     "sessions"
+    "scripts"
+    "skills"
 )
 for d in "${config_dir[@]}"; do
     mkdir -p "$config_path/$d"
@@ -66,11 +61,10 @@ for d in "${config_dir[@]}"; do
 done
 
 config_files=(
-    "auth.json"
-    "config.yaml"
     ".env"
     "SOUL.md"
-    "state.db"
+    "auth.json"
+    "config.yaml"
 )
 
 for f in "${config_files[@]}"; do
@@ -79,17 +73,6 @@ for f in "${config_files[@]}"; do
     fi
     extra_args+=("--bind-try" "$config_path/$f" "$HOME/.hermes/$f")
 done
-
-bin_path=""
-if [ -f "$container_path/.hermes/hermes-agent/venv/bin/hermes" ]; then
-    bin_path="$HOME/.hermes/hermes-agent/venv/bin/hermes"
-else
-    bin_path="$HOME/.hermes/hermes-agent/setup-hermes.sh"
-fi
-
-if [ "$current_path" != "$HOME" ]; then
-    extra_args+=("--bind" "$current_path" "$current_path" "--chdir" "$current_path")
-fi
 
 ## Map nvim config, allow editing prompt with nvim
 overlay_paths=(
@@ -109,6 +92,19 @@ for p in "${overlay_paths[@]}"; do
         extra_args+=("--overlay-src" "$(readlink -f "$p")" "--tmp-overlay" "$p")
     fi
 done
+
+bin_path=""
+if [ -f "$container_path/.hermes/hermes-agent/venv/bin/hermes" ]; then
+    bin_path="$HOME/.hermes/hermes-agent/venv/bin/hermes"
+else
+    bin_path="$HOME/.hermes/hermes-agent/setup-hermes.sh"
+fi
+
+if [ "$current_path" != "$HOME" ]; then
+    extra_args+=("--bind" "$current_path" "$current_path" "--chdir" "$current_path")
+else
+    extra_args+=("--chdir" "$HOME")
+fi
 
 ## '--new-session' breaks lf, and maybe some other tools.
 ## Use another disposable container to do testing on the generated code.
@@ -133,6 +129,7 @@ bwrap \
     --setenv DISPLAY "$DISPLAY" \
     --setenv EDITOR nvim \
     --setenv HOME "$HOME" \
+    --setenv NPM_CONFIG_PREFIX "$HOME/.node_modules" \
     --setenv PATH "$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:/usr/lib/rustup/bin" \
     --setenv SHELL "$SHELL" \
     --setenv TERM xterm-kitty \
