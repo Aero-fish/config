@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 set -e
 # ---------- Config ----------
-storage_path="$HOME/Projects/AI/web-ui"
+storage_path="$HOME/workspace/ai_workspace/web-ui"
 port=8080
 container_name="open-webui"
 

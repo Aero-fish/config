@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 set -e
 
-storage_path="$HOME/Projects/AI/models"
+storage_path="$HOME/workspace/ai_models"
 hf_path="$HOME/misc/repo/huggingface-hub"
 hf_bin="$HOME/misc/repo/huggingface-hub/bin/hf"
 token_path="$HOME/.config/my-config/hf_token"

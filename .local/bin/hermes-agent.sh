@@ -6,14 +6,15 @@ agent_path="$HOME/misc/repo/$agent_name"
 
 host_name="$(cat /proc/sys/kernel/hostname)"
 host_name="${host_name// /_}"
-config_path="$HOME/Projects/AI/agent_configs/${agent_name}_${host_name}"
-container_path="$HOME/Projects/AI/agent_workspaces/${agent_name}_${host_name}"
+config_path="$HOME/.config/ai/agent_configs/${agent_name}_${host_name}"
+container_path="$HOME/workspace/ai_workspace/agents/${agent_name}_${host_name}"
+skill_path="$HOME/.config/ai/skills"
 run_path="$XDG_RUNTIME_DIR/agent/${agent_name}_${host_name}/run"
 tmp_path="$XDG_RUNTIME_DIR/agent/${agent_name}_${host_name}/tmp"
 
 current_path="$(pwd)"
 
-mkdir -p "$tmp_path" "$run_path" "$container_path"
+mkdir -p "$tmp_path" "$run_path" "$container_path/.cache/zsh"
 
 source /usr/local/share/bwrap_share/strict_rules
 source /usr/local/share/bwrap_share/net_addon
@@ -30,7 +31,7 @@ source /usr/local/share/bwrap_share/generate_args
 ## Container baseline
 extra_args=(
     "--bind-try" "$container_path" "$HOME"
-    "--bind-try" "$HOME/Projects/AI/skills" "$HOME/Projects/AI/skills"
+    "--bind-try" "$skill_path" "$skill_path"
 
     # Let all instance share the same tmpfs
     "--bind-try" "$tmp_path" "/tmp"
@@ -52,7 +53,6 @@ done
 
 ## Agent configs
 config_dir=(
-    "bin"
     "plugins"
     "profiles"
     "memories"
@@ -130,14 +130,17 @@ bwrap \
     --clearenv \
     --setenv COLORTERM truecolor \
     --setenv DBUS_SESSION_BUS_ADDRESS "$DBUS_SESSION_BUS_ADDRESS" \
+    --setenv DISPLAY "$DISPLAY" \
     --setenv EDITOR nvim \
     --setenv HOME "$HOME" \
     --setenv PATH "$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:/usr/lib/rustup/bin" \
     --setenv SHELL "$SHELL" \
     --setenv TERM xterm-kitty \
     --setenv TERMINFO "/usr/lib/kitty/terminfo" \
+    --setenv WAYLAND_DISPLAY "$WAYLAND_DISPLAY" \
     --setenv XDG_RUNTIME_DIR "$XDG_RUNTIME_DIR" \
     --setenv _CONTAINER_ 1 \
+    --setenv _ZO_DATA_DIR "$HOME/.cache/zsh" \
     \
     --dev /dev \
     "${dev_bind[@]}" \

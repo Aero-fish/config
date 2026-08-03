@@ -2,9 +2,9 @@
 set -e
 
 # ---------- Config ----------
-model_lib_path="$HOME/Projects/AI/models"
-template_path="$HOME/Projects/AI/templates"
-framework_config_path="$HOME/Projects/AI/framework_config"
+model_lib_path="$HOME/workspace/ai_models"
+template_path="$HOME/.config/ai/templates"
+framework_config_path="$HOME/.config/ai/framework_config"
 
 template_path_container="/templates"
 model_path_container="/model"

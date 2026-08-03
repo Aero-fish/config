@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 set -e
 
-project_storage="$HOME/Projects/container_home_dir"
+project_storage="$HOME/workspace/container_home_dir"
 
 help() {
     echo "Usage: $(basename -- "$0") <project_name>"
@@ -103,7 +103,6 @@ overlay_paths=(
     "$HOME/.zshrc"
 
     # AI agents
-    "$HOME/Projects/AI/agent_configs"
     "$HOME/misc/repo/opencode"
     "$HOME/.local/bin/opencode.sh"
     "$HOME/misc/repo/hermes-agent"
@@ -131,8 +130,8 @@ extra_args+=(
     "--ro-bind" "$(readlink -f "$HOME/.local/bin/hermes-agent.sh")" "$HOME/.local/bin/hermes-agent.sh"
 
     ## Agent config
-    "--bind-try" "$(readlink -f "$HOME/Projects/AI/agent_configs")" "$HOME/Projects/AI/agent_configs"
-    "--bind-try" "$(readlink -f "$HOME/Projects/AI/skills")" "$HOME/Projects/AI/skills"
+    "--bind-try" "$(readlink -f "$HOME/.config/ai/agent_configs")" "$HOME/.config/ai/agent_configs"
+    "--bind-try" "$(readlink -f "$HOME/.config/ai/skills")" "$HOME/.config/ai/agent_configs"
 )
 
 ## '--new-session' breaks lf, and maybe some other tools.
@@ -155,6 +154,7 @@ bwrap \
     --clearenv \
     --setenv COLORTERM truecolor \
     --setenv DBUS_SESSION_BUS_ADDRESS "$DBUS_SESSION_BUS_ADDRESS" \
+    --setenv DISPLAY "$DISPLAY" \
     --setenv EDITOR nvim \
     --setenv HOME "$HOME" \
     --setenv LANG "en_NZ.UTF-8" \
@@ -173,6 +173,7 @@ bwrap \
     --setenv TERM xterm-kitty \
     --setenv TZ "Pacific/Auckland" \
     --setenv VISUAL nvim \
+    --setenv WAYLAND_DISPLAY "$WAYLAND_DISPLAY" \
     --setenv XDG_RUNTIME_DIR "$XDG_RUNTIME_DIR" \
     --setenv _CONTAINER_ 1 \
     --setenv _ZO_DATA_DIR "$HOME/.cache/zsh" \
