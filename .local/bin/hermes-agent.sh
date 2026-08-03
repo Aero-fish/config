@@ -64,7 +64,10 @@ config_files=(
     ".env"
     "SOUL.md"
     "auth.json"
+    "channel_directory.json"
     "config.yaml"
+    "gateway_state.json"
+    "state.db"
 )
 
 for f in "${config_files[@]}"; do
