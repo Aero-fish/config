@@ -46,7 +46,7 @@ fi
 
 # nodejs
 # export PATH="$HOME/.node_modules/bin:$PATH"
-export npm_config_prefix="$HOME/.node_modules"
+export NPM_CONFIG_PREFIX="$HOME/.node_modules"
 
 # WINE
 export WINEPREFIX="$HOME/.wine/default"
