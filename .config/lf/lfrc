@@ -2022,8 +2022,8 @@ map owN         open-in-proton-net
 
 ##### Goto #####
 map gb          cd ~/.snapshots/Bak
-map gc          cd ~/Projects/container_home_dir
-map gC          cd ~/Projects/coding
+map gc          cd ~/workspace/container_home_dir
+map gC          cd ~/workspace/coding
 map gD          cd ~/Downloads
 map gd          cd ~/Desktop
 map gh          cd ~
@@ -2035,8 +2035,8 @@ map gr          cd ~/misc/repo
 map gs          cd ~/Sync
 map gt          cd ~/.local/share/Trash
 map gu          goto_usb
-map gv          cd ~/Projects/vm_share
-map gw          cd ~/Projects
+map gv          cd ~/Personal/vm_share
+map gw          cd ~/workspace
 map ;           push :cd<space>
 
 ##### Sort #####
