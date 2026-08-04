@@ -361,7 +361,7 @@ hl.bind("SUPER + CTRL + W",
 ----- Open note book -----
 hl.bind("SUPER + N",
     hl.dsp.exec_raw(
-        "/usr/local/share/nvim-via-desktop -c \"cd ~/Documents/Notebook\" \"$HOME\"/Documents/Notebook/Note.md"))
+        "/usr/local/share/nvim-via-desktop -c \"cd ~/Personal/Documents/Notebook\" \"$HOME\"/Personal/Documents/Notebook/Note.md"))
 
 ----- Calculator -----
 hl.bind("SUPER + C", hl.dsp.exec_raw("gnome-calculator"))
