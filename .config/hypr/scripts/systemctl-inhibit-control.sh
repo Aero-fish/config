@@ -6,6 +6,8 @@ current_script_dir="$(
 )"
 
 inhibit_programs=(
+    "^$HOME/misc/repo/huggingface-hub/bin/python3 $HOME/misc/repo/huggingface-hub/bin/hf ?"
+    "^$HOME/misc/repo/yt-dlp/bin/python3 $HOME/misc/repo/yt-dlp/bin/yt-dlp ?"
     "^($HOME/misc/programs/115Browser/|)115Browser"
     "^($HOME/misc/programs/baidunetdisk/|)baidunetdisk"
     "^(/usr/bin/|/bin/|)(bash|sh) (/usr/local/share/|)wine-net .*115(chrome)?\\.exe"
@@ -13,14 +15,12 @@ inhibit_programs=(
     "^(/usr/bin/|/bin/|)7z ?"
     "^(/usr/bin/|/bin/|)bash -c sleep infinity; echo no-suspension ended\$"
     "^(/usr/bin/|/bin/|)bash .*/cemu.sh"
+    "^(/usr/bin/|/bin/|)bash .*/download-hugging-face.sh"
     "^(/usr/bin/|/bin/|)bash .*/download-youtube-watchlist.sh"
-    "^(/usr/bin/|/bin/|)bash .*/hf-download.sh"
     "^(/usr/bin/|/bin/|)bash .*/jdownloader.sh"
-    "^(/usr/bin/|/bin/|)bash .*/start_download.sh"
     "^(/usr/bin/|/bin/|)bash .*/yuzu.sh"
     "^(/usr/bin/|/bin/|)cp ?"
     "^(/usr/bin/|/bin/|)ffmpeg ?"
-    "^(/usr/bin/|/bin/|)hf ?"
     "^(/usr/bin/|/bin/|)mv ?"
     "^(/usr/bin/|/bin/|)qbittorrent ?"
     "^(/usr/bin/|/bin/|)qemu-system-x86_64 ?"
@@ -29,8 +29,6 @@ inhibit_programs=(
     "^(/usr/bin/|/bin/|)rsync ?"
     "^(/usr/bin/|/bin/|)tar ?"
     "^(/usr/bin/|/bin/|)zip ?"
-    "hf ?"
-    "yt-dlp ?"
 )
 
 for prog in "${inhibit_programs[@]}"; do
