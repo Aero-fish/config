@@ -38,13 +38,6 @@ extra_args=(
     "--bind-try" "$run_path" "$XDG_RUNTIME_DIR"
 )
 
-## Hermes download node packages and setup venv in the same directory.
-## Too hard to do it with ro-bind
-if [ ! -f "$container_path/.hermes/hermes-agent/setup-hermes.sh" ]; then
-    rm -rf "$container_path/.hermes/hermes-agent"/*
-    cp -r "$agent_path"/* "$container_path/.hermes/hermes-agent"
-fi
-
 ## Agent configs
 config_dir=(
     "cron"
@@ -96,11 +89,19 @@ for p in "${overlay_paths[@]}"; do
     fi
 done
 
-bin_path=""
-if [ -f "$container_path/.hermes/hermes-agent/venv/bin/hermes" ]; then
-    bin_path="$HOME/.hermes/hermes-agent/venv/bin/hermes"
+## Hermes download node packages and setup venv in the same directory.
+## Too hard to do it with ro-bind. Also it updates with 'git pull'.
+bin_path=()
+if [ ! -f "$container_path/.hermes/hermes-agent/setup-hermes.sh" ]; then
+    mkdir -p "$container_path/.hermes/hermes-agent"
+    BRANCH="main"
+    REPO_URL_HTTPS="https://github.com/NousResearch/hermes-agent.git"
+    INSTALL_DIR="\$HOME/.hermes/hermes-agent"
+    bin_path=("sh" "-c" "git clone --depth 1 --branch \"$BRANCH\" \"$REPO_URL_HTTPS\" \"$INSTALL_DIR\"")
+elif [ -f "$container_path/.hermes/hermes-agent/venv/bin/hermes" ]; then
+    bin_path=("$HOME/.hermes/hermes-agent/venv/bin/hermes")
 else
-    bin_path="$HOME/.hermes/hermes-agent/setup-hermes.sh"
+    bin_path=("$HOME/.hermes/hermes-agent/setup-hermes.sh")
 fi
 
 if [ "$current_path" != "$HOME" ]; then
@@ -156,7 +157,7 @@ bwrap \
     --perms 444 --file 7 /etc/passwd \
     --perms 444 --file 8 /etc/group \
     "${remount_ro[@]}" \
-    "$bin_path" "$@" \
+    "${bin_path[@]}" "$@" \
     9</usr/local/share/seccomp-filter/seccomp_filter_tiocsti.bpf \
     7< <(echo "hugh:x:1000:1000::/home/hugh:/bin/nologin") \
     8< <(echo "hugh:x:1000:")
