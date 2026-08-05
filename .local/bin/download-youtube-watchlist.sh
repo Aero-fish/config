@@ -17,7 +17,7 @@ trap 'rv=$?; [ ! -z $ytdl_pid ] && kill -INT $ytdl_pid; rm -rf "$TMP_DIR"; exit 
 
 TMP_DIR="$(mktemp -d "$XDG_RUNTIME_DIR/tmp.XXXXXXXXXX")"
 DOWNLOAD_DIR="$HOME"/Downloads/youtube
-LOG_DIR="$HOME"/Documents/youtube-log
+LOG_DIR="$HOME/Personal/Documents/youtube-log"
 
 OUTPUT_EXT="mp4"
 WAIT_IF_ERROR_SEC=5
@@ -27,7 +27,7 @@ WAIT_BETWEEN_DOWNLOADS_SEC_MAX=60
 MEMBERS_ONLY_CONTENT_KEYWORDS=" members-only "
 NOT_YET_PREMIERES_MESSAGE_REGEX=".* ?(premieres|will begin) ?.*"
 MAX_DISK_USAGE=95
-COOKIE_PATH="$(find "$HOME/Documents/youtube-log/mozilla-ytdl" -type d -regex '.*default-release' 2>/dev/null | head -n 1)"
+COOKIE_PATH="$(find "$HOME/Personal/Documents/youtube-log/mozilla-ytdl" -type d -regex '.*default-release' 2>/dev/null | head -n 1)"
 
 check_disk_usage() {
     disk_usage="$(
@@ -241,7 +241,8 @@ while read -r line; do
     [ -f "$video_no_access" ] && sort -u -o "$video_no_access"{,}
     [ -d "$DOWNLOAD_DIR/$channel_name" ] && rmdir --ignore-fail-on-non-empty "$DOWNLOAD_DIR/$channel_name"
 
-done < <(grep -v -E '^\s*((#|;).*)?$' "$LOG_DIR"/channel)
+done < <(grep -v -E '^\s*((#|;).*)?$' "$LOG_DIR"/channel | sort -R)
+# Use random order to access the channel to prevent pattern
 
 rm -r "$TMP_DIR"
 
