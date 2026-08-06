@@ -56,7 +56,9 @@ file_basename="$(basename -s .conf -- "$model_config_path")"
 model_name="${file_basename##*'_'}"
 model_author="${file_basename%%'_'*}"
 
-mkdir -p "$model_lib_path" "$template_path"
+cache_path="$HOME/.cache/$framework_name"
+
+mkdir -p "$model_lib_path" "$template_path" "$cache_path"
 
 # ---------- pre-processing ----------
 
@@ -82,6 +84,7 @@ fi
 
 podman_cmd+=" -v '$model_lib_path/${model_author}_${model_name}':'$model_path_container'"
 podman_cmd+=" -v '$template_path':'$template_path_container'"
+podman_cmd+=" -v '$cache_path':'/root/.cache'"
 # podman_cmd+=" -v '$HOME/misc/repo/$framework_name':'/home/user/venv'"
 
 config_args="$(
@@ -96,7 +99,8 @@ config_args="$(
 case "$framework_name" in
 
 vllm)
-    podman_cmd+=" --env 'VLLM_SERVER_DEV_MODE=1'"
+    podman_cmd+=" --env 'VLLM_SERVER_DEV_MODE=1'"  ## Enable sleep, clear prefix cache etc.
+    # podman_cmd+=" --entrypoint '/bin/bash'"
     podman_cmd+=" docker.io/vllm/vllm-openai:latest"
 
     ## Model path must be the first argument, and currently is defined in config.
@@ -109,6 +113,7 @@ vllm)
     ;;
 
 sglang)
+    # podman_cmd+=" --entrypoint '/bin/bash'"
     podman_cmd+=" docker.io/lmsysorg/sglang:latest-runtime"
 
     sgland_cmd="sglang serve --enable-memory-saver --served-model-name '$serving_model_name'"
