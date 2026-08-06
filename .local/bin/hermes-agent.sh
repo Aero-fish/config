@@ -2,7 +2,7 @@
 set -e
 
 agent_name="hermes-agent"
-agent_path="$HOME/misc/repo/$agent_name"
+# agent_path="$HOME/misc/repo/$agent_name"
 
 host_name="$(cat /proc/sys/kernel/hostname)"
 host_name="${host_name// /_}"
@@ -44,9 +44,10 @@ config_dir=(
     "memories"
     "plugins"
     "profiles"
-    "sessions"
     "scripts"
+    "sessions"
     "skills"
+    "skins"
 )
 for d in "${config_dir[@]}"; do
     mkdir -p "$config_path/$d"
