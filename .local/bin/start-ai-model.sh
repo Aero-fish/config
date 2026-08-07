@@ -91,7 +91,8 @@ config_args="$(
     grep -v -e "^#.*" "$model_config_path" |
         grep -v -e "^\s*$" |
         tr "\n" " " |
-        sed -e "s:MODEL_PATH:$model_path_container:" -e "s:TEMPLATE_PATH:$template_path_container:"
+        sed -e "s:MODEL_PATH:$model_path_container:" \
+            -e "s:TEMPLATE_PATH:$template_path_container:"
 )"
 
 # ---------- Run the framework  ----------
@@ -99,7 +100,7 @@ config_args="$(
 case "$framework_name" in
 
 vllm)
-    podman_cmd+=" --env 'VLLM_SERVER_DEV_MODE=1'"  ## Enable sleep, clear prefix cache etc.
+    podman_cmd+=" --env 'VLLM_SERVER_DEV_MODE=1'" ## Enable sleep, clear prefix cache etc.
     # podman_cmd+=" --entrypoint '/bin/bash'"
     podman_cmd+=" docker.io/vllm/vllm-openai:latest"
 
