@@ -39,7 +39,7 @@ extra_args=(
 
 ## Agent configs
 config_dir=(
-    "agent"
+    "agents"
     "prompts"
     "skills"
 )

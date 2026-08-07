@@ -125,7 +125,7 @@ extra_args+=(
 
     ## Agent config
     "--bind-try" "$(readlink -f "$HOME/.config/ai/agent_configs")" "$HOME/.config/ai/agent_configs"
-    "--bind-try" "$(readlink -f "$HOME/.config/ai/skills")" "$HOME/.config/ai/agent_configs"
+    "--bind-try" "$(readlink -f "$HOME/.config/ai/skills")" "$HOME/.config/ai/skills"
 )
 
 ## '--new-session' breaks lf, and maybe some other tools.
