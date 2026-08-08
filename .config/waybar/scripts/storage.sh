@@ -3,11 +3,11 @@ set -e
 
 if [ $# -eq 1 ]; then
     info="$(
-        df -H |
+        df -h |
             grep -E "^(/|Filesystem)" |
             grep -E -v "^/(home|run/media)/" |
             cut -d" " -f 2- |
-            sed -E -e "s:^\s*::" -e "s:Mounted on:Path:" -e "s:\s+:\t:g" 
+            sed -E -e "s:^\s*::" -e "s:Mounted on:Path:" -e "s:\s+:\t:g"
     )"
 
     # echo "$info"

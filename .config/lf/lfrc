@@ -38,6 +38,7 @@ set incfilter true
 
 # Info on the side. 'size:time:atime:ctime', default empty
 set info size
+set sizeunits binary
 
 set mouse true
 

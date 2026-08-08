@@ -229,7 +229,7 @@ alias chmod="chmod --preserve-root"
 alias chgrp="chgrp --preserve-root"
 
 # ---------- storage ----------
-alias df="df -H"
+alias df="df -h"
 alias du="du -sh"
 alias dud="du -d 1 -h"
 
