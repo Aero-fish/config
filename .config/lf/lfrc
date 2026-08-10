@@ -694,37 +694,70 @@ cmd broot_whale :{{
 
 #----------
 cmd fzf ${{
-    extra_args=()
-    if [ "$lf_user_fzf_opt" = "file" ]; then
-        extra_args+=("-tf")
-    elif [ "$lf_user_fzf_opt" = "dir" ]; then
-        extra_args+=("-td")
-    elif [ "$lf_user_fzf_opt" = "executable" ]; then
-        extra_args+=("-tx")
-    fi
+    extra_args=(
+        "--exclude" "*.kdb" "--exclude" "*.kdbx" "--exclude" "*.key" "--exclude" "*cache/"
+        "--exclude" ".cargo/" "--exclude" ".cert" "--exclude" ".fpm/" "--exclude" ".git/"
+        "--exclude" ".gnupg/" "--exclude" ".gphoto/" "--exclude" ".hyprland/"
+        "--exclude" ".ipython/" "--exclude" ".jupyter/" "--exclude" ".keepass/"
+        "--exclude" ".keepassxc/" "--exclude" ".lastpass/" "--exclude" ".npm/"
+        "--exclude" ".nv" "--exclude" ".password-store/" "--exclude" ".perl5/"
+        "--exclude" ".pki/" "--exclude" ".snapshots/" "--exclude" ".ssh/" "--exclude" ".svn/"
+        "--exclude" ".texlive/" "--exclude" ".vscode-oss/" "--exclude" ".wine/"
+        "--exclude" "bitwarden/" "--exclude" "keepass/" "--exclude" "keepassxcrc/"
+        "--exclude" "__pycache__/" "--exclude" "containers/" "--exclude" "go/"
+        "--exclude" "keepass/" "--exclude" "keepassx/" "--exclude" "keepassxc/"
+        "--exclude" "keyrings/" "--exclude" "lost+found" "--exclude" "mozilla*/"
+        "--exclude" "librewolf*/" "--exclude" "node_modules/" "--exclude" "rclone/"
+        "--exclude" "thunderbird/"
+    )
 
-    files="$( fd --unrestricted --follow \
-            --exclude "*.kdb" --exclude "*.kdbx" --exclude "*.key" --exclude "*cache/" \
-            --exclude ".cargo/" --exclude ".cert" --exclude ".fpm/" --exclude ".git/" \
-            --exclude ".gnupg/" --exclude ".gphoto/" --exclude ".hyprland/" \
-            --exclude ".ipython/" --exclude ".jupyter/" --exclude ".keepass/" \
-            --exclude ".keepassxc/" --exclude ".lastpass/" --exclude ".npm/" \
-            --exclude ".nv" --exclude ".password-store/" --exclude ".perl5/" \
-            --exclude ".pki/" --exclude ".snapshots/" --exclude ".ssh/" --exclude ".svn/" \
-            --exclude ".texlive/" --exclude ".vscode-oss/" --exclude ".wine/" \
-            --exclude "bitwarden/" --exclude "keepass/" --exclude "keepassxcrc/" \
-            --exclude "__pycache__/"  --exclude "containers/" --exclude "go/" \
-            --exclude "keepass/" --exclude "keepassx/" --exclude "keepassxc/" \
-            --exclude "keyrings/" --exclude "lost+found" --exclude "mozilla*/" \
-            --exclude "librewolf*/" --exclude "node_modules/" --exclude "rclone/" \
-            --exclude "thunderbird/" \
-            "${extra_args[@]}" \
-            . "${PWD}" |
+    case "$lf_user_fzf_opt" in
+
+    all)
+        :
+        ;;
+    fzf_all_unfiltered)
+        extra_args=()
+        ;;
+
+    file)
+        extra_args+=("-tf")
+        ;;
+
+    file_unfiltered)
+        extra_args=("-tf")
+        ;;
+
+    dir)
+        extra_args+=("-td")
+        ;;
+
+    dir_unfiltered)
+        extra_args=("-td")
+        ;;
+
+    executable)
+        extra_args+=("-tx")
+        ;;
+
+    executable_unfiltered)
+        extra_args=("-tx")
+        ;;
+
+    *)
+        lf -remote "send $id echo Unknown fzf opt '$lf_user_fzf_opt'"
+        exit 1
+        ;;
+
+    esac
+
+    files="$(
+        fd --unrestricted --follow "${extra_args[@]}" . "${PWD}" |
             fzf --multi --exact --reverse --prompt="lf select:"
     )"
 
     arr=()
-    readarray -t arr < <(printf '%s' "$files")
+    readarray -t arr < <(printf "%s" "$files")
     IFS=" "
 
     if [ "${#arr[@]}" -eq 1 ]; then
@@ -760,12 +793,21 @@ cmd fzf_all :{{
     fzf
 }}
 
+cmd fzf_all_unfiltered :{{
+    set user_fzf_opt "fzf_all_unfiltered"
+    fzf
+}}
+
 #----------
 cmd fzf_file :{{
     set user_fzf_opt "file"
     fzf
 }}
 
+cmd fzf_file_unfiltered :{{
+    set user_fzf_opt "file_unfiltered"
+    fzf
+}}
 
 #----------
 cmd fzf_dir :{{
@@ -773,9 +815,19 @@ cmd fzf_dir :{{
     fzf
 }}
 
+cmd fzf_dir_unfiltered :{{
+    set user_fzf_opt "dir_unfiltered"
+    fzf
+}}
+
 #----------
 cmd fzf_exe :{{
     set user_fzf_opt "executable"
+    fzf
+}}
+
+cmd fzf_exe_unfiltered :{{
+    set user_fzf_opt "executable_unfiltered"
     fzf
 }}
 
@@ -1983,8 +2035,13 @@ map b           broot_norm
 map B           broot_whale
 
 map z           fzf_all
+map ZA          fzf_all_unfiltered
+map za          fzf_all
+map ZD          fzf_dir_unfiltered
 map Zd          fzf_dir
+map ZF          fzf_file_unfiltered
 map Zf          fzf_file
+map ZX          fzf_exe_unfiltered
 map Zx          fzf_exe
 
 # find-back
@@ -2146,4 +2203,3 @@ map <c-m-down>  page-down
 
 # --------- Auto execute ----------
 $mkdir -p "$HOME/.cache/lf_thumbnails"
-
