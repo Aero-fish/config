@@ -598,6 +598,18 @@ comfy-ui-download() {
     touch "$work_path/$version.txt"
 }
 
+pi-agent-download() {
+    download_url="$(
+        curl -s -L "$1" |
+            jq -r ".assets[] | select(.name==\"pi-linux-x64.tar.gz\") | .browser_download_url"
+    )"
+    _check_download_url
+    curl -L "$download_url" --output "$work_path/$version.tar.gz"
+    tar -xf "$work_path/$version.tar.gz" -C "$work_path" --strip-components=1
+    rm "$work_path/$version.tar.gz"
+    touch "$work_path/$version.txt"
+}
+
 declare -A non_aur_packages=(
     ## Update proton before dxvk etc, so its dxvk/dxvk-nvapi/vkd3d-proton dlls
     ## can be updated in subsequent dxvk/dxvk-nvapi/vkd3d-proton updates.
@@ -616,6 +628,7 @@ declare -A non_aur_packages=(
     ["maple-mono"]="https://api.github.com/repos/subframe7536/maple-font/releases/latest"
     ["opencode"]="https://api.github.com/repos/anomalyco/opencode/releases/latest"
     ["pandoc-eisvogel-template"]="https://api.github.com/repos/Wandmalfarbe/pandoc-latex-template/releases/latest"
+    ["pi-agent"]="https://api.github.com/repos/earendil-works/pi/releases/latest"
     ["revealjs"]="https://api.github.com/repos/hakimel/reveal.js/releases/latest"
     ["vkd3d-proton"]="https://api.github.com/repos/HansKristian-Work/vkd3d-proton/releases/latest"
     ["yay"]="https://api.github.com/repos/Jguer/yay/releases/latest"
