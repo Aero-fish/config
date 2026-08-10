@@ -35,11 +35,11 @@ source /usr/local/share/bwrap_share/strict_rules
 source /usr/local/share/bwrap_share/net_addon
 
 ro_bind_path+=(
+    "/etc/profile.d/lfcd.sh"
     "/usr/include"
     "/usr/local/bin"
     "/usr/local/share/bwrap_share"
     "/usr/local/share/seccomp-filter"
-
 )
 
 # shellcheck disable=SC2119
