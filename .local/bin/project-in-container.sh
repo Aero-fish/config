@@ -89,6 +89,7 @@ fi
 
 ## "$HOME/.local/bin" contains script to containerises ai agents.
 overlay_paths=(
+    "$HOME/.config/lazygit/config.yml"
     "$HOME/.config/lf"
     "$HOME/.config/my-config/wordlist"
     "$HOME/.config/nvim"
@@ -96,6 +97,7 @@ overlay_paths=(
     "$HOME/.config/starship.container.toml"
     "$HOME/.config/tz"
     "$HOME/.config/vim"
+    "$HOME/.gitconfig"
     "$HOME/.local/share/nvim/lazy"
     "$HOME/.local/share/nvim/mason"
     "$HOME/.local/share/nvim/site"
