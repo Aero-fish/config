@@ -35,6 +35,7 @@ source /usr/local/share/bwrap_share/strict_rules
 source /usr/local/share/bwrap_share/net_addon
 
 ro_bind_path+=(
+    "/etc/highlight"
     "/etc/profile.d/lfcd.sh"
     "/usr/include"
     "/usr/local/bin"
@@ -95,6 +96,7 @@ overlay_paths=(
     "$HOME/.config/nvim"
     "$HOME/.config/pythonrc"
     "$HOME/.config/starship.container.toml"
+    "$HOME/.config/tmux"
     "$HOME/.config/tz"
     "$HOME/.config/vim"
     "$HOME/.gitconfig"
