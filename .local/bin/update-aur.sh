@@ -311,7 +311,7 @@ vkd3d-proton-update() {
 proton-ge-download() {
     download_url="$(
         curl -s -L "$1" |
-            jq -r ".assets[] | select(.name==\"$version.tar.gz\") | .browser_download_url"
+            jq -r ".assets[] | select(.name==\"$version-x86_64.tar.gz\") | .browser_download_url"
     )"
     _check_download_url
 
