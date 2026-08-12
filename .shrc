@@ -1158,14 +1158,10 @@ fi
 # ---------- Shortcut to programs ----------
 if [ -x "$HOME/misc/repo/opencode/opencode" ] && [ -x "$HOME/.local/bin/opencode.sh" ]; then
     # shellcheck disable=SC2139
-    alias opencode="$HOME/.local/bin/opencode.sh"
-    # shellcheck disable=SC2139
     alias oc="$HOME/.local/bin/opencode.sh"
 fi
 
 if [ -x "$HOME/misc/repo/hermes-agent/setup-hermes.sh" ] && [ -x "$HOME/.local/bin/hermes-agent.sh" ]; then
-    # shellcheck disable=SC2139
-    alias hermes="$HOME/.local/bin/hermes-agent.sh"
     # shellcheck disable=SC2139
     alias ha="$HOME/.local/bin/hermes-agent.sh"
 fi
