@@ -57,7 +57,7 @@ if [ "$project_name" == "tmp_container" ]; then
     run_path="$XDG_RUNTIME_DIR/projects/$project_name/run"
     tmp_path="$XDG_RUNTIME_DIR/projects/$project_name/tmp"
 
-    trap 'rm -rf "$container_path"; if [ "$(find "$XDG_RUNTIME_DIR/projects/$project_name" -maxdepth 1 -mindepth 1 -type d -name "workspace_*" -printf "%f\n" | wc -l)" -eq 0 ]; then echo hi; rm -rf "$XDG_RUNTIME_DIR/projects/$project_name"; fi' EXIT
+    trap 'rm -rf "$container_path"; if [ "$(find "$XDG_RUNTIME_DIR/projects/$project_name" -maxdepth 1 -mindepth 1 -type d -name "workspace_*" -printf "%f\n" | wc -l)" -eq 0 ]; then rm -rf "$XDG_RUNTIME_DIR/projects/$project_name"; fi' EXIT
 
     mkdir -p "$container_path/.cache/zsh" "$run_path" "$tmp_path"
 
