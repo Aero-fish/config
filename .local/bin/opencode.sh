@@ -30,7 +30,7 @@ source /usr/local/share/bwrap_share/generate_args
 extra_args=(
     "--bind-try" "$container_path" "$HOME"
     "--ro-bind" "$(readlink -f "$agent_path")" "$agent_path"
-    "--bind-try" "$skill_path" "$skill_path"
+    "--bind-try" "$skill_path" "$HOME/.agents/skills"
 
     # Let all instance share the same tmpfs
     "--bind-try" "$tmp_path" "/tmp"

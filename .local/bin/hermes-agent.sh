@@ -14,7 +14,7 @@ tmp_path="$XDG_RUNTIME_DIR/agent/${agent_name}_${host_name}/tmp"
 
 current_path="$(pwd)"
 
-mkdir -p "$tmp_path" "$run_path" "$container_path/.hermes/hermes-agent" "$container_path/.cache/zsh"
+mkdir -p "$tmp_path" "$run_path" "$container_path/.cache/zsh" "$container_path/.hermes/hermes-agent"
 
 source /usr/local/share/bwrap_share/strict_rules
 source /usr/local/share/bwrap_share/net_addon
@@ -31,7 +31,7 @@ source /usr/local/share/bwrap_share/generate_args
 ## Container baseline
 extra_args=(
     "--bind-try" "$container_path" "$HOME"
-    "--bind-try" "$skill_path" "$skill_path"
+    "--bind-try" "$skill_path" "$HOME/.agents/skills"
 
     # Let all instance share the same tmpfs
     "--bind-try" "$tmp_path" "/tmp"
@@ -61,7 +61,6 @@ config_files=(
     "channel_directory.json"
     "config.yaml"
     "gateway_state.json"
-    "state.db"
 )
 
 for f in "${config_files[@]}"; do
