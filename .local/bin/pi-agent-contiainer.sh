@@ -2,7 +2,8 @@
 set -e
 
 exec bash <(
-    sed -e 's:"${bin_path\[@\]}" :bash :' \
+    sed -e 's:"$agent_path"/pi:bash:' \
         -e 's:^current_path=.*:current_path="$HOME":' \
-        "$HOME/.local/bin/hermes-agent.sh"
+        "$HOME/.local/bin/pi-agent.sh"
 ) "$@"
+
