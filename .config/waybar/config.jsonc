@@ -77,7 +77,7 @@
             "class<libreoffice-startcenter>": "󰏆",
             "class<libreoffice-writer>": "󱎒",
             "class<librewolf>": "",
-            "class<localsend_app>": "󰆨",
+            "class<org.localsend.localsend_app>": "󰆨",
             "class<mcomixstarter.py>": "",
             "class<mpv>": "",
             "class<nethogs>": "",
