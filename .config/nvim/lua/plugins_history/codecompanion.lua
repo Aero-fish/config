@@ -37,7 +37,7 @@ return {
             interactions = {
                 chat = {
                     adapter = {
-                        name = "opencode",
+                        name = "opencode.sh",
                     },
                 },
                 inline = {

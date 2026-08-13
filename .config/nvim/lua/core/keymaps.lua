@@ -899,8 +899,6 @@ local default_keymaps = {
     { "<leader>la", vim.lsp.buf.code_action, desc = "Code action", mode = nx },
     { "<leader>lc", group = "Code lens", mode = nx },
     { "<leader>lca", vim.lsp.codelens.run, desc = "Action", mode = nx },
-    { "<leader>lcc", vim.lsp.codelens.clear, desc = "Clear", mode = nx },
-    { "<leader>lcr", vim.lsp.codelens.refresh, desc = "Refresh", mode = nx },
     { "<leader>ld", vim.lsp.buf.definition, desc = "Definition", mode = nx },
     { "<leader>lD", vim.lsp.buf.declaration, desc = "Declaration", mode = nx },
     {
@@ -959,6 +957,7 @@ local default_keymaps = {
         function()
             print("Enter registry (single char):")
             local ok, char = pcall(vim.fn.getchar)
+            char = string.byte(char)
             if not ok or char == 27 then
                 return
             end
@@ -1375,6 +1374,9 @@ local default_keymaps = {
         desc = "View output",
         mode = nx
     },
+
+    -- AI
+    { "<leader>Z", group = "AI", mode = nx },
 }
 
 return default_keymaps
