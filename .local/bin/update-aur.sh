@@ -352,7 +352,6 @@ ksmbd-tools-update() {
 }
 
 localsend-download() {
-    echo "$1"
     download_url="$(
         curl -s -L "$1" |
             jq -r '.assets[] | select(.name | test(".*\\.AppImage$")) | .browser_download_url'
