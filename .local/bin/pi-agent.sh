@@ -15,7 +15,7 @@ tmp_path="$XDG_RUNTIME_DIR/agent/${agent_name}_${host_name}/tmp"
 
 current_path="$(pwd)"
 
-mkdir -p "$tmp_path" "$run_path" "$container_path/.cache/zsh" "$container_path/.pi/agent/sessions"
+mkdir -p "$tmp_path" "$run_path" "$container_path/.cache/zsh"
 
 source /usr/local/share/bwrap_share/strict_rules
 source /usr/local/share/bwrap_share/net_addon
@@ -41,10 +41,28 @@ extra_args=(
 
     # Map config files
     "--bind-try" "$config_path" "$HOME/.pi/agent"
-
-    # Save sessions in the work space
-    "--bind-try" "$container_path/.pi/agent/sessions" "$HOME/.pi/agent/sessions"
 )
+
+## Configs that store in workspace, not in '~/.config/ai'
+config_dir=(
+    "npm"
+    "sessions"
+)
+for d in "${config_dir[@]}"; do
+    mkdir -p "$container_path/.pi/agent/$d"
+    extra_args+=("--bind-try" "$container_path/.pi/agent/$d" "$HOME/.pi/agent/$d")
+done
+
+config_files=(
+    # "auth.json"
+)
+
+for f in "${config_files[@]}"; do
+    if [ ! -f "$container_path/.pi/agent/$f" ]; then
+        touch "$container_path/.pi/agent/$f"
+    fi
+    extra_args+=("--bind-try" "$container_path/.pi/agent/$f" "$HOME/.pi/agent/$f")
+done
 
 if [ "$current_path" != "$HOME" ]; then
     extra_args+=("--bind" "$current_path" "$current_path" "--chdir" "$current_path")
