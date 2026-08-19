@@ -9,10 +9,19 @@ return {
         "HakonHarnes/img-clip.nvim",
     },
     opts = {
+        cli = {
+            args = { "--thinking", "off" },
+        },
         panels = {
             history = { title = "Pi agent" },
             prompt = { title = "prompt", bash_title = "bash" },
             attachments = { title = "attached" },
+        },
+        expand_startup_details = false,
+        layout = {
+            side = {
+                width = 0.4
+            },
         },
     },
     cmd = {
