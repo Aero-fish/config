@@ -101,6 +101,7 @@ case "$framework_name" in
 
 vllm)
     podman_cmd+=" --env 'VLLM_SERVER_DEV_MODE=1'" ## Enable sleep, clear prefix cache etc.
+    podman_cmd+=" --env 'VLLM_ALLOW_LONG_MAX_MODEL_LEN=1'" ## Enable 1M context
     # podman_cmd+=" --entrypoint '/bin/bash'"
     podman_cmd+=" docker.io/vllm/vllm-openai:latest"
 
