@@ -55,7 +55,6 @@ for d in "${config_dir[@]}"; do
 done
 
 config_files=(
-    ".env"
     "SOUL.md"
     "auth.json"
     "channel_directory.json"
