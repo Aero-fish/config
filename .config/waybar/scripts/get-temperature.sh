@@ -3,8 +3,8 @@ set -e
 
 CPU_HWMON_NAME="$XDG_RUNTIME_DIR"/cpu_hwmon
 GPU_HWMON_NAME="$XDG_RUNTIME_DIR"/gpu_hwmon
-CPU_MAX=95
-GPU_MAX=86
+CPU_MAX=92
+GPU_MAX=88
 
 cpu_max_temp=0
 gpu_max_temp=0
