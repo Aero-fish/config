@@ -36,12 +36,19 @@ extra_args=(
     "--bind-try" "$skill_path" "$HOME/.agents/skills"
 
     # Let all instance share the same tmpfs
-    "--bind-try" "$tmp_path" "/tmp"
     "--bind-try" "$run_path" "$XDG_RUNTIME_DIR"
 
     # Map config files
     "--bind-try" "$config_path" "$HOME/.pi/agent"
 )
+
+if [ -n "${_NVIM_}" ] || [ -n "${_AERC_}" ]; then
+    ## Inside nvim or aerc bwrap, use their /tmp to access files.
+    ## E.g., emails are stored in /tmp/xxxxxx.eml for editing, renaming also use /tmp.
+    extra_args+=("--bind-try" "/tmp" "/tmp")
+else
+    extra_args+=("--bind-try" "$tmp_path" "/tmp")
+fi
 
 ## Configs that store in workspace, not in '~/.config/ai'
 config_dir=(
