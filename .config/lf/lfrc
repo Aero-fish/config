@@ -2094,6 +2094,7 @@ map gs          cd ~/Sync
 map gt          cd ~/.local/share/Trash
 map gu          goto_usb
 map gv          cd ~/Personal/vm_share
+map gW          cd ~/workspace/writing
 map gw          cd ~/workspace
 map ;           push :cd<space>
 
