@@ -91,6 +91,18 @@ return {
             mode = { "n", "x", "i", "t" }
         },
         {
+            "<leader>c",
+            function()
+                if vim.bo.filetype == "pi-chat-history" or vim.bo.filetype == "pi-chat-prompt" then
+                    require("pi").toggle()
+                else
+                    vim.cmd("close")
+                end
+            end,
+            desc = "Close window",
+            mode = { "n", "x" }
+        },
+        {
             "<leader>z",
             function()
                 require("pi").toggle()
