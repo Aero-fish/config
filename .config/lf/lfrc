@@ -1042,28 +1042,29 @@ cmd extract ${{
 #${PWD@Q}
 cd ${PWD@Q} || { rm "\$0"; exit 1; }
 
+
 ex() {
     if [ "\$#" -ne 1 ]; then
         echo "usage: ex <file>"
+
     elif [ -f "\$1" ] ; then
         case \$1 in
-            *.tar.bz2)  tar -xjpf "\$1" ;;
-            *.tar.gz)   tar -xzpf "\$1" ;;
-            *.tar.xz)   tar -I pixz -xpf "\$1" ;;
-            *.tar.zst)  tar --zstd -xpf "\$1" ;;
-            *.bz2)      bunzip2 -kc "\$1" > ./"\$(basename -- "\$1" | sed -E 's:\\.bz2$::')" ;;
-            *.rar)      unrar x -inul "\$1" . ;;
-            *.tar)      tar -xpf "\$1" ;;
-            *.gz)       gunzip -kc "\$1" > ./"\$(basename -- "\$1" | sed -E 's:\\.gz$::')" ;;
-            *.tar)      tar -xpf - ;;
-            *.tbz2)     tar -xjpf "\$1" ;;
-            *.tgz)      tar -xzpf "\$1" ;;
-            *.zip)      unzip -q "\$1" ;;
-            *.Z)        uncompress "\$1" ;;
-            *.deb)      ar -x "\$1" ;;
-            *.7z)       7z x "\$1" ;;
-            *.iso)       7z x "\$1" ;;
-            *.rpm)      rpmextract.sh "\$1" ;;
+            *.tar.bz2) pv "\$1" | tar -xjpf - ;;
+            *.tar.gz) pv "\$1" | tar -xzpf - ;;
+            *.tar.xz) pv "\$1" | tar -I pixz -xpf - ;;
+            *.tar.zst) pv "\$1" | tar --zstd -xpf - ;;
+            *.bz2) bunzip2 -kc "\$1" >./"\$(basename -- "\$1" | sed -E 's:\\.bz2\$::')" ;;
+            *.rar) unrar x "\$1" ;;
+            *.gz) gunzip -kc "\$1" >./"$(basename -- "\$1" | sed -E 's:\\.gz\$::')" ;;
+            *.tar) pv "\$1" | tar -xpf - ;;
+            *.tbz2) pv "\$1" | tar -xjpf - ;;
+            *.tgz) pv "\$1" | tar -xzpf - ;;
+            *.zip) unzip "\$1" ;;
+            *.Z) uncompress "\$1" ;;
+            *.deb) ar -x "\$1" ;;
+            *.7z) 7z x "\$1" ;;
+            *.iso) 7z x "\$1" ;;
+            *.rpm) rpmextract.sh "\$1" ;;
             *.AppImage)
                 if [ ! -x "\$1" ]; then
                     if [ ! -w "\$1" ]; then
@@ -1079,8 +1080,10 @@ ex() {
                         chmod o+x "\$1"
                     fi
                 fi
-
-                dir_path="\$(dirname -- "\$1")"
+                local work_path file_name
+                work_path="\$(dirname -- "\$(realpath --no-symlinks -- "\$1")")"
+                file_name="\$(basename -- "\$1")"
+                echo "Extracting '\$1'"
                 bwrap \\
                     --unshare-user \\
                     --unshare-ipc \\
@@ -1102,14 +1105,18 @@ ex() {
                     --symlink "/usr/bin" "/sbin" \\
                     --symlink "/usr/lib" "/lib" \\
                     --symlink "/usr/lib" "/lib64" \\
-                    --bind-try ${PWD@Q} ${PWD@Q} \\
-                    --bind-try "\$dir_path" "\$dir_path" \\
-                    "\$1" --appimage-extract
+                    --bind-try "\$work_path" "\$work_path" \\
+                    "\$work_path/\$file_name" --appimage-extract \\
+                    >/dev/null
+                    ;;
+            *)
+                echo "'\$1' cannot be extracted via ex()"
+                notify-send "'\$1' cannot be extracted via ex()"
                 ;;
-            *) echo "\$1 cannot be extracted via ex()" ;;
         esac
     else
-        echo "\$1 is not a valid file"
+        echo "'\$1' is not a valid file"
+        notify-send "'\$1' is not a valid file"
     fi
 }
 
@@ -1168,23 +1175,22 @@ ex() {
 
     elif [ -f "\$1" ] ; then
         case \$1 in
-            *.tar.bz2)  tar -xjpf "\$1" ;;
-            *.tar.gz)   tar -xzpf "\$1" ;;
-            *.tar.xz)   tar -I pixz -xpf "\$1" ;;
-            *.tar.zst)  tar --zstd -xpf "\$1" ;;
-            *.bz2)      bunzip2 -kc "\$1" > ./"\$(basename -- "\$1" | sed -E 's:\\.bz2$::')" ;;
-            *.rar)      unrar x -inul "\$1" . ;;
-            *.tar)      tar -xpf "\$1" ;;
-            *.gz)       gunzip -kc "\$1" > ./"\$(basename -- "\$1" | sed -E 's:\\.gz$::')" ;;
-            *.tar)      tar -xpf - ;;
-            *.tbz2)     tar -xjpf "\$1" ;;
-            *.tgz)      tar -xzpf "\$1" ;;
-            *.zip)      unzip -q "\$1" ;;
-            *.Z)        uncompress "\$1" ;;
-            *.deb)      ar -x "\$1" ;;
-            *.7z)       7z x "\$1" ;;
-            *.iso)       7z x "\$1" ;;
-            *.rpm)      rpmextract.sh "\$1" ;;
+            *.tar.bz2) pv "\$1" | tar -xjpf - ;;
+            *.tar.gz) pv "\$1" | tar -xzpf - ;;
+            *.tar.xz) pv "\$1" | tar -I pixz -xpf - ;;
+            *.tar.zst) pv "\$1" | tar --zstd -xpf - ;;
+            *.bz2) bunzip2 -kc "\$1" >./"\$(basename -- "\$1" | sed -E 's:\\.bz2\$::')" ;;
+            *.rar) unrar x "\$1" ;;
+            *.gz) gunzip -kc "\$1" >./"$(basename -- "\$1" | sed -E 's:\\.gz\$::')" ;;
+            *.tar) pv "\$1" | tar -xpf - ;;
+            *.tbz2) pv "\$1" | tar -xjpf - ;;
+            *.tgz) pv "\$1" | tar -xzpf - ;;
+            *.zip) unzip "\$1" ;;
+            *.Z) uncompress "\$1" ;;
+            *.deb) ar -x "\$1" ;;
+            *.7z) 7z x "\$1" ;;
+            *.iso) 7z x "\$1" ;;
+            *.rpm) rpmextract.sh "\$1" ;;
             *.AppImage)
                 if [ ! -x "\$1" ]; then
                     if [ ! -w "\$1" ]; then
@@ -1200,8 +1206,10 @@ ex() {
                         chmod o+x "\$1"
                     fi
                 fi
-
-                dir_path="\$(dirname -- "\$1")"
+                local work_path file_name
+                work_path="\$(dirname -- "\$(realpath --no-symlinks -- "\$1")")"
+                file_name="\$(basename -- "\$1")"
+                echo "Extracting '\$1'"
                 bwrap \\
                     --unshare-user \\
                     --unshare-ipc \\
@@ -1223,14 +1231,18 @@ ex() {
                     --symlink "/usr/bin" "/sbin" \\
                     --symlink "/usr/lib" "/lib" \\
                     --symlink "/usr/lib" "/lib64" \\
-                    --bind-try ${PWD@Q} ${PWD@Q} \\
-                    --bind-try "\$dir_path" "\$dir_path" \\
-                    "\$1" --appimage-extract
+                    --bind-try "\$work_path" "\$work_path" \\
+                    "\$work_path/\$file_name" --appimage-extract \\
+                    >/dev/null
+                    ;;
+            *)
+                echo "'\$1' cannot be extracted via ex()"
+                notify-send "'\$1' cannot be extracted via ex()"
                 ;;
-            *)          echo "\$1 cannot be extracted via ex()" ;;
         esac
     else
-        echo "\$1 is not a valid file"
+        echo "'\$1' is not a valid file"
+        notify-send "'\$1' is not a valid file"
     fi
 }
 
