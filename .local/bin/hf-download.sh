@@ -17,6 +17,10 @@ model_author="${model%%'/'*}"
 model_path="$storage_path/${model_author}_${model_name}"
 shift
 
+if [[ "$model_name" =~ -(DFlash2)(-GGUF)?$ ]]; then
+    storage_path="$HOME/workspace/ai_draft_model"
+fi
+
 include_paths=()
 for p in "$@"; do
     if [[ "$p" != *.* ]] && [[ "$p" != */ ]]; then

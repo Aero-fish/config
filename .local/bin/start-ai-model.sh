@@ -5,9 +5,11 @@ set -e
 model_lib_path="$HOME/workspace/ai_models"
 template_path="$HOME/.config/ai/templates"
 framework_config_path="$HOME/.config/ai/framework_config"
+draft_model_lib_path="$HOME/workspace/ai_draft_model"
 
-template_path_container="/templates"
-model_path_container="/model"
+template_path_in_container="/templates"
+model_path_in_container="/model"
+draft_model_path_in_container="/draft_model"
 container_label="AI"
 serving_model_name="local_model"
 
@@ -76,23 +78,55 @@ fi
 podman_cmd="podman run --rm -it --cap-drop=all $detach_mode"
 podman_cmd+=" --shm-size=-0 --detach-keys='ctrl-q' --init"
 podman_cmd+=" --name '$container_name' --label '$container_label'"
+
 podman_cmd+=" --network ai_internal --ip '192.168.0.1' --mac-address '44:33:22:11:00:01' -p $port:$port"
+# podman_cmd+=" --network host"
 
 if lspci | grep -E "(VGA|Display controller)" | grep -q "NVIDIA"; then
     podman_cmd+=" --device 'nvidia.com/gpu=all'"
 fi
 
-podman_cmd+=" -v '$model_lib_path/${model_author}_${model_name}':'$model_path_container'"
-podman_cmd+=" -v '$template_path':'$template_path_container'"
+podman_cmd+=" -v '$model_lib_path/${model_author}_${model_name}':'$model_path_in_container'"
+podman_cmd+=" -v '$template_path':'$template_path_in_container'"
 podman_cmd+=" -v '$cache_path':'/root/.cache'"
 # podman_cmd+=" -v '$HOME/misc/repo/$framework_name':'/home/user/venv'"
+
+config_args="$(grep -v -e "^#.*" "$model_config_path" | grep -v -e "^\s*$")"
+
+if grep -v -e "^#.*" "$model_config_path" | grep -q "DRAFT_MODEL_PATH"; then
+    draft_models=()
+    base_model_name="$(echo "$model_name" | sed -E "s:(-UD)?-(NVFP4|FP8|GGUF|BF16|(MLX|unsloth-bnb)-[0-9]bit)$::")"
+
+    readarray -d '' draft_models < <(find "$draft_model_lib_path" -name "*_${base_model_name}-*" -printf '%P\0')
+    num_of_draft_models="${#draft_models[@]}"
+
+    if [ "$num_of_draft_models" -eq 0 ]; then
+        msg="Using draft model in config for '$base_model_name', but no matching draft model in '$draft_model_lib_path'."
+        echo "$msg"
+        notify-send "$msg"
+        exit 1
+    elif [ "$num_of_draft_models" -eq 1 ]; then
+        draft_model_path="${draft_models[0]}"
+
+    else
+        draft_model_path="$draft_model_lib_path/$(
+            printf "%s\n" "${draft_models[@]}" |
+                fzf --exact --reverse --prompt="Choose a draft model:" --no-multi
+        )"
+    fi
+
+    podman_cmd+=" -v '$draft_model_path':'$draft_model_path_in_container'"
+
+    unset draft_models base_model_name num_of_draft_models msg draft_model_path
+fi
 
 config_args="$(
     grep -v -e "^#.*" "$model_config_path" |
         grep -v -e "^\s*$" |
         tr "\n" " " |
-        sed -e "s:MODEL_PATH:$model_path_container:" \
-            -e "s:TEMPLATE_PATH:$template_path_container:"
+        sed -e "s:MODEL_PATH:$model_path_in_container:" \
+            -e "s:TEMPLATE_PATH:$template_path_in_container:" \
+            -e "s:DRAFT_MODEL_PATH:$draft_model_path_in_container:"
 )"
 
 # ---------- Run the framework  ----------
@@ -100,7 +134,7 @@ config_args="$(
 case "$framework_name" in
 
 vllm)
-    podman_cmd+=" --env 'VLLM_SERVER_DEV_MODE=1'" ## Enable sleep, clear prefix cache etc.
+    podman_cmd+=" --env 'VLLM_SERVER_DEV_MODE=1'"          ## Enable sleep, clear prefix cache etc.
     podman_cmd+=" --env 'VLLM_ALLOW_LONG_MAX_MODEL_LEN=1'" ## Enable 1M context
     # podman_cmd+=" --entrypoint '/bin/bash'"
     podman_cmd+=" docker.io/vllm/vllm-openai:latest"
