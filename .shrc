@@ -1035,7 +1035,7 @@ convert-pdf-to-png() {
 }
 
 # ---------- wine ----------
-alias kill-all-exe="pkill -9 -f '.exe'"
+alias kill-all-exe="pkill -9 -f '\.exe'"
 
 # ---------- LaTeX ----------
 ## Keep consistency with texlab LSP for neovim. It only parse log in root dir.
