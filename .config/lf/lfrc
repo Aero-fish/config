@@ -1852,6 +1852,7 @@ cmd open-with-yacreader         $(setsid "$HOME/.local/bin/yacreader.sh" "$f" &)
 
 #----------
 cmd open-in-proton              $(setsid "$HOME/.local/bin/proton.sh" "$f" &) >/dev/null 2>&1 </dev/null
+cmd open-in-proton-xorg         $(setsid "$HOME/.local/bin/proton-xorg.sh" "$f" &) >/dev/null 2>&1 </dev/null
 cmd open-in-proton-net          $(setsid "$HOME/.local/bin/proton-net.sh" "$f" &) >/dev/null 2>&1 </dev/null
 cmd open-in-wine-default        $(setsid "$HOME/.local/bin/wine-default.sh" "$f" &) >/dev/null 2>&1 </dev/null
 cmd open-in-wine-default-cn     $(setsid "$HOME/.local/bin/wine-default-cn.sh" "$f" &) >/dev/null 2>&1 </dev/null
@@ -2084,6 +2085,7 @@ map ov          open-with-vim
 map ox          open-with-xnview
 map oy          open-with-yacreader
 
+map owP         open-in-proton-xorg
 map owp         open-in-proton
 map owd         open-in-wine-default
 map owg         open-in-wine-games
