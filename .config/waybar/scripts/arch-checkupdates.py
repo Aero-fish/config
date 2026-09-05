@@ -30,6 +30,10 @@ key_packages: set[str] = {
     "nvidia-utils",
     "nwg-bar",
     "opencl-nvidia",
+    "pipewire",
+    "pipewire-alsa",
+    "pipewire-jack",
+    "pipewire-pulse",
     "podman",
     "qemu",
     "swayosd",
@@ -38,6 +42,7 @@ key_packages: set[str] = {
     "waybar",
     "wine",
     "wine-stage",
+    "wireplumber",
     "zsh",
 }
 
