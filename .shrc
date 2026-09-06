@@ -154,7 +154,7 @@ mirror() {
     rsync -ah --delete --no-inc-recursive --info=progress2 --exclude "lost+found/" "$scr_path" "$dest_path"
     notify-send "Mirror finished" "$scr_path\nto\n$dest_path"
     if ! pgrep --quiet -f "^(/usr/bin/|/bin/|)gpu-screen-recorder" && [ -f "$HOME/.config/my-config/notification_tones/file_operation_completed.mp3" ]; then
-        setsid pw-play "$HOME/.config/my-config/notification_tones/file_operation_completed.mp3" &
+        (setsid pw-play "$HOME/.config/my-config/notification_tones/file_operation_completed.mp3" &)
     fi
 }
 
@@ -650,11 +650,11 @@ alias ls-network-connections="ss --tcp --udp --processes"
 alias ls-network-port-listening="ss --listening --tcp --udp --processes"
 alias ls-network-bandwidth-usage="nethogs -v 4"
 
-alias soft-reboot="if pgrep -u \"\$(whoami)\" -x Hyprland; then hyprshutdown --top-label 'Restarting...' --post-cmd 'systemctl soft-reboot'; else systemctl soft-reboot; fi"
+alias soft-reboot="if pgrep --quiet -u \"\$(whoami)\" -x Hyprland; then hyprshutdown --top-label 'Restarting...' --post-cmd 'systemctl soft-reboot'; else systemctl soft-reboot; fi"
 
-alias reboot="if pgrep -u \"\$(whoami)\" -x Hyprland; then hyprshutdown --top-label 'Restarting...' --post-cmd 'systemctl reboot'; else systemctl reboot; fi"
+alias reboot="if pgrep --quiet -u \"\$(whoami)\" -x Hyprland; then hyprshutdown --top-label 'Restarting...' --post-cmd 'systemctl reboot'; else systemctl reboot; fi"
 
-alias poweroff="if pgrep -u \"\$(whoami)\" -x Hyprland; then hyprshutdown --top-label 'Shutting down...' --post-cmd 'systemctl -i poweroff'; else systemctl poweroff; fi"
+alias poweroff="if pgrep --quiet -u \"\$(whoami)\" -x Hyprland; then hyprshutdown --top-label 'Shutting down...' --post-cmd 'systemctl -i poweroff'; else systemctl poweroff; fi"
 
 ls-dbus() {
     echo "---------- System ----------"
@@ -751,9 +751,9 @@ refresh-desktop-mime() {
 
 # Inhibit from suspension
 no-suspend() {
-    if pgrep -x sway >/dev/null 2>&1 || pgrep -x Hyprland >/dev/null 2>&1; then
+    if pgrep --quiet -x sway || pgrep --quiet -x Hyprland; then
         bash -c 'sleep infinity; echo no-suspension ended'
-    elif pgrep -x gnome-shell >/dev/null 2>&1; then
+    elif pgrep --quiet -x gnome-shell; then
         gnome-session-inhibit --inhibit suspend --inhibit-only
     else
         echo "Unknown DE"
@@ -762,7 +762,7 @@ no-suspend() {
 
 spawn() {
     arg=("$@")
-    setsid "${arg[@]}" >/dev/null 2>&1 </dev/null &
+    (setsid "${arg[@]}" >/dev/null 2>&1 </dev/null &)
 }
 
 print-24bit-colours() {
