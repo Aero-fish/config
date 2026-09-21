@@ -7,7 +7,8 @@ set -e
 ## Arguments: toggle_replay, save_replay, screen, window, area, portal, save_and_stop, stop_all
 ## Use -w as the first arg for normal recording, and -r for replay to distinguish them.
 
-mkdir -p "$HOME/Pictures/ScreenRecording"
+output_path="$HOME/Personal/Pictures/ScreenRecording"
+mkdir -p "$output_path"
 
 mode="$1"
 codec="av1_10bit"
@@ -108,9 +109,9 @@ fi
 # overlap if transition from replay to normal.
 # Replay default has "Replay" prefix in the file name, and normal recording don't
 if [ "$mode" = "toggle_replay" ]; then
-    output="$HOME/Pictures/ScreenRecording"
+    output="$output_path"
 else
-    output="$HOME/Pictures/ScreenRecording/$(date "+%Y-%m-%d %H-%M-%S.%2N").mkv"
+    output="$output_path/$(date "+%Y-%m-%d %H-%M-%S.%2N").mkv"
 fi
 
 # setsid gpu-screen-recorder "${extra_cmd[@]}" -pixfmt yuv444 -f 60 \

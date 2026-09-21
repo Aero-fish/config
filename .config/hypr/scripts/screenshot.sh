@@ -2,7 +2,8 @@
 set -e
 
 [ "$#" -ne 1 ] && exit 0
-mkdir -p "$HOME/Pictures/Screenshots"
+output_path="$HOME/Personal/Pictures/Screenshots"
+mkdir -p "$output_path"
 msg=""
 
 if [ "$1" = "screen" ]; then
@@ -31,9 +32,9 @@ else
 fi
 
 if [ "$1" = "swappy" ]; then
-    grim -g "$(slurp)" -t png - | swappy --file - --output-file "$HOME/Pictures/Screenshots/$(date "+%Y-%m-%d %H-%M-%S.%2N").png"
+    grim -g "$(slurp)" -t png - | swappy --file - --output-file "$output_path/$(date "+%Y-%m-%d %H-%M-%S.%2N").png"
 else
-    grim -t png "${extra_cmd[@]}" "$HOME/Pictures/Screenshots/$(date "+%Y-%m-%d %H-%M-%S.%2N").png"
+    grim -t png "${extra_cmd[@]}" "$output_path/$(date "+%Y-%m-%d %H-%M-%S.%2N").png"
 fi
 
 if pidof wf-recorder >/dev/null || pidof gpu-screen-recorder >/dev/null; then
