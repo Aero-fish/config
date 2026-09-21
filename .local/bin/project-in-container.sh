@@ -120,16 +120,23 @@ done
 ## AI agent
 extra_args+=(
     ## Agent bin
-    "--ro-bind" "$(readlink -f "$HOME/misc/repo/opencode")" "$HOME/misc/repo/opencode"
-    "--ro-bind" "$(readlink -f "$HOME/misc/repo/hermes-agent")" "$HOME/misc/repo/hermes-agent"
+    "--ro-bind-try" "$HOME/misc/repo/opencode" "$HOME/misc/repo/opencode"
+    "--ro-bind-try" "$HOME/misc/repo/hermes-agent" "$HOME/misc/repo/hermes-agent"
+    "--ro-bind-try" "$HOME/misc/repo/pi-agent" "$HOME/misc/repo/pi-agent"
 
     ## Agent containerised
-    "--ro-bind" "$(readlink -f "$HOME/.local/bin/opencode.sh")" "$HOME/.local/bin/opencode.sh"
-    "--ro-bind" "$(readlink -f "$HOME/.local/bin/hermes-agent.sh")" "$HOME/.local/bin/hermes-agent.sh"
+    "--ro-bind-try" "$HOME/.local/bin/opencode.sh" "$HOME/.local/bin/opencode.sh"
+    "--symlink" "$HOME/.local/bin/opencode.sh" "$HOME/.local/bin/opencode"
+
+    "--ro-bind-try" "$HOME/.local/bin/hermes-agent.sh" "$HOME/.local/bin/hermes-agent.sh"
+    "--symlink" "$HOME/.local/bin/hermes-agent.sh" "$HOME/.local/bin/hermes"
+
+    "--ro-bind-try" "$HOME/.local/bin/pi-agent.sh" "$HOME/.local/bin/pi-agent.sh"
+    "--symlink" "$HOME/.local/bin/pi-agent.sh" "$HOME/.local/bin/pi"
 
     ## Agent config
-    "--bind-try" "$(readlink -f "$HOME/.config/ai/agent_configs")" "$HOME/.config/ai/agent_configs"
-    "--bind-try" "$(readlink -f "$HOME/.config/ai/skills")" "$HOME/.config/ai/skills"
+    "--bind-try" "$HOME/.config/ai/agent_configs" "$HOME/.config/ai/agent_configs"
+    "--bind-try" "$HOME/.config/ai/skills" "$HOME/.config/ai/skills"
 )
 
 ## '--new-session' breaks lf, and maybe some other tools.

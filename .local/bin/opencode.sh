@@ -3,6 +3,10 @@ set -e
 
 agent_name="opencode"
 agent_path="$HOME/misc/repo/$agent_name"
+if [ ! -d "$agent_path" ]; then
+    echo "'$agent_path' does not exist."
+    exit 1
+fi
 
 config_path="$HOME/.config/ai/agent_configs/$agent_name"
 container_path="$HOME/workspace/ai_workspace/agents/$agent_name"

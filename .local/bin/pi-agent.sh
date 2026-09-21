@@ -3,6 +3,10 @@ set -e
 
 agent_name="pi-agent"
 agent_path="$HOME/misc/repo/$agent_name"
+if [ ! -d "$agent_path" ]; then
+    echo "'$agent_path' does not exist."
+    exit 1
+fi
 
 host_name="$(cat /proc/sys/kernel/hostname)"
 host_name="${host_name// /_}"
@@ -15,7 +19,7 @@ tmp_path="$XDG_RUNTIME_DIR/agent/${agent_name}_${host_name}/tmp"
 
 current_path="$(pwd)"
 
-mkdir -p "$tmp_path" "$run_path" "$container_path/.cache/zsh"
+mkdir -p "$tmp_path" "$run_path" "$container_path/.cache/zsh" "$config_path"
 
 source /usr/local/share/bwrap_share/strict_rules
 source /usr/local/share/bwrap_share/net_addon

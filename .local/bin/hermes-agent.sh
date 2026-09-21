@@ -6,6 +6,7 @@ agent_name="hermes-agent"
 
 host_name="$(cat /proc/sys/kernel/hostname)"
 host_name="${host_name// /_}"
+
 config_path="$HOME/.config/ai/agent_configs/${agent_name}_${host_name}"
 container_path="$HOME/workspace/ai_workspace/agents/${agent_name}_${host_name}"
 skill_path="$HOME/.config/ai/skills"
@@ -14,7 +15,8 @@ tmp_path="$XDG_RUNTIME_DIR/agent/${agent_name}_${host_name}/tmp"
 
 current_path="$(pwd)"
 
-mkdir -p "$tmp_path" "$run_path" "$container_path/.cache/zsh" "$container_path/.hermes/hermes-agent"
+mkdir -p "$tmp_path" "$run_path" "$container_path/.cache/zsh" \
+    "$container_path/.hermes/hermes-agent" "$config_path"
 
 source /usr/local/share/bwrap_share/strict_rules
 source /usr/local/share/bwrap_share/net_addon
