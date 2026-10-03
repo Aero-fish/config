@@ -75,13 +75,13 @@ return {
             {
                 "<leader>gr",
                 function() require("gitsigns").reset_hunk() end,
-                desc = "Resent hunk",
+                desc = "Reset hunk",
                 mode = "n"
             },
             {
                 "<leader>gr",
                 function() require("gitsigns").reset_hunk { vim.fn.line("."), vim.fn.line("v") } end,
-                desc = "Resent hunk",
+                desc = "Reset hunk",
                 mode = "x"
             },
             {
