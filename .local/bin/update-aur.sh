@@ -609,6 +609,23 @@ pi-agent-download() {
     touch "$work_path/$version.txt"
 }
 
+ingetrazo-download() {
+    download_url="$(
+        curl -s -L "$1" |
+            jq -r ".assets[] | select(.name | test(\"^IngeTrazo-.+-linux-x86_64.tar.gz$\")) | .browser_download_url"
+    )"
+
+    _check_download_url
+    curl -L "$download_url" --output "$work_path/$version.tar.gz"
+    tar -xf "$work_path/$version.tar.gz" -C "$work_path" --strip-components=1
+    rm "$work_path/$version.tar.gz"
+    touch "$work_path/$version.txt"
+
+    fd --unrestricted -tf . "$work_path" --exec-batch chmod 600 {}
+    fd --unrestricted -td . "$work_path" --exec-batch chmod 700 {}
+    chmod 700 "$work_path"/{ingetrazo,ingetrazo-mcp}
+}
+
 declare -A non_aur_packages=(
     ## Update proton before dxvk etc, so its dxvk/dxvk-nvapi/vkd3d-proton dlls
     ## can be updated in subsequent dxvk/dxvk-nvapi/vkd3d-proton updates.
@@ -620,6 +637,7 @@ declare -A non_aur_packages=(
     ["dxvk-nvapi"]="https://api.github.com/repos/jp7677/dxvk-nvapi/releases/latest"
     ["ffmpeg-yt-dlp"]="https://api.github.com/repos/yt-dlp/FFmpeg-Builds/releases/latest"
     ["hermes-agent"]="https://api.github.com/repos/NousResearch/hermes-agent/releases/latest"
+    ["ingetrazo"]="https://api.github.com/repos/ingelibre/ingetrazo/releases/latest"
     ["katex"]="https://api.github.com/repos/KaTeX/KaTeX/releases/latest"
     ["ksmbd-tools"]="https://api.github.com/repos/cifsd-team/ksmbd-tools/releases/latest"
     ["localsend"]="https://api.github.com/repos/localsend/localsend/releases/latest"
