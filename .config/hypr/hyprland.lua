@@ -18,24 +18,8 @@ hl.env("HYPRCURSOR_THEME", "rose-pine-hyprcursor")
 hl.env("HYPRCURSOR_SIZE", "48")
 
 -----------------------------
--- Monitors
+-- Monitor defaults
 -----------------------------
-hl.monitor({
-    output            = "desc:ASUSTek COMPUTER INC PG32UCDM S3LMQS068423",
-    mode              = "highres",
-    bitdepth          = 10,
-    supports_wide_color = 1,
-    min_luminance     = 0,
-    max_luminance     = 1000,
-    max_avg_luminance = 250,
-})
-
-hl.monitor({
-    output = "desc:Chimei Innolux Corporation 0x13B0",
-    mode   = "highres",
-    vrr    = 0,
-    scale  = 1
-})
 
 hl.monitor({
     output   = "",
@@ -121,7 +105,7 @@ hl.config({
         no_break_fs_vrr = 1 -- 0 - off, 1 - on, 2 - auto (on with content type 'game')
     },
     ecosystem = {
-        no_update_news=true,
+        no_update_news = true,
         no_donation_nag = true,
         enforce_permissions = true,
     },
@@ -149,3 +133,11 @@ require("hyprland-autostart")
 require("hyprland-keymap")
 require("hyprland-permission")
 require("hyprland-window-rules")
+-- pcall(require, "host_specific/beast")
+
+local handle = io.popen("cat /proc/sys/kernel/hostname | tr -d '\n'")
+if handle ~= nil then
+    local hostname = handle:read("*a")
+    handle:close()
+    pcall(require, "host_specific/" .. hostname)
+end
