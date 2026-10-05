@@ -1118,7 +1118,7 @@ alias get-wifi-hw-regom='journalctl -f -n 10 -kg "$(nmcli --get-values GENERAL.D
 alias get-wifi-limits="iw list | grep -A 15 Frequencies:"
 
 # ---------- Utilities ----------
-alias aria2-downlaod='aria2c --dir="$HOME/Desktop" --continue=true'
+alias aria2-downlaod='aria2c --split 20 --max-connection-per-server 5 --dir="$HOME/Desktop" --continue=true'
 
 mount-dev() {
     local dev_path mount_path extra_args opts fs
