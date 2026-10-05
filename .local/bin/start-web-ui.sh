@@ -2,7 +2,7 @@
 set -e
 # ---------- Config ----------
 storage_path="$HOME/workspace/ai_workspace/web-ui"
-port=8080
+port=88
 container_name="open-webui"
 
 detach_mode=""
