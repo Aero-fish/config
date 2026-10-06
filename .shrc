@@ -151,6 +151,7 @@ mirror() {
         return
     fi
 
+    echo "mirror '$src_path' to '$dest_path'"
     rsync -ah --delete --no-inc-recursive --info=progress2 --exclude "lost+found/" "$scr_path" "$dest_path"
     notify-send "Mirror finished" "$scr_path\nto\n$dest_path"
     if ! pgrep --quiet -f "^(/usr/bin/|/bin/|)gpu-screen-recorder" && [ -f "$HOME/.config/my-config/notification_tones/file_operation_completed.mp3" ]; then
@@ -162,7 +163,6 @@ mirror-bak() {
     local src_path dest_path
     src_path="/run/media/$(id -u -n)/T5_EVO"
     dest_path="/run/media/$(id -u -n)/Bak"
-    echo "mirror '$src_path' to '$dest_path'"
     mirror "$src_path" "$dest_path"
 }
 
