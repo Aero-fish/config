@@ -159,8 +159,11 @@ mirror() {
 }
 
 mirror-bak() {
-    echo "mirror '/run/media/$(id -u -n)/T5_EVO' to '/run/media/$(id -u -n)/Bak'"
-    mirror "/run/media/$(id -u -n)/T5_EVO/" "/run/media/$(id -u -n)/Bak/"
+    local src_path dest_path
+    src_path="/run/media/$(id -u -n)/T5_EVO"
+    dest_path="/run/media/$(id -u -n)/Bak"
+    echo "mirror '$src_path' to '$dest_path'"
+    mirror "$src_path" "$dest_path"
 }
 
 # ---------- ls ----------
