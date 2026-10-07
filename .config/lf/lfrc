@@ -2102,7 +2102,7 @@ map gh          cd ~
 map gi          goto_phone
 map ~           push :cd<space>~
 map gP          cd /srv/smb/printer
-map gp          cd ~/Pictures
+map gp          cd ~/Personal/Pictures
 map gr          cd ~/misc/repo
 map gs          cd ~/Sync
 map gt          cd ~/.local/share/Trash
