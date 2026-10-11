@@ -41,6 +41,8 @@ bwrap \
     --seccomp 9 \
     9</usr/local/share/seccomp-filter/seccomp_filter_tiocsti.bpf \
     \
+    --setenv QT_SCALE_FACTOR 1.5 \
+    \
     --dev /dev \
     "${dev_bind[@]}" \
     "${tmpfs[@]}" \
