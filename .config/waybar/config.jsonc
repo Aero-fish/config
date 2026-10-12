@@ -126,8 +126,17 @@
     },
     "custom/power_button": {
         "format": "<b> </b>",
-        "on-click": "nwg-bar -f -i 128 -p bottom -mb 80",
-        "tooltip": false
+        "tooltip": false,
+        "menu": "on-click",
+        "menu-file": "~/.config/waybar/power_menu.xml",
+        "menu-actions": {
+            "lock": "~/.config/waybar/scripts/power_menu.sh lock",
+            "logout": "~/.config/waybar/scripts/power_menu.sh logout",
+            "suspend": "~/.config/waybar/scripts/power_menu.sh suspend",
+            "hibernate": "~/.config/waybar/scripts/power_menu.sh suspend",
+            "reboot": "~/.config/waybar/scripts/power_menu.sh reboot",
+            "shutdown": "~/.config/waybar/scripts/power_menu.sh shutdown"
+        }
     },
     "custom/clock": {
         "exec-if": "[ -x $HOME/.config/waybar/scripts/get-timedate.sh ]",

@@ -254,3 +254,12 @@ tooltip label {
 #custom-spotify {
     color: rgb(102, 220, 105);
 }
+
+menu {
+    border-radius: 8px;
+    background: #ffffff;
+    color: #000000;
+}
+menuitem {
+    border-radius: 0px;
+}
