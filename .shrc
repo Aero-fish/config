@@ -161,7 +161,7 @@ mirror() {
 
 mirror-bak() {
     local src_path dest_path
-    src_path="/run/media/$(id -u -n)/T5_EVO"
+    src_path="/run/media/$(id -u -n)/T5_EVO/"
     dest_path="/run/media/$(id -u -n)/Bak"
     mirror "$src_path" "$dest_path"
 }
@@ -644,7 +644,7 @@ aur-container() {
     fi
     podman run --rm -it --userns keep-id -u user \
         --name aur --label aur --network host \
-        -v "$HOME/misc/repo":/home/user \
+        -v "$HOME/misc/repo":/home/user/aur \
         localhost/archlinux-aur-build \
         bash
 }
