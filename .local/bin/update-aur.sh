@@ -54,9 +54,9 @@ if [ "$pc_name" = "$main_pc" ]; then
         # Run the container
         podman run --rm -it --userns keep-id -u user \
             --name aur --label aur --network host \
-            -v "$HOME/misc/repo":/home/user \
+            -v "$HOME/misc/repo":/home/user/aur \
             localhost/archlinux-aur-build \
-            /home/user/update-AUR-here.sh || echo "Container exit with $?"
+            /home/user/aur/update-AUR-here.sh || echo "Container exit with $?"
     fi
 
     ## clean up packages
