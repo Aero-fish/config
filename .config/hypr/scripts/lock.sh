@@ -51,6 +51,6 @@ if pidof Hyprland >/dev/null; then
     setsid hyprlock --quiet >/dev/null &
 
 else
-    notify-send "Lock fail"
+    notify-send "Lock fail, Hyprland is not running."
     exit 1
 fi
