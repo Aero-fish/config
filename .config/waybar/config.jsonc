@@ -143,8 +143,13 @@
         "exec": "$HOME/.config/waybar/scripts/get-timedate.sh",
         "format": "{}",
         "interval": 10,
-        "on-click-middle": "[ -x /usr/bin/vdirsyncer ] && systemctl --user --no-block start vdirsyncer.service",
-        "on-click-right": "[ -x /usr/local/share/khal-via-desktop ] && /usr/local/share/khal-via-desktop",
+        "menu": "on-click-right",
+        "menu-file": "~/.config/waybar/clock_menu.xml",
+        "menu-actions": {
+            "khal": "[ -x /usr/local/share/khal-via-desktop ] && /usr/local/share/khal-via-desktop",
+            "sync_email": "[ -x /usr/bin/mbsync ] && systemctl --user --no-block start mbsync.service",
+            "sync_vdir": "[ -x /usr/bin/vdirsyncer ] && systemctl --user --no-block start vdirsyncer.service"
+        },
         "smooth-scrolling-threshold": 1,
         "return-type": "json",
         "tooltip": true

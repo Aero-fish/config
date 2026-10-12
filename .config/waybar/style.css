@@ -256,8 +256,8 @@ tooltip label {
 }
 
 menu {
-    border-radius: 8px;
-    background: #ffffff;
+    border-radius: 0px;
+    background: #f0f0f0;
     color: #000000;
 }
 menuitem {
