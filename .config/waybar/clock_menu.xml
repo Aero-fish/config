@@ -8,7 +8,7 @@
         </child>
         <child>
             <object class="GtkMenuItem" id="sync_email">
-                <property name="label">Sync Email</property>
+                <property name="label">Sync email</property>
             </object>
         </child>
         <child>
