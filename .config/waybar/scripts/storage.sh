@@ -15,7 +15,7 @@ if [ $# -eq 1 ]; then
     remain="$(echo "$info" | grep -E "\s$1$" | awk '{print $3}')"
     # echo "$remain"
     # echo "------"
-    info="$(echo "$info" | sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g')"
+    info="$(echo "$info" | column -t | sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g')"
     printf '{"text":"%s", "tooltip": "%s"}' "$remain" "$info"
 
 else

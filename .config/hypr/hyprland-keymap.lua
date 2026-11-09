@@ -299,7 +299,7 @@ hl.bind("SUPER + SHIFT + F10",
 -- Record area
 hl.bind("SUPER + ALT + F10",
     hl.dsp.exec_cmd(scripts_dir .. "/screen_recording.sh area"))
-hl.bind("SHIFT + SHIFT + ALT + F10",
+hl.bind("SHIFT + ALT + F10",
     hl.dsp.exec_cmd(scripts_dir .. "/screen_recording.sh area_hdr"))
 
 -- Record portal
