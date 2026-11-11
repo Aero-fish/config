@@ -654,13 +654,13 @@ alias ls-network-port-listening="ss --listening --tcp --udp --processes"
 alias ls-network-bandwidth-usage="nethogs -v 4"
 
 # shellcheck disable=SC2139
-alias soft-reboot="$HOME/.config/waybar/scripts/power_menu.sh soft-reboot"
+alias soft-reboot="if [ -x \"$HOME\"/.config/waybar/scripts/power_menu.sh ]; then \"$HOME\"/.config/waybar/scripts/power_menu.sh soft-reboot; else systemctl soft-reboot; fi"
 
 # shellcheck disable=SC2139
-alias reboot="$HOME/.config/waybar/scripts/power_menu.sh reboot"
+alias reboot="if [ -x \"$HOME\"/.config/waybar/scripts/power_menu.sh ]; then \"$HOME\"/.config/waybar/scripts/power_menu.sh reboot; else systemctl reboot; fi"
 
 # shellcheck disable=SC2139
-alias poweroff="$HOME/.config/waybar/scripts/power_menu.sh poweroff"
+alias poweroff="if [ -x \"$HOME\"/.config/waybar/scripts/power_menu.sh ]; then \"$HOME\"/.config/waybar/scripts/power_menu.sh poweroff; else systemctl -i power off; fi"
 
 ls-dbus() {
     echo "---------- System ----------"
