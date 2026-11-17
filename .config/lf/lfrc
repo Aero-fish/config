@@ -347,17 +347,18 @@ cmd paste ${{
 
     lf_user_paste_opt="replace"
     if [ "${#filename_already_exist[@]}" -ne 0 ]; then
+        num_file_already_exist="${#filename_already_exist[@]}"
         echo "----- File name already exist -----"
         # Trim down to max 50 paths
-        if [ "${#filename_already_exist[@]}" -gt 50 ]; then
-            filename_already_exist="${filename_already_exist[@]:0:49}"
+        if [ "$num_file_already_exist" -gt 50 ]; then
+            filename_already_exist=("${filename_already_exist[@]:0:50}")
             filename_already_exist+=("...more...")
         fi
         printf '%s\n' "${filename_already_exist[@]}"
         echo "----------"
 
         while true; do
-            echo -n -e "File name(s) exists in destination ("${#filename_already_exist[@]}"), do you want to \e[31mskip[s]\e[0m, \e[31mreplace[r]\e[0m or \e[31mbackup[b]\e[0m? "
+            echo -n -e "File name(s) exists in destination ("$num_file_already_exist"), do you want to \e[31mskip[s]\e[0m, \e[31mreplace[r]\e[0m or \e[31mbackup[b]\e[0m? "
             read -n 1 -r res
             echo
             if [ "$res" = "s" ]; then
