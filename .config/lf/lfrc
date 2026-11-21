@@ -1328,7 +1328,10 @@ EOF
 }}
 
 #----------
-cmd archive-single-tar-zstd ${{
+cmd archive-single-tar ${{
+    compressor="${1:-zstdmt}"
+    ext=""${2:-zst}""
+
     readarray -t arr <<<"$fx"
     [ "${#arr[@]}" -eq 0 ] && {
         lf -remote "send $id echo Nothing to archive"
@@ -1380,7 +1383,7 @@ cmd archive-single-tar-zstd ${{
         echo "Empty file name"
         exit 0
     fi
-    dest="${PWD}/${file_name}.tar.zst"
+    dest="${PWD}/${file_name}.tar.${ext}"
 
     # Check if file of same name exists
     if [ -e "$dest" ]; then
@@ -1400,9 +1403,9 @@ cmd archive-single-tar-zstd ${{
         cat << EOF >"$SH_FILE"
 #!/usr/bin/bash
 #$dest
-${tar_cmd[@]} | pv -s "\$(${du_cmd[@]} | tail -1 | awk '{print \$1}')" | zstdmt >${dest@Q}
+${tar_cmd[@]} | pv -s "\$(${du_cmd[@]} | tail -1 | awk '{print \$1}')" | ${compressor} >${dest@Q}
 
-notify-send "lf: Archive to single tar.zst completed" "$dest"
+notify-send "lf: Archive to single tar.${ext} completed" "$dest"
 lf -remote "send reload"
 if ! pgrep --quiet -f "^(/usr/bin/|/bin/|)gpu-screen-recorder" && [ -f "$lf_user_file_operation_finish_sound" ]; then
     setsid pw-play "$lf_user_file_operation_finish_sound" &
@@ -1420,7 +1423,10 @@ EOF
 }}
 
 #----------
-cmd archive-individual-tar-zstd ${{
+cmd archive-individual-tar ${{
+    compressor="${1:-zstdmt}"
+    ext=""${2:-zst}""
+
     readarray -t arr <<<"$fx"
     [ "${#arr[@]}" -eq 0 ] && {
         lf -remote "send $id echo Nothing to archive"
@@ -1455,7 +1461,7 @@ for file in "\${files[@]}"; do
     if [ -e "\$file" ]; then
         dir="\$(dirname -- "\$file")"
         name="\$(basename -- "\$file")"
-        dest=${PWD@Q}/"\${name}.tar.zst"
+        dest=${PWD@Q}/"\${name}.tar.${ext}"
 
         if [ -e "\$dest" ]; then
             while [ "\${overwrite_policy}" != "v" ] && [ "\${overwrite_policy}" != "k" ]; do
@@ -1476,15 +1482,15 @@ for file in "\${files[@]}"; do
         fi
 
         echo "Compressing '\$file'...(\${count}/\${total_count})"
-        tar --owner=0 --group=0 -C "\$dir" -cpf - "\$name" | pv -s \$( du -csb "\$file" | tail -1 | awk '{print \$1}') | zstdmt > "\$dest"
+        tar --owner=0 --group=0 -C "\$dir" -cpf - "\$name" | pv -s \$( du -csb "\$file" | tail -1 | awk '{print \$1}') | ${compressor} > "\$dest"
 
-        [ "\$del_file" == "y" ] && [ -s "\${name}.tar.zst" ] && rm -rf "\$file"
+        [ "\$del_file" == "y" ] && [ -s "\${name}.tar.${ext}" ] && rm -rf "\$file"
     else
         echo "'\$file' does not exist."
     fi
 done
 
-notify-send "lf: Archive to individual tar.zst completed" "$PWD"
+notify-send "lf: Archive to individual tar.${ext} completed" "$PWD"
 lf -remote "send reload"
 if ! pgrep --quiet -f "^(/usr/bin/|/bin/|)gpu-screen-recorder" && [ -f "$lf_user_file_operation_finish_sound" ]; then
     setsid pw-play "$lf_user_file_operation_finish_sound" &
@@ -1500,6 +1506,13 @@ EOF
     lf -remote "send $id echo Archiving ${#arr[@]} file(s) to individual tar"
 
 }}
+
+#----------
+cmd archive-single-tar-zstd :archive-single-tar zstdmt zst
+cmd archive-individual-tar-zstd :archive-individual-tar zstdmt zst
+
+cmd archive-single-tar-gz :archive-single-tar pigz gz
+cmd archive-individual-tar-gz :archive-individual-tar pigz gz
 
 #----------
 cmd archive-single-zip ${{
@@ -1804,15 +1817,10 @@ EOF
 }}
 
 #----------
-cmd open-with-mpv-with-svp &{{
-# Need this to detect GPU in older SVP
-#clinfo >/dev/null 2>&1; sleep 1
-
-(setsid bash <(
-    sed -E -e '/"\$\{symbolic_link\[@\]\}"/a\    --ro-bind-try /etc/machine-id /etc/machine-id \\\n    --ro-bind-try /run/udev /run/udev \\\n    --ro-bind-try "\$HOME\/misc/programs/SVP4" "\$HOME\/misc/programs/SVP4" \\\n    --bind-try "\$HOME\/.config\/SVP4" "\$HOME\/.local\/share\/SVP4" \\\n    --bind-try "\$HOME\/.cache\/trt-models" "\$HOME\/.cache\/trt-models" \\' \
-    -e 's:^(\s*)/usr/bin/mpv .*:\1/usr/bin/sh -c "$HOME/misc/programs/SVP4/SVPManager \& /usr/bin/mpv \${extra_args[*]} \${1@Q}; /usr/bin/pkill -x SVPManager":' \
-    /usr/local/bin/mpv) "$f" &) >/dev/null 2>&1 </dev/null
+cmd open-with-mpv-rife &{{
+    (setsid "$HOME/misc/programs/mpv_rife/bin/mpv-rife" "$f" &) >/dev/null 2>&1 </dev/null
 }}
+
 cmd open-lf-here                $(setsid kitty -- lf "$PWD" &) >/dev/null 2>&1 </dev/null
 cmd open-with-7z-gui            ${{
 
@@ -2064,6 +2072,8 @@ map Zx          fzf_exe
 # search-back
 
 ##### Archive ######
+map ag        archive-single-tar-gz
+map aG        archive-individual-tar-gz
 map at        archive-single-tar-zstd
 map aT        archive-individual-tar-zstd
 map ax        extract-to-individual-folder
@@ -2080,8 +2090,8 @@ map od          open-with-drawing
 map oe          open-lf-here
 map oE          open-with-nautilus
 map ol          $lazygit
+map om          open-with-mpv-rife
 map or          open-with-file-roller
-map os          open-with-mpv-with-svp
 map ov          open-with-vim
 map ox          open-with-xnview
 map oy          open-with-yacreader
