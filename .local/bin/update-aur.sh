@@ -22,6 +22,11 @@ if [ "$pc_name" = "$main_pc" ]; then
             if [ "$git_pull_result" != "Already up to date." ]; then
                 echo -ne "\e[31mPulled '$dir_name' from repo\e[0m"
                 if [ -f "PKGBUILD" ]; then
+                    if [ -e "$work_path/old" ]; then
+                        rm -rf "$work_path/old"
+                    fi
+                    mkdir -p "$work_path/old"
+                    find "$work_path" -mindepth 1 -maxdepth 1 ! -name old -exec mv -t "$work_path/old" {} +
                     echo -e "\e[31m, pending make.\e[0m"
                     echo "$dir_name" >>"$repo_dir/pending_make.txt"
                 else
