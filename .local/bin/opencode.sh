@@ -9,7 +9,7 @@ if [ ! -d "$agent_path" ]; then
 fi
 
 config_path="$HOME/.config/ai/agent_configs/$agent_name"
-container_path="$HOME/workspace/ai_workspace/agents/$agent_name"
+container_path="$HOME/.ai/agents/$agent_name"
 skill_path="$HOME/.config/ai/skills"
 run_path="$XDG_RUNTIME_DIR/agent/$agent_name/run"
 tmp_path="$XDG_RUNTIME_DIR/agent/$agent_name/tmp"

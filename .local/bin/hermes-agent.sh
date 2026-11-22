@@ -8,7 +8,7 @@ host_name="$(cat /proc/sys/kernel/hostname)"
 host_name="${host_name// /_}"
 
 config_path="$HOME/.config/ai/agent_configs/${agent_name}_${host_name}"
-container_path="$HOME/workspace/ai_workspace/agents/${agent_name}_${host_name}"
+container_path="$HOME/.ai/agents/${agent_name}_${host_name}"
 skill_path="$HOME/.config/ai/skills"
 run_path="$XDG_RUNTIME_DIR/agent/${agent_name}_${host_name}/run"
 tmp_path="$XDG_RUNTIME_DIR/agent/${agent_name}_${host_name}/tmp"

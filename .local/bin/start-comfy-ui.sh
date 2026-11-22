@@ -2,10 +2,10 @@
 set -e
 # ---------- Config ----------
 comfy_ui_path="$HOME/misc/repo/comfy-ui"
-venv_path="$HOME/workspace/ai_workspace/comfy-ui/venv"
-model_path="$HOME/workspace/ai_workspace/comfy-ui/models"
-output_path="$HOME/workspace/ai_workspace/comfy-ui/output"
-input_path="$HOME/workspace/ai_workspace/comfy-ui/input"
+venv_path="$HOME/.ai/services/comfy-ui/venv"
+model_path="$HOME/.ai/services/comfy-ui/models"
+output_path="$HOME/.ai/services/comfy-ui/output"
+input_path="$HOME/.ai/services/comfy-ui/input"
 port=8188
 
 container_name="comfy-ui"
