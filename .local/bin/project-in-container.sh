@@ -50,8 +50,6 @@ source /usr/local/share/bwrap_share/generate_args
 
 extra_args=()
 if [ "$project_name" == "tmp_container" ]; then
-    ## Let instance of a project share the same HOME and tmpfs
-
     mkdir -p "$XDG_RUNTIME_DIR/projects/$project_name"
     container_path="$(mktemp -d "$XDG_RUNTIME_DIR/projects/$project_name/workspace_XXXXX")"
     run_path="$XDG_RUNTIME_DIR/projects/$project_name/run"
@@ -139,6 +137,9 @@ extra_args+=(
     "--bind-try" "$HOME/.config/ai/skills" "$HOME/.config/ai/skills"
 )
 
+user_name="$(id -n -u)"
+user_id="$(id -u)"
+
 ## '--new-session' breaks lf, and maybe some other tools.
 ## Use another disposable container to do testing on the generated code.
 ## Use 'seccomp_filter_tiocsti' only not 'default_seccomp_filter' to avoid crashing tools.
@@ -189,7 +190,7 @@ bwrap \
     "${extra_args[@]}" \
     "${ro_bind[@]}" \
     "${bind[@]}" \
-    "${unhide[@]}" \
+    "${hide[@]}" \
     "${unhide_ro[@]}" \
     "${unhide[@]}" \
     "${symbolic_link[@]}" \
@@ -199,5 +200,5 @@ bwrap \
     "${remount_ro[@]}" \
     /usr/bin/zsh \
     9</usr/local/share/seccomp-filter/seccomp_filter_tiocsti.bpf \
-    7< <(echo "hugh:x:1000:1000::/home/hugh:/bin/nologin") \
-    8< <(echo "hugh:x:1000:")
+    7< <(echo "$user_name:x:$user_id:$user_id::$HOME:/bin/nologin") \
+    8< <(echo "$user_name:x:$user_id:")

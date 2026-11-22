@@ -112,6 +112,9 @@ alias v='$EDITOR'
 
 alias incognito=' unset HISTFILE'
 
+## Better terminal compatibility
+alias ssh='TERM=xterm-256color ssh'
+
 # ---------- Helper function ----------
 _get_basename() {
     local fullname="${1##*/}"

@@ -75,7 +75,7 @@ if ! podman network exists ai_internal; then
 fi
 
 ## Container with internal network only
-podman_cmd="podman run --rm -it --cap-drop=all $detach_mode"
+podman_cmd="podman run --rm -it --cap-drop=all --security-opt=no-new-privileges $detach_mode"
 podman_cmd+=" --shm-size=-0 --detach-keys='ctrl-q' --init"
 podman_cmd+=" --name '$container_name' --label '$container_label'"
 
@@ -86,8 +86,8 @@ if lspci | grep -E "(VGA|Display controller)" | grep -q "NVIDIA"; then
     podman_cmd+=" --device 'nvidia.com/gpu=all'"
 fi
 
-podman_cmd+=" -v '$model_lib_path/${model_author}_${model_name}':'$model_path_in_container'"
-podman_cmd+=" -v '$template_path':'$template_path_in_container'"
+podman_cmd+=" -v '$model_lib_path/${model_author}_${model_name}':'$model_path_in_container':ro"
+podman_cmd+=" -v '$template_path':'$template_path_in_container':ro"
 podman_cmd+=" -v '$cache_path':'/root/.cache'"
 # podman_cmd+=" -v '$HOME/misc/repo/$framework_name':'/home/user/venv'"
 

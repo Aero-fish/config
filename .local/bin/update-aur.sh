@@ -391,8 +391,8 @@ localsend-download() {
         "$work_path/squashfs-root" \
         "$work_path"/org.localsend.localsend_app.desktop
 
-    fd --unrestricted -tf . "$work_path" --exec-batch chmod 600 {}
-    fd --unrestricted -td . "$work_path" --exec-batch chmod 700 {}
+    fd --unrestricted -tf --exclude old . "$work_path" --exec-batch chmod 600 {}
+    fd --unrestricted -td --exclude old . "$work_path" --exec-batch chmod 700 {}
     chmod 700 "$work_path"/{AppRun,localsend_app}
 
 }
@@ -407,8 +407,8 @@ pandoc-eisvogel-template-download() {
     curl -L "$download_url" --output "$work_path/$version.tar.gz"
     tar -xf "$work_path/$version.tar.gz" -C "$work_path"
     rm "$work_path/$version.tar.gz"
-    fd --unrestricted -tf . "$work_path" --exec-batch /usr/bin/chmod 600 {}
-    fd --unrestricted -td . "$work_path" --exec-batch /usr/bin/chmod 700 {}
+    fd --unrestricted -tf --exclude old . "$work_path" --exec-batch /usr/bin/chmod 600 {}
+    fd --unrestricted -td --exclude old . "$work_path" --exec-batch /usr/bin/chmod 700 {}
 }
 
 pandoc-eisvogel-template-update() {
@@ -621,8 +621,8 @@ ingetrazo-download() {
     rm "$work_path/$version.tar.gz"
     touch "$work_path/$version.txt"
 
-    fd --unrestricted -tf . "$work_path" --exec-batch chmod 600 {}
-    fd --unrestricted -td . "$work_path" --exec-batch chmod 700 {}
+    fd --unrestricted -tf --exclude old . "$work_path" --exec-batch chmod 600 {}
+    fd --unrestricted -td --exclude old . "$work_path" --exec-batch chmod 700 {}
     chmod 700 "$work_path"/{ingetrazo,ingetrazo-mcp}
 }
 
@@ -686,7 +686,11 @@ for p in "${!non_aur_packages[@]}"; do
 
             if [ ! -f "$work_path/$version.txt" ]; then
                 echo -e "\e[31mUpdating '$p'.\e[0m"
-                rm -rf "${work_path:?}"/*
+                if [ -e "$work_path/old" ]; then
+                    rm -rf "$work_path/old"
+                fi
+                mkdir -p "$work_path/old"
+                find "$work_path" -mindepth 1 -maxdepth 1 ! -name old -exec mv -t "$work_path/old" {} +
 
                 if declare -F "$p-download" >/dev/null; then
                     # Call custom function to download new version
