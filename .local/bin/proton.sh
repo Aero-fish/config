@@ -60,6 +60,8 @@ if [ "$1" != "" ]; then
 fi
 
 ## Set PROTON_DLSS_UPGRADE=1 to download the latest DLSS, need internet to run
+user_name="$(id -n -u)"
+user_id="$(id -u)"
 
 bwrap \
     --unshare-user \
@@ -112,7 +114,7 @@ bwrap \
     --perms 444 --file 7 /etc/passwd \
     --perms 444 --file 8 /etc/machine-id \
     umu-run "$@" \
-    6< <(echo "hugh:x:1000:") \
-    7< <(echo "hugh:x:1000:1000::/home/hugh:/bin/nologin") \
+    6< <(echo "$user_name:x:$user_id:") \
+    7< <(echo "$user_name:x:$user_id:$user_id::$HOME:/bin/nologin") \
     8< <(dbus-uuidgen) \
     9</usr/local/share/seccomp-filter/seccomp_filter_tiocsti.bpf

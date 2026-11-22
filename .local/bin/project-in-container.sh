@@ -121,6 +121,7 @@ extra_args+=(
     "--ro-bind-try" "$HOME/misc/repo/opencode" "$HOME/misc/repo/opencode"
     "--ro-bind-try" "$HOME/misc/repo/hermes-agent" "$HOME/misc/repo/hermes-agent"
     "--ro-bind-try" "$HOME/misc/repo/pi-agent" "$HOME/misc/repo/pi-agent"
+    "--bind-try" "$HOME/misc/repo/claude" "$HOME/misc/repo/claude"
 
     ## Agent containerised
     "--ro-bind-try" "$HOME/.local/bin/opencode.sh" "$HOME/.local/bin/opencode.sh"
@@ -137,13 +138,15 @@ extra_args+=(
     "--bind-try" "$HOME/.config/ai/skills" "$HOME/.config/ai/skills"
 )
 
-user_name="$(id -n -u)"
-user_id="$(id -u)"
+
 
 ## '--new-session' breaks lf, and maybe some other tools.
 ## Use another disposable container to do testing on the generated code.
 ## Use 'seccomp_filter_tiocsti' only not 'default_seccomp_filter' to avoid crashing tools.
 ## Don't hide rc, use overlay
+user_name="$(id -n -u)"
+user_id="$(id -u)"
+
 bwrap \
     --unshare-user \
     --unshare-ipc \

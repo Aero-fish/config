@@ -115,6 +115,9 @@ fi
 ## Use another disposable container to do testing on the generated code.
 ## Use 'seccomp_filter_tiocsti' only not 'default_seccomp_filter' to avoid crashing tools.
 ## dbus is needed if wanting to use nvim in the container
+user_name="$(id -n -u)"
+user_id="$(id -u)"
+
 bwrap \
     --unshare-user \
     --unshare-ipc \
@@ -160,5 +163,5 @@ bwrap \
     "${remount_ro[@]}" \
     "${bin_path[@]}" "$@" \
     9</usr/local/share/seccomp-filter/seccomp_filter_tiocsti.bpf \
-    7< <(echo "hugh:x:1000:1000::/home/hugh:/bin/nologin") \
-    8< <(echo "hugh:x:1000:")
+    7< <(echo "$user_name:x:$user_id:$user_id::$HOME:/bin/nologin") \
+    8< <(echo "$user_name:x:$user_id:")
