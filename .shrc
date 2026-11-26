@@ -384,16 +384,14 @@ ex() {
         echo "usage: ex <file>"
     elif [ -f "$1" ]; then
         case $1 in
-        *.tar.bz2) pv "$1" | tar -xjpf - ;;
-        *.tar.gz) pv "$1" | tar -xzpf - ;;
+        *.tar.bz2 | *.tbz2) pv "$1" | tar -xjpf - ;;
+        *.tar.gz | *.tgz) pv "$1" | tar -xzpf - ;;
         *.tar.xz) pv "$1" | tar -I pixz -xpf - ;;
         *.tar.zst) pv "$1" | tar --zstd -xpf - ;;
         *.bz2) bunzip2 -kc "$1" >./"$(basename -- "$1" | sed -E 's:\\.bz2$::')" ;;
         *.rar) unrar x "$1" ;;
         *.gz) gunzip -kc "$1" >./"$(basename -- "$1" | sed -E 's:\\.gz$::')" ;;
         *.tar) pv "$1" | tar -xpf - ;;
-        *.tbz2) pv "$1" | tar -xjpf - ;;
-        *.tgz) pv "$1" | tar -xzpf - ;;
         *.zip) unzip "$1" ;;
         *.Z) uncompress "$1" ;;
         *.deb) ar -x "$1" ;;
