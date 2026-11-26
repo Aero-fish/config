@@ -1050,16 +1050,14 @@ ex() {
 
     elif [ -f "\$1" ] ; then
         case \$1 in
-            *.tar.bz2) pv "\$1" | tar -xjpf - ;;
-            *.tar.gz) pv "\$1" | tar -xzpf - ;;
+            *.tar.bz2 | *.tbz2) pv "\$1" | tar -xjpf - ;;
+            *.tar.gz | *.tgz) pv "\$1" | tar -xzpf - ;;
             *.tar.xz) pv "\$1" | tar -I pixz -xpf - ;;
             *.tar.zst) pv "\$1" | tar --zstd -xpf - ;;
             *.bz2) bunzip2 -kc "\$1" >./"\$(basename -- "\$1" | sed -E 's:\\.bz2\$::')" ;;
             *.rar) unrar x "\$1" ;;
             *.gz) gunzip -kc "\$1" >./"$(basename -- "\$1" | sed -E 's:\\.gz\$::')" ;;
             *.tar) pv "\$1" | tar -xpf - ;;
-            *.tbz2) pv "\$1" | tar -xjpf - ;;
-            *.tgz) pv "\$1" | tar -xzpf - ;;
             *.zip) unzip "\$1" ;;
             *.Z) uncompress "\$1" ;;
             *.deb) ar -x "\$1" ;;
@@ -1176,16 +1174,14 @@ ex() {
 
     elif [ -f "\$1" ] ; then
         case \$1 in
-            *.tar.bz2) pv "\$1" | tar -xjpf - ;;
-            *.tar.gz) pv "\$1" | tar -xzpf - ;;
+            *.tar.bz2 | *.tbz2) pv "\$1" | tar -xjpf - ;;
+            *.tar.gz | *.tgz) pv "\$1" | tar -xzpf - ;;
             *.tar.xz) pv "\$1" | tar -I pixz -xpf - ;;
             *.tar.zst) pv "\$1" | tar --zstd -xpf - ;;
             *.bz2) bunzip2 -kc "\$1" >./"\$(basename -- "\$1" | sed -E 's:\\.bz2\$::')" ;;
             *.rar) unrar x "\$1" ;;
             *.gz) gunzip -kc "\$1" >./"$(basename -- "\$1" | sed -E 's:\\.gz\$::')" ;;
             *.tar) pv "\$1" | tar -xpf - ;;
-            *.tbz2) pv "\$1" | tar -xjpf - ;;
-            *.tgz) pv "\$1" | tar -xzpf - ;;
             *.zip) unzip "\$1" ;;
             *.Z) uncompress "\$1" ;;
             *.deb) ar -x "\$1" ;;
@@ -1817,6 +1813,82 @@ EOF
 }}
 
 #----------
+cmd archive-test ${{
+    readarray -t arr <<<"$fx"
+    [ "${#arr[@]}" -eq 0 ] && {
+        lf -remote "send $id echo Nothing to test"
+        exit 0
+    }
+
+    run_dir="${XDG_RUNTIME_DIR:-/run/user/0}"
+    mkdir -p "$run_dir/lf_progress"
+    SH_FILE="$(mktemp "$run_dir/lf_progress/archive_test_XXXXX.sh")"
+    cat << EOF >"$SH_FILE"
+#!/usr/bin/bash
+#${PWD@Q}
+cd ${PWD@Q} || { rm "\$0"; exit 1; }
+
+
+archive_test() {
+    if [ "\$#" -ne 1 ]; then
+        echo "usage: archive_test <file>"
+
+    elif [ -f "\$1" ] ; then
+        case \$1 in
+            *.tar.bz2 | *.tbz2) pv "\$1" | bzip2 -dc | tar -xOf - > /dev/null && echo "Archive ok" ;;
+            *.tar.gz | *.tgz) pv "\$1" | pigz -dc | tar -xOf - > /dev/null && echo "Archive ok" ;;
+            *.tar.xz) pv "\$1" | xz -dc | tar -xOf - > /dev/null && echo "Archive ok";;
+            *.tar.zst) pv "\$1" | zstd -dc | tar -xOf - > /dev/null && echo "Archive ok";;
+            *.bz2) pv "\$1" | bzip2 -t && echo "Archive ok" ;;
+            *.rar) 7z t "\$1" ;;
+            *.gz) pv "\$1" | gzip -t && echo "Archive ok" ;;
+            *.tar) pv "\$1" | tar -xOf - > /dev/null && echo "Archive ok" ;;
+            *.zip) 7z t "\$1" ;;
+            *.7z) 7z t "\$1" ;;
+            *)
+                echo "'\$1' cannot be test via archive_test()"
+                notify-send "'\$1' cannot be extracted via ex()"
+                ;;
+        esac
+    else
+        echo "'\$1' is not a valid file"
+        notify-send "'\$1' is not a valid file"
+    fi
+}
+
+files=(
+$(printf '    %s\n' "${arr[@]@Q}")
+)
+
+count=0
+total_count="\${#files[@]}"
+overwrite_policy=""
+for file in "\${files[@]}"; do
+    count=\$((count+1))
+    if [ -f "\${file}" ]; then
+        echo "Testig '\$file'...(\${count}/\${total_count})"
+        archive_test "\$file"
+    else
+        echo "'\$file' does not exist."
+    fi
+done
+
+notify-send "lf: Archive test completed"
+lf -remote "send reload"
+if ! pgrep --quiet -f "^(/usr/bin/|/bin/|)gpu-screen-recorder" && [ -f "$lf_user_file_operation_finish_sound" ]; then
+    setsid pw-play "$lf_user_file_operation_finish_sound" &
+fi
+read -n 1 -s -p "Press any key to exit..."
+rm -- "\$0"
+EOF
+    chmod 700 "$SH_FILE"
+    TMUX_NAME="$(basename "$SH_FILE" | tr "." "_")"
+    tmux new-session -d -s "$TMUX_NAME" -- bash "$SH_FILE"
+    setsid kitty -- tmux attach-session -t "$TMUX_NAME" >/dev/null 2>&1 </dev/null &
+    lf -remote "send $id echo Extracting $f"
+}}
+
+#----------
 cmd open-with-mpv-rife &{{
     (setsid "$HOME/misc/programs/mpv_rife/bin/mpv-rife" "$f" &) >/dev/null 2>&1 </dev/null
 }}
@@ -2072,10 +2144,11 @@ map Zx          fzf_exe
 # search-back
 
 ##### Archive ######
-map ag        archive-single-tar-gz
-map aG        archive-individual-tar-gz
-map at        archive-single-tar-zstd
-map aT        archive-individual-tar-zstd
+map atg       archive-single-tar-gz
+map atG       archive-individual-tar-gz
+map atz       archive-single-tar-zstd
+map atZ       archive-individual-tar-zstd
+map aT        archive-test
 map ax        extract-to-individual-folder
 map aX        extract
 map az        archive-single-zip
