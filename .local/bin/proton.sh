@@ -74,7 +74,6 @@ bwrap \
     --proc /proc \
     --cap-drop ALL \
     --new-session \
-    --seccomp 9 \
     \
     --clearenv \
     --setenv DBUS_SESSION_BUS_ADDRESS "$DBUS_SESSION_BUS_ADDRESS" \
@@ -116,5 +115,4 @@ bwrap \
     umu-run "$@" \
     6< <(echo "$user_name:x:$user_id:") \
     7< <(echo "$user_name:x:$user_id:$user_id::$HOME:/bin/nologin") \
-    8< <(dbus-uuidgen) \
-    9</usr/local/share/seccomp-filter/seccomp_filter_tiocsti.bpf
+    8< <(dbus-uuidgen)
